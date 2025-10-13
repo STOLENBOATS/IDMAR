@@ -1,0 +1,4 @@
+(function(w){
+  w.IDMAR_APP_NAME = "IDMAR";
+  w.IDMAR_APP_SUB  = "Identificação Marítima — Cascos & Motores";
+})(window);

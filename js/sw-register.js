@@ -4,3 +4,4 @@
   navigator.serviceWorker.register(swUrl, { scope: './' })
     .catch(err => console.error('[IDMAR][SW] register failed:', err));
 })();
+

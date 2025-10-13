@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IDMAR — Admin motores (overrides locais)</title>
+  <link rel="icon" href="img/logo-pm.png"/>
+
+  <!-- CSS base (mesmos da app) -->
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/theme-soft-light.v1.css">
+  <link rel="stylesheet" href="css/nav-ribbon.v5.css">
+
+  <style>
+    :root{--bg:#f8fafc;--fg:#0f172a;--bg-elev:#fff;--border:#e5e7eb;--link:#0b6bcb}
+    html,body{height:100%}
+    body{background:var(--bg);color:var(--fg);margin:0;display:flex;flex-direction:column;
+         font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;
+         font-size:16.5px}
+    main{flex:1}
+    .container{max-width:1100px;margin:1.25rem auto;padding:0 1rem}
+    .panel{background:var(--bg-elev);border:1px solid var(--border);border-radius:12px;padding:1rem;margin:.75rem 0}
+    label{display:block;margin:.35rem 0 .25rem}
+    input,select,textarea{width:100%;border:1px solid var(--border);background:#fff;border-radius:10px;padding:.5rem .6rem}
+    button{background:#0b6bcb;color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;cursor:pointer}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+    .small{opacity:.75}
+    .footer{border-top:1px solid var(--border);padding:1rem;text-align:left;opacity:.85;background:var(--bg-elev)}
+    .btn-secondary{background:#111827;color:#fff}
+    .btn-danger{background:#ef4444}
+    pre{background:#f6f7f9;border:1px solid var(--border);border-radius:10px;padding:.75rem;overflow:auto}
+  </style>
+
+  <!-- Gate de sessão simples -->
+  <script>
+    (function(){
+      try{
+        var ok = sessionStorage.getItem('IDMAR_SESSION')==='ok' || sessionStorage.getItem('NAV_SESSION')==='ok';
+        if(!ok) location.replace('login.html');
+      }catch(e){}
+    })();
+  </script>
+
+  <!-- Versão + header iguais às outras páginas -->
+  <script>window.IDMAR_VERSION="Vs 1.3";</script>
+  <script defer src="js/idmar-config.v4.js"></script>
+  <script defer src="js/idmar-i18n.js"></script>
+  <script defer src="js/idmar-header-only.all.v4.js"></script>
+  <script defer src="js/header-override.v4.js"></script>
+  <script defer src="js/i18n-boot.js"></script>
+  <script defer src="js/idmar-version.v4.js"></script>
+</head>
+
+<body>
+  <!-- header é injetado por JS -->
+
+  <main class="container">
+    <h1 style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">
+      <button onclick="location.href='validador.html'" class="btn-secondary" title="Voltar ao Validador / Back to Validator">← Voltar ao Validador</button>
+      <span>Admin — Overrides de Catálogo (localStorage)</span>
+    </h1>
+    <p class="small">Escreve em <code>localStorage["IDMAR_ENGINE_OVERRIDES"]</code>. Útil para testar novas entradas sem editar o JSON. Após guardar, o Validador atualiza o picker automaticamente.</p>
+
+    <div class="panel">
+      <div class="row">
+        <div>
+          <label>Marca / Brand</label>
+          <select id="brand">
+            <option>Yamaha</option><option>Suzuki</option><option>Honda</option><option>Mercury</option>
+            <option>Tohatsu</option><option>Evinrude/Johnson</option><option>Volvo Penta</option><option>MerCruiser</option>
+          </select>
+        </div>
+        <div>
+          <label>Família / Family (opcional)</label>
+          <input id="family" placeholder="ex.: F115B / DF140A / BF100 / etc.">
+        </div>
+      </div>
+
+      <label>Modelo / Model code (vírgulas)</label>
+      <textarea id="model" rows="2" placeholder="ex.: F115B,F150D,VF150,XTO425"></textarea>
+
+      <label>Potência (hp) / Power (vírgulas)</label>
+      <textarea id="hp" rows="2" placeholder="ex.: 2.5,4,6,8,9.9,15,20,25,30,40,50,60,70,90,115,150,175,200,225,250,300,425"></textarea>
+
+      <div class="row">
+        <div>
+          <label>Cilindrada (cc) / Displacement (vírgulas)</label>
+          <input id="disp" placeholder="ex.: 5559,4169,2785,1832,996">
+        </div>
+        <div>
+          <label>Anos / Years (vírgulas)</label>
+          <input id="years" placeholder="ex.: 1998,1999,...,2025">
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Comando / Rigging (vírgulas)</label>
+          <input id="rig" placeholder="ex.: DEC/DBW,Mechanical,Tiller">
+        </div>
+        <div>
+          <label>Altura / Shaft (vírgulas)</label>
+          <input id="shaft" placeholder="ex.: S,L,X,XL,U,UL,XX">
+        </div>
+      </div>
+
+      <div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <button id="save">Guardar override</button>
+        <button id="clear" class="btn-danger">Limpar todos</button>
+        <button class="btn-secondary" onclick="location.href='validador.html'">Fechar</button>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="small" style="margin-bottom:.5rem">Conteúdo atual de <strong>IDMAR_ENGINE_OVERRIDES</strong></div>
+      <pre id="out">{}</pre>
+    </div>
+  </main>
+
+  <footer class="footer">IDMAR — Identificação Marítima</footer>
+
+  <script>
+    // ===== lógica dos overrides (igual à tua, só com family e UX) =====
+    const KEY='IDMAR_ENGINE_OVERRIDES';
+    const $=id=>document.getElementById(id);
+    const parseList=(str, mapFn)=> (str||'').split(',').map(s=>s.trim()).filter(Boolean).map(mapFn||((x)=>x));
+
+    function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ return {}; } }
+    function save(obj){ localStorage.setItem(KEY, JSON.stringify(obj, null, 2)); }
+    function render(){ $('out').textContent = localStorage.getItem(KEY)||'{}'; }
+
+    $('save').onclick = function(){
+      const brand=$('brand').value.trim();
+      const family=($('family').value||'_generic').trim() || '_generic';
+      const hp=parseList($('hp').value, x=>Number(x)).filter(x=>!isNaN(x));
+      const disp=parseList($('disp').value, x=>Number(x)).filter(x=>!isNaN(x));
+      const model=parseList($('model').value);
+      const years=parseList($('years').value, x=>Number(x)).filter(x=>!isNaN(x));
+      const rig=parseList($('rig').value);
+      const shaft=parseList($('shaft').value);
+
+      const all=load();
+      all[brand]=all[brand]||{};
+      // estrutura por famílias (v2); se o picker estiver em v1, também lemos listas no nível da marca
+      all[brand].families = all[brand].families || {};
+      const F = all[brand].families[family] = all[brand].families[family] || {};
+
+      if(hp.length)   F.hp_list = (F.hp_list||[]).concat(hp);
+      if(disp.length) F.displacement_list = (F.displacement_list||[]).concat(disp);
+      if(model.length)F.model_code_list = (F.model_code_list||[]).concat(model);
+      if(years.length)F.year_list = (F.year_list||[]).concat(years);
+      if(rig.length)  F.rigging = (F.rigging||[]).concat(rig);
+      if(shaft.length)F.shaft_options = (F.shaft_options||[]).concat(shaft);
+
+      // também populamos nível de marca para fallback v1
+      if(hp.length)   all[brand].hp_list = (all[brand].hp_list||[]).concat(hp);
+      if(disp.length) all[brand].displacement_list = (all[brand].displacement_list||[]).concat(disp);
+      if(model.length)all[brand].model_code_list = (all[brand].model_code_list||[]).concat(model);
+      if(years.length)all[brand].year_list = (all[brand].year_list||[]).concat(years);
+      if(rig.length)  all[brand].rigging = (all[brand].rigging||[]).concat(rig);
+      if(shaft.length)all[brand].shaft_options = (all[brand].shaft_options||[]).concat(shaft);
+
+      save(all);
+      render();
+      // dica: se vieres do Validador aberto numa outra aba, um reload lá já lê os novos overrides
+    };
+
+    $('clear').onclick = function(){
+      if(confirm('Limpar TODOS os overrides locais?')){ localStorage.removeItem(KEY); render(); }
+    };
+
+    render();
+  </script>
+</body>
+</html>

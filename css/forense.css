@@ -1,0 +1,4 @@
+.forense-box{margin-top:8px;border:1px solid #e5e7eb;border-radius:8px;padding:6px 10px}
+.forense-box summary{cursor:pointer;font-weight:600}
+.forense-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px;margin-top:8px}
+.forense-grid textarea{grid-column:1/-1;width:100%;padding:6px 8px;border:1px solid #d1d5db;border-radius:8px}

@@ -1,0 +1,3 @@
+/* Minimal nav polish */
+header nav a, .nav a, .menu a, .top-nav a { padding: 0 .5rem; text-decoration: none; }
+header nav a:hover, .nav a:hover, .menu a:hover, .top-nav a:hover { text-decoration: underline; }

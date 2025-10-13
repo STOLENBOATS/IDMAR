@@ -1,0 +1,82 @@
+
+/* IDMAR hotfix r3b — restablece tipografia e layout base, sem interferir no JS */
+:root{
+  --bg:#f8fafc;
+  --fg:#0f172a;
+  --bg-elev:#ffffff;
+  --border:#e5e7eb;
+  --link:#0b6bcb;
+  --muted:#64748b;
+}
+html,body{margin:0;padding:0}
+body{
+  background:var(--bg);
+  color:var(--fg);
+  font: 16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif;
+  -webkit-font-smoothing:antialiased; -moz-osx-font-smoothing:grayscale;
+}
+a{color:var(--link); text-decoration:none}
+a:hover{text-decoration:underline}
+
+.container{max-width:1100px;margin:1.25rem auto;padding:0 1rem}
+.panel{
+  background:var(--bg-elev);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:1rem;
+  margin:.75rem 0;
+}
+h1{font-size:1.8rem; margin:.6rem 0 1rem 0; font-weight:800}
+h2{font-size:1.25rem; margin:.5rem 0 .75rem 0; font-weight:700}
+.small{font-size:.85rem; color:var(--muted)}
+
+input,select,button,textarea{
+  font: inherit;
+  color: inherit;
+  border-radius:10px;
+  border:1px solid var(--border);
+  background:#fff;
+  padding:.45rem .6rem;
+}
+button{background:#0b6bcb; color:#fff; border-color:#0b6bcb; cursor:pointer}
+button:hover{filter:brightness(.96)}
+input[type="date"]{padding:.35rem .5rem}
+
+table{width:100%; border-collapse:collapse}
+th,td{padding:.6rem .5rem; border-bottom:1px solid var(--border); text-align:left}
+th{font-weight:800}
+.badge{display:inline-block;padding:.15rem .5rem;border-radius:999px;font-size:.85rem}
+.badge.good{background:#e6f7ed;color:#057647;border:1px solid #b5efc9}
+.badge.bad{background:#fde8e8;color:#9b1c1c;border:1px solid #f8c7c7}
+
+/* aplica largura total nos inputs dentro de .panel quando fizer sentido */
+.panel input[type="text"], .panel input[type="search"],
+.panel input[type="date"], .panel select, .panel textarea{
+  width:100%;
+  box-sizing:border-box;
+}
+
+/* header area (se existir) */
+.idmar-topbar{background:#fff;border-bottom:1px solid var(--border)}
+
+/* footer */
+.footer{opacity:.9;color:#334155}
+
+/* === IDMAR: normalização de margens/containers === */
+:root{
+  --idmar-container-max: 1100px;
+  --idmar-container-pad: 16px;
+  --idmar-block-gap: .75rem;
+}
+main{
+  max-width: var(--idmar-container-max);
+  margin: 1.25rem auto;
+  padding: 0 var(--idmar-container-pad);
+}
+.container{
+  max-width: var(--idmar-container-max);
+  margin: 1.25rem auto;
+  padding: 0 var(--idmar-container-pad);
+}
+.panel{ margin: var(--idmar-block-gap) 0; }
+

@@ -1,0 +1,134 @@
+{
+  "AT": {
+    "pt": "Áustria",
+    "en": "Austria"
+  },
+  "BE": {
+    "pt": "Bélgica",
+    "en": "Belgium"
+  },
+  "BG": {
+    "pt": "Bulgária",
+    "en": "Bulgaria"
+  },
+  "HR": {
+    "pt": "Croácia",
+    "en": "Croatia"
+  },
+  "CY": {
+    "pt": "Chipre",
+    "en": "Cyprus"
+  },
+  "CZ": {
+    "pt": "Chéquia",
+    "en": "Czechia"
+  },
+  "DK": {
+    "pt": "Dinamarca",
+    "en": "Denmark"
+  },
+  "EE": {
+    "pt": "Estónia",
+    "en": "Estonia"
+  },
+  "FI": {
+    "pt": "Finlândia",
+    "en": "Finland"
+  },
+  "FR": {
+    "pt": "França",
+    "en": "France"
+  },
+  "DE": {
+    "pt": "Alemanha",
+    "en": "Germany"
+  },
+  "GR": {
+    "pt": "Grécia",
+    "en": "Greece"
+  },
+  "HU": {
+    "pt": "Hungria",
+    "en": "Hungary"
+  },
+  "IE": {
+    "pt": "Irlanda",
+    "en": "Ireland"
+  },
+  "IT": {
+    "pt": "Itália",
+    "en": "Italy"
+  },
+  "LV": {
+    "pt": "Letónia",
+    "en": "Latvia"
+  },
+  "LT": {
+    "pt": "Lituânia",
+    "en": "Lithuania"
+  },
+  "LU": {
+    "pt": "Luxemburgo",
+    "en": "Luxembourg"
+  },
+  "MT": {
+    "pt": "Malta",
+    "en": "Malta"
+  },
+  "NL": {
+    "pt": "Países Baixos",
+    "en": "Netherlands"
+  },
+  "PL": {
+    "pt": "Polónia",
+    "en": "Poland"
+  },
+  "PT": {
+    "pt": "Portugal",
+    "en": "Portugal"
+  },
+  "RO": {
+    "pt": "Roménia",
+    "en": "Romania"
+  },
+  "SK": {
+    "pt": "Eslováquia",
+    "en": "Slovakia"
+  },
+  "SI": {
+    "pt": "Eslovénia",
+    "en": "Slovenia"
+  },
+  "ES": {
+    "pt": "Espanha",
+    "en": "Spain"
+  },
+  "SE": {
+    "pt": "Suécia",
+    "en": "Sweden"
+  },
+  "IS": {
+    "pt": "Islândia",
+    "en": "Iceland"
+  },
+  "LI": {
+    "pt": "Listenstaine",
+    "en": "Liechtenstein"
+  },
+  "NO": {
+    "pt": "Noruega",
+    "en": "Norway"
+  },
+  "CH": {
+    "pt": "Suíça",
+    "en": "Switzerland"
+  },
+  "GB": {
+    "pt": "Reino Unido",
+    "en": "United Kingdom"
+  },
+  "US": {
+    "pt": "Estados Unidos",
+    "en": "United States"
+  }
+}

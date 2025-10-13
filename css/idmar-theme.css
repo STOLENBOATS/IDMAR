@@ -1,0 +1,42 @@
+/*! IDMAR theme CSS (One r3) — Claro por defeito, Dark opcional via data-theme="dark" */
+:root{
+  --bg: #f6f7fb;
+  --bg-elev: #ffffff;
+  --text: #0b1524;
+  --muted: #4b5563;
+  --border: #e5e7eb;
+  --link: #0b57d0;
+  --btn: #1f6feb;
+  --btn-text: #ffffff;
+  --ok: #0f766e;
+  --nok: #b91c1c;
+}
+:root[data-theme="dark"]{
+  --bg: #0b1220;
+  --bg-elev: #0f172a;
+  --text: #e6edf3;
+  --muted: #94a3b8;
+  --border: #1e293b;
+  --link: #93c5fd;
+  --btn: #2563eb;
+  --btn-text: #ffffff;
+  --ok: #34d399;
+  --nok: #f87171;
+}
+html,body{background:var(--bg); color:var(--text);}
+a{color:var(--link);}
+.topbar{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-elev);position:sticky;top:0;z-index:5}
+.topbar .main a{margin-right:1rem}
+.container{max-width:1100px;margin:1.25rem auto;padding:0 1rem}
+.panel{background:var(--bg-elev);border:1px solid var(--border);border-radius:12px;padding:1rem;margin:.75rem 0}
+input,select,textarea{background:var(--bg);color:var(--text);border:1px solid var(--border);border-radius:10px;padding:.45rem .6rem}
+button.btn, button{background:var(--btn);color:var(--btn-text);border:none;border-radius:10px;padding:.5rem .9rem;cursor:pointer}
+button.ghost{background:transparent;color:var(--link);border:1px solid var(--border)}
+table{width:100%;border-collapse:collapse;margin-top:.75rem}
+th,td{border-bottom:1px solid var(--border);padding:.6rem .5rem;text-align:left}
+.badge{display:inline-block;border-radius:999px;padding:.25rem .55rem;font-weight:600;border:1px solid var(--border);}
+.badge.ok{background:color-mix(in oklab, var(--ok) 18%, transparent); color:var(--ok);}
+.badge.nok{background:color-mix(in oklab, var(--nok) 18%, transparent); color:var(--nok);}
+.footer{opacity:.8;padding:1rem;color:var(--muted)}
+.result-header{margin:.25rem 0 .5rem 0}
+.rules{margin:.25rem 0 0 1rem}

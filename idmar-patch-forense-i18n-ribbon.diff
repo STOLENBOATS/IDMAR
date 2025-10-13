@@ -1,0 +1,132 @@
+﻿diff --git a/js/validador-win.r3b.js b/js/validador-win.r3b.js
+index 0000000..0000001 100644
+--- a/js/validador-win.r3b.js
++++ b/js/validador-win.r3b.js
+@@ -1,6 +1,32 @@
+ (function(w,d){
+   "use strict";
+ 
++  // === BEGIN PATCH: i18n + flags bilingues no histórico ===
++  function currentLang(){
++    try { return (localStorage.getItem('IDMAR_LANG') || 'pt').toLowerCase(); }
++    catch(e){ return 'pt'; }
++  }
++
++  function buildForensicFlags() {
++    // usa as chaves já carregadas em i18n (IDMAR_i18n.t)
++    const t = w.IDMAR_i18n?.t || ((k)=>k);
++    return {
++      layout: { pt: t('forense.flag.layout_pt'),  en: t('forense.flag.layout_en') },
++      font:   { pt: t('forense.flag.font_pt'),    en: t('forense.flag.font_en') },
++      spacing:{ pt: t('forense.flag.spacing_pt'), en: t('forense.flag.spacing_en') },
++      engrave:{ pt: t('forense.flag.engrave_pt'), en: t('forense.flag.engrave_en') }
++    };
++  }
++
++  function renderFlagCell(flagKey, flags, lang){
++    const lbl = (flags && flags[flagKey] && flags[flagKey][lang]) || flagKey;
++    return '<span class="flag"><span class="dot"></span>'+lbl+'</span>';
++  }
++  // === END PATCH ===
++
+   // ... código existente ...
+ 
+@@ -120,12 +146,26 @@ function onValidateWin(){
+     // toda a tua lógica atual de validação do WIN
+     // resultado final:
+     // const overallOk = ...;
+-    const record = {
+-      ts: Date.now(),
+-      win,
+-      result: overallOk ? "OK" : "NOK"
+-    };
++    const lang = currentLang();
++    const flags = buildForensicFlags(); // bilingue
++    const record = {
++      ts: Date.now(),
++      win,
++      result: overallOk ? "OK" : "NOK",
++      lang,
++      flags
++    };
+     pushWinHistory(record);
+     renderWinResult(overallOk, record);
+ }
+ 
++// (Opcional) se fizeres tabela de histórico aqui:
++function renderWinHistoryRow(rec){
++  const L = (rec.lang || currentLang());
++  return [
++    new Date(rec.ts).toLocaleString(),
++    rec.win,
++    rec.result,
++    renderFlagCell('layout', rec.flags, L) + ' ' +
++    renderFlagCell('font',   rec.flags, L) + ' ' +
++    renderFlagCell('spacing',rec.flags, L) + ' ' +
++    renderFlagCell('engrave',rec.flags, L)
++  ];
++}
+diff --git a/js/validador-motor.r3d.js b/js/validador-motor.r3d.js
+index 0000000..0000002 100644
+--- a/js/validador-motor.r3d.js
++++ b/js/validador-motor.r3d.js
+@@ -1,6 +1,22 @@
+ (function(w,d){
+   "use strict";
+ 
++  // === BEGIN PATCH: tooltip/rotação uniforme ===
++  function setRotateTooltip(el){
++    try{
++      const t = w.IDMAR_i18n?.t ? w.IDMAR_i18n.t('tip.rotate') : 'Rodar: use o menu ou SHIFT+R';
++      el?.setAttribute('title', t);
++      el?.setAttribute('data-i18n-title','tip.rotate');
++    }catch(e){}
++  }
++  d.addEventListener('DOMContentLoaded', ()=>{
++    const rot = d.querySelector('.rotatable');
++    if (rot) setRotateTooltip(rot);
++  });
++  // === END PATCH ===
++
+   // ... código existente ...
+ 
+   async function validateEngine(){
+@@ -78,10 +94,34 @@ async function validateEngine(){
+       // tua validação principal atual populando overallOk e notes/erros
+       // let overallOk = ...; let notes = [...];
+ 
++      // === BEGIN PATCH: integração validação extra + overrides ===
++      const brand = (state.brand || '').trim();
++      const sn    = (state.sn || '').trim();
++      if (w.IDMAR_EngineExtra?.validateEngineExtra){
++        const extra = w.IDMAR_EngineExtra.validateEngineExtra(sn, brand);
++        if (extra){
++          if (extra.ok === false) overallOk = false;
++          if (Array.isArray(extra.notes) && extra.notes.length){
++            notes = (notes || []).concat(extra.notes);
++          }
++        }
++      }
++      // === END PATCH ===
++
+       renderEngineResult(overallOk, notes);
+ 
+       // preview/rotação
+-      const ph = d.getElementById('engine-photo-preview');
++      const ph = d.getElementById('engine-photo-preview');
+       if (ph){
+         ph.classList.add('rotatable');
++        setRotateTooltip(ph); // mantém tooltip i18n consistente
+       }
+   }
+ 
++  // (se tiveres um ponto único de renderização de notas)
++  function renderEngineResult(ok, notes){
++    const box = d.getElementById('engine-result-hook');
++    if (!box) return;
++    const status = ok ? 'OK' : 'NOK';
++    box.innerHTML = '<p><strong>'+status+'</strong></p>' +
++      (notes && notes.length ? '<ul>'+notes.map(n=>'<li>'+n+'</li>').join('')+'</ul>' : '');
++  }
++
+ })(window, document);

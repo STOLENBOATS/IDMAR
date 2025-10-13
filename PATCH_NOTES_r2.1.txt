@@ -1,0 +1,13 @@
+IDMAR Patch r2.1 — CSS + Logo quick-fix  (2025-09-16)
+
+1) Corrige o caminho do LOGO para 'img/logo-pm.png' (o ficheiro existente no repo).
+2) Adiciona um LOADER de CSS resiliente (tenta 'css/style.css', 'css/idmar.css', 'css/site.css', 'css/pm.css').
+3) Inclui um CSS mínimo inline como fallback (para não ficar sem estilo mesmo que falhe tudo).
+
+Como aplicar (sem mexer no resto do patch r2):
+- Em cada página (validador/históricos/login), substitui:
+  • a tag <link rel="icon"...> pelo que está neste snippet
+  • o bloco do <header> (logo + nav) por este snippet
+  • adiciona o bloco do loader de CSS no <head> (antes de fechar </head>)
+
+Se preferires, posso gerar .html completos já com este ajuste.

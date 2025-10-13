@@ -1,0 +1,21 @@
+Epic,Issue Title,Description,Priority,Estimate (pts),Milestone
+Reconstruction,Motor ISO 10087 + MIC dictionary,Parser regras + dicionário MIC; validação e normalização HIN/WIN.,P0,5,Phase 1
+Reconstruction,Heurística confusão de caracteres,Mapa de confusões (O/0,I/1,5/S,2/Z,8/B) + distância de edição.,P0,3,Phase 1
+Reconstruction,UI de sugestões com ranking,Sugestões explicadas + seleção pelo agente.,P1,3,Phase 1
+Graph,Modelo de dados casco⇄motor⇄trailer,Esquema e migração inicial.,P0,3,Phase 1
+Graph,UI de relações + alertas,Visualização; highlight quando há conflitos.,P1,5,Phase 1
+Checklists,Catálogo por tipo de embarcação,JSON/YAML com locais do HIN e padrões.,P0,3,Phase 1
+Checklists,UI modo guiado + export PDF,Wizard e exportação simplificada.,P1,5,Phase 1
+Offline,Bundles assinados (MIC/regras/checklists),Gerar, assinar e versionar.,P0,5,Phase 1
+Offline,Service Worker + IndexedDB,Cache de dados e modo offline.,P0,5,Phase 1
+Offline,Verificação de assinatura (Ed25519),Verificar pacotes e rejeitar inválidos.,P0,3,Phase 1
+Forensics,OCR serial/HIN (baseline),Pipeline OCR base (tesseract wasm ou serviço).,P0,5,Phase 2
+Forensics,Análise de textura/relief,Detetar retificação/placa trocada; heatmap.,P1,8,Phase 2
+Gateway LEA,Modelo de payload + filas,DTOs, filas com retry/backoff, audit trail.,P0,5,Phase 2
+Gateway LEA,UI de estados e evidências,Exibir hit/no-hit, anexos e logs.,P1,3,Phase 2
+Photo Reuse,Perceptual hash e crawler,pHash; busca em fontes configuráveis.,P1,8,Phase 3
+Intel,Hotspots/Timeline,Dashboards, mapas e perfis de risco.,P2,5,Phase 3
+Passport,QR/NFC piloto,Token verificável de leitura pública + vista LEA.,P2,5,Phase 3
+Security,Logs imutáveis (hash chain),Encadear entradas, verificação.,P2,3,Phase 2
+QA,Testes de aceitação (operacional),Roteiros e casos de teste com agentes.,P0,3,Phase 1
+DevOps,CI lint/build/offline bundles,Pipelines, validação de assinaturas.,P0,3,Phase 1

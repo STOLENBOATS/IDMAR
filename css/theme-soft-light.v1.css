@@ -1,0 +1,23 @@
+/* theme-soft-light.v1.css — Soft Light override (v1) */
+html, body { background:#f6f8fb; color:#0f172a; }
+header, .app-header { background:#ffffff !important; border-bottom:1px solid #e5e7eb; }
+.panel, .card, .box, .container .panel, section.panel, main .panel, .workspace, .toolbox {
+  background:#ffffff !important; color:#0f172a !important;
+  border:1px solid #e5e7eb !important; box-shadow:0 6px 18px rgba(2,6,23,.05);
+}
+.masthead, .hero, .hero-band, .toolbar, .filters, .filters .panel {
+  background:#eef2f7 !important; color:#0f172a !important; border-color:#e5e7eb !important;
+}
+input, select, textarea { background:#ffffff !important; color:#0f172a !important; border:1px solid #e5e7eb !important; }
+table { background:#ffffff !important; border-color:#e5e7eb !important; }
+thead th { background:#f3f4f6 !important; color:#111827 !important; }
+tbody tr { background:#ffffff !important; }
+tbody tr:nth-child(odd) { background:#fafbfc !important; }
+.badge, .status, .pill { border:1px solid rgba(2,6,23,.08); box-shadow:0 1px 0 rgba(2,6,23,.04); }
+.nav-ribbon[data-section="validador"]{ --pm-blue:#1e66d0; --pm-blue-2:#0f4da7; }
+.nav-ribbon[data-section="hist_win"], .nav-ribbon[data-section="hist_motor"]{ --pm-blue:#1a9e4b; --pm-blue-2:#147a3a; }
+.nav-ribbon[data-section="forense"]{ --pm-blue:#6a4dd9; --pm-blue-2:#4e33b3; }
+.nav-ribbon[data-section="logout"]{ --pm-blue:#475569; --pm-blue-2:#334155; }
+a{ color:#1e66d0; } a:hover{ color:#0f4da7; }
+body.dark, .dark, [data-theme="dark"]{ background:#f6f8fb !important; color:#0f172a !important; }
+body.dark .panel, .dark .panel, [data-theme="dark"] .panel { background:#ffffff !important; }

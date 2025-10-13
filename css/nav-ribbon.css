@@ -1,0 +1,71 @@
+
+/* Formal PM Ribbon Navigation
+   - Applied to header nav anchors via class 'nav-ribbon'
+   - Colors chosen to be sober/institutional
+*/
+:root{
+  --pm-blue:#0b6bcb;
+  --pm-blue-2:#074b8d;
+  --pm-green:#15803d;
+  --pm-green-2:#0e5e2c;
+  --pm-purple:#5b21b6;
+  --pm-purple-2:#3b1577;
+  --pm-gray:#334155;
+  --pm-gray-2:#1f2937;
+  --pm-fg:#ffffff;
+  --pm-shadow: rgba(2,6,23,.10);
+}
+
+header nav, .nav, .top-nav, .menu{
+  display:flex; gap:.5rem; flex-wrap:wrap; align-items:center;
+}
+
+header nav a.nav-ribbon, .nav a.nav-ribbon, .top-nav a.nav-ribbon, .menu a.nav-ribbon{
+  position:relative;
+  display:inline-flex; align-items:center; gap:.6rem;
+  min-height:38px;
+  padding:.4rem .9rem .4rem .6rem;
+  color:var(--pm-fg); text-decoration:none; font-weight:600;
+  letter-spacing:.2px; border-radius:12px;
+  background:linear-gradient(to right, var(--pm-blue), var(--pm-blue-2));
+  box-shadow:0 6px 16px var(--pm-shadow);
+  transition:transform .08s ease, box-shadow .12s ease, filter .12s ease;
+}
+
+header nav a.nav-ribbon:hover{ transform:translateY(-1px); box-shadow:0 10px 22px var(--pm-shadow); }
+
+header nav a.nav-ribbon:focus-visible{
+  outline:2px solid #111827; outline-offset:3px;
+}
+
+/* Diamond icon via pseudo-element; icon hinted by data-section */
+header nav a.nav-ribbon::before{
+  content:"";
+  display:inline-block;
+  width:28px; height:28px; flex:0 0 28px;
+  background:rgba(255,255,255,.14);
+  clip-path:polygon(50% 0, 100% 50%, 50% 100%, 0 50%);
+}
+
+/* Section color variants */
+a.nav-ribbon[data-section="validador"]{
+  --pm-blue:#0b6bcb; --pm-blue-2:#074b8d;
+}
+a.nav-ribbon[data-section="hist_win"],
+a.nav-ribbon[data-section="hist_motor"]{
+  --pm-blue: var(--pm-green); --pm-blue-2: var(--pm-green-2);
+}
+a.nav-ribbon[data-section="forense"]{
+  --pm-blue: var(--pm-purple); --pm-blue-2: var(--pm-purple-2);
+}
+a.nav-ribbon[data-section="logout"]{
+  --pm-blue: var(--pm-gray); --pm-blue-2: var(--pm-gray-2);
+}
+
+/* Full-width on small screens */
+@media (max-width: 720px){
+  header nav, .nav, .top-nav, .menu{ gap:.4rem; }
+  header nav a.nav-ribbon{ width:100%; justify-content:flex-start; border-radius:14px; }
+}
+
+.nav-ribbon.is-active{ box-shadow:0 12px 24px var(--pm-shadow); filter:saturate(1.05); }

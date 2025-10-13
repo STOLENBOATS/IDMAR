@@ -1,0 +1,374 @@
+{
+  "schema_version": 1,
+  "brands": {
+    "Yamaha": {
+      "segments": [
+        "outboard"
+      ],
+      "shaft_options": [
+        "S",
+        "L",
+        "X",
+        "U",
+        "XX"
+      ],
+      "year_letter_pairs_hint": "BA, BB, …",
+      "series_digits": [
+        6,
+        7
+      ],
+      "model_code_examples": [
+        "F300",
+        "F250",
+        "F225",
+        "XTO450",
+        "XTO425",
+        "F150",
+        "F115"
+      ],
+      "power_hp_range": [
+        2,
+        450
+      ],
+      "displacement_cc_range": [
+        50,
+        5559
+      ],
+      "origins_hint": [
+        "JP",
+        "TH"
+      ],
+      "rigging": [
+        "DEC",
+        "Mechanical"
+      ],
+      "search_examples": [
+        "F300",
+        "F225",
+        "F150",
+        "XTO450"
+      ]
+    },
+    "Suzuki": {
+      "segments": [
+        "outboard"
+      ],
+      "shaft_options": [
+        "S",
+        "L",
+        "X",
+        "UL"
+      ],
+      "year_letter_pairs_hint": "BA, BB, …",
+      "series_digits": [
+        6,
+        7
+      ],
+      "model_code_examples": [
+        "DF350A",
+        "DF300B",
+        "DF200A",
+        "DF140A",
+        "DF90A"
+      ],
+      "power_hp_range": [
+        2,
+        350
+      ],
+      "displacement_cc_range": [
+        68,
+        4028
+      ],
+      "origins_hint": [
+        "JP",
+        "TH"
+      ],
+      "rigging": [
+        "Drive-by-Wire",
+        "Mechanical"
+      ],
+      "search_examples": [
+        "DF140A",
+        "DF90A",
+        "DF200A"
+      ]
+    },
+    "Honda": {
+      "segments": [
+        "outboard"
+      ],
+      "shaft_options": [
+        "S",
+        "L",
+        "X",
+        "UL"
+      ],
+      "year_letter_pairs_hint": "—",
+      "series_digits": [
+        7
+      ],
+      "model_code_examples": [
+        "BF250",
+        "BF225",
+        "BF200",
+        "BF150",
+        "BF115"
+      ],
+      "power_hp_range": [
+        2.3,
+        250
+      ],
+      "displacement_cc_range": [
+        57,
+        3583
+      ],
+      "origins_hint": [
+        "JP",
+        "US"
+      ],
+      "rigging": [
+        "Drive-by-Wire",
+        "Mechanical",
+        "Tiller"
+      ],
+      "search_examples": [
+        "BF250",
+        "BF150"
+      ]
+    },
+    "Mercury": {
+      "segments": [
+        "outboard"
+      ],
+      "shaft_options": [
+        "S",
+        "L",
+        "X",
+        "XX"
+      ],
+      "year_letter_pairs_hint": "—",
+      "series_digits": [
+        7
+      ],
+      "model_code_examples": [
+        "Verado 400",
+        "SeaPro 300",
+        "FourStroke 150"
+      ],
+      "power_hp_range": [
+        2.5,
+        600
+      ],
+      "displacement_cc_range": [
+        123,
+        7470
+      ],
+      "origins_hint": [
+        "US",
+        "CN",
+        "JP",
+        "MX"
+      ],
+      "rigging": [
+        "Digital",
+        "Mechanical",
+        "Commercial"
+      ],
+      "search_examples": [
+        "Verado 400",
+        "SeaPro 300",
+        "FourStroke 150"
+      ]
+    },
+    "Tohatsu": {
+      "segments": [
+        "outboard"
+      ],
+      "shaft_options": [
+        "S",
+        "L",
+        "X",
+        "UL"
+      ],
+      "year_letter_pairs_hint": "—",
+      "series_digits": [
+        6,
+        7
+      ],
+      "model_code_examples": [
+        "MFS 60",
+        "MFS 140",
+        "BFT 150"
+      ],
+      "power_hp_range": [
+        2.5,
+        140
+      ],
+      "displacement_cc_range": [
+        85,
+        1995
+      ],
+      "origins_hint": [
+        "JP",
+        "TH"
+      ],
+      "rigging": [
+        "Mechanical",
+        "Tiller"
+      ],
+      "search_examples": [
+        "MFS 60",
+        "BFT 150"
+      ]
+    },
+    "Evinrude/Johnson": {
+      "segments": [
+        "outboard"
+      ],
+      "shaft_options": [
+        "S",
+        "L",
+        "X",
+        "UL"
+      ],
+      "year_letter_pairs_hint": "—",
+      "series_digits": [
+        6,
+        7
+      ],
+      "model_code_examples": [
+        "E-TEC G2 300",
+        "E-TEC 150"
+      ],
+      "power_hp_range": [
+        2,
+        300
+      ],
+      "displacement_cc_range": [
+        169,
+        3441
+      ],
+      "origins_hint": [
+        "US",
+        "CA"
+      ],
+      "rigging": [
+        "Digital",
+        "Mechanical"
+      ],
+      "search_examples": [
+        "E-TEC 150",
+        "G2 300"
+      ]
+    },
+    "Volvo Penta": {
+      "segments": [
+        "inboard",
+        "sterndrive",
+        "saildrive"
+      ],
+      "shaft_options": [],
+      "year_letter_pairs_hint": "—",
+      "series_digits": [
+        7
+      ],
+      "model_code_examples": [
+        "V8-380",
+        "D4-300",
+        "D6-440",
+        "D1-30"
+      ],
+      "power_hp_range": [
+        10,
+        600
+      ],
+      "displacement_cc_range": [
+        479,
+        5700
+      ],
+      "origins_hint": [
+        "SE",
+        "DE"
+      ],
+      "rigging": [
+        "Sterndrive",
+        "Inboard",
+        "IPS"
+      ],
+      "search_examples": [
+        "D4-300",
+        "V8-380"
+      ]
+    },
+    "MerCruiser": {
+      "segments": [
+        "inboard",
+        "sterndrive"
+      ],
+      "shaft_options": [],
+      "year_letter_pairs_hint": "—",
+      "series_digits": [
+        7
+      ],
+      "model_code_examples": [
+        "4.5L",
+        "6.2L",
+        "8.2L",
+        "TDI 3.0"
+      ],
+      "power_hp_range": [
+        230,
+        430
+      ],
+      "displacement_cc_range": [
+        3000,
+        8237
+      ],
+      "origins_hint": [
+        "US",
+        "DE"
+      ],
+      "rigging": [
+        "Inboard",
+        "Sterndrive"
+      ],
+      "search_examples": [
+        "6.2L",
+        "TDI 3.0"
+      ]
+    },
+    "Yanmar": {
+      "segments": [
+        "inboard"
+      ],
+      "shaft_options": [],
+      "year_letter_pairs_hint": "—",
+      "series_digits": [
+        7
+      ],
+      "model_code_examples": [
+        "3YM30AE",
+        "4JH80",
+        "6LY440"
+      ],
+      "power_hp_range": [
+        9,
+        440
+      ],
+      "displacement_cc_range": [
+        719,
+        6494
+      ],
+      "origins_hint": [
+        "JP"
+      ],
+      "rigging": [
+        "Inboard"
+      ],
+      "search_examples": [
+        "4JH80",
+        "6LY440"
+      ]
+    }
+  }
+}

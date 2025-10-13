@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+
+<html lang="pt">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>IDMAR — Validador</title>
+<link href="img/logo-pm.png" rel="icon"/>
+<style>
+    :root{--bg:#f8fafc;--fg:#0f172a;--bg-elev:#ffffff;--border:#e5e7eb;--link:#0b6bcb}
+    html,body{height:100%}
+    body{background:var(--bg);color:var(--fg);margin:0;display:flex;flex-direction:column;
+         font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif}
+    main{flex:1}
+    .topbar{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;border-bottom:1px solid var(--border);background:var(--bg-elev)}
+    .topbar img{height:36px}
+    .topbar .brand{display:flex;flex-direction:column}
+    .topbar .brand .app{font-weight:800}
+    .topbar nav a{margin-right:1rem;color:var(--link);text-decoration:none}
+    .container{max-width:1100px;margin:1.25rem auto;padding:0 1rem}
+    .panel{background:var(--bg-elev);border:1px solid var(--border);border-radius:12px;padding:1rem;margin:.75rem 0}
+    .two{display:grid;grid-template-columns:1fr;gap:1rem}
+    @media(min-width:980px){ .two{grid-template-columns:1fr 1fr} }
+    label{display:block;margin:.35rem 0 .25rem}
+    input[type="text"], input[type="search"], input[type="file"], select, textarea{
+      width:100%;border:1px solid var(--border);background:#fff;border-radius:10px;padding:.5rem .6rem;
+    }
+    button{background:#0b6bcb;color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;cursor:pointer}
+    table{width:100%;border-collapse:collapse;margin-top:.5rem}
+    th,td{border-bottom:1px solid var(--border);padding:.6rem .5rem;text-align:left}
+    .small{opacity:.75;font-size:.9em}
+    .badge{display:inline-block;border-radius:999px;padding:.15rem .55rem;font-weight:600}
+    .good{background:#10b98120;color:#065f46}
+    .bad{background:#ef444420;color:#7f1d1d}
+    details.forense-box{margin-top:.75rem;border:1px dashed var(--border);border-radius:10px;padding:.5rem}
+    .forense-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem;margin-top:.5rem}
+    .footer{border-top:1px solid var(--border);padding:1rem;text-align:left;opacity:.85;background:var(--bg-elev)}
+  </style>
+<script>
+    // Gate de sessão simples
+    (function(){
+      try{
+        var ok = sessionStorage.getItem('IDMAR_SESSION')==='ok' || sessionStorage.getItem('NAV_SESSION')==='ok';
+        if(!ok) location.replace('login.html');
+      }catch(e){}
+    })();
+    <script defer src="js/idmar-header-only.all.js?v=1"></script>
+
+</head>
+<body>
+<header class="topbar" id="fallback-topbar">
+<img alt="Polícia Marítima" src="img/logo-pm.png"/>
+<div class="brand">
+<span class="app">IDMAR</span>
+<small>Identificação Marítima — Cascos &amp; Motores</small>
+</div>
+<nav style="margin-left:auto">
+<a href="validador.html">Validador</a>
+<a href="historico_win.html">Histórico WIN</a>
+<a href="historico_motor.html">Histórico Motor</a>
+<a href="forense.html">Forense</a>
+<a href="#" onclick="try{sessionStorage.clear()}catch(e){};location.href='login.html'">Sair</a>
+</nav>
+</header>
+<main class="container">
+<h1 data-i18n="validator.title">Validador</h1>
+<section class="two">
+<!-- WIN -->
+<div class="panel">
+<h2>Validador WIN</h2>
+<form id="formWin">
+<label data-i18n="validator.win.label" for="win">WIN / HIN</label>
+<input data-i18n-placeholder="validator.win.label" id="win" placeholder="Ex.: PT-ABC12345D404" type="text"/>
+<div style="margin:.5rem 0">
+<button data-i18n="validator.win.validate" id="btnWin" type="submit">Validar WIN</button>
+</div>
+<div style="margin-top:.5rem">
+<label for="winPhoto">Foto opcional / Optional photo</label>
+<input accept="image/*" id="winPhoto" type="file"/>
+</div>
+<div id="winOut" style="margin-top:.75rem"></div>
+<table>
+<thead>
+<tr><th>Campo / Field</th><th>Valor / Value</th><th>Interpretação / Meaning</th></tr>
+</thead>
+<tbody id="interpWinBody"></tbody>
+</table>
+</form>
+</div>
+<!-- MOTOR -->
+<div class="panel">
+<h2>Validador Motor</h2>
+<form id="formMotor">
+<label for="brand">Marca</label>
+<select id="brand">
+<option>Yamaha</option><option>Honda</option><option>Suzuki</option><option>Tohatsu</option>
+<option>Mercury</option><option>MerCruiser</option><option>Volvo Penta</option>
+<option>Yanmar</option><option>Evinrude/Johnson</option>
+</select>
+<div id="brandDynamic"></div>
+<div style="margin-top:.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.5rem">
+<div><label>Modelo (pesquisa)</label><input id="srch_model" placeholder="Ex.: DF140A" type="text"/></div>
+<div><label>Potência (hp)</label><input id="srch_power" placeholder="Ex.: 150" type="text"/></div>
+<div><label>Cilindrada (cc)</label><input id="srch_disp" placeholder="Ex.: 2670" type="text"/></div>
+<div><label>Ano</label><input id="srch_year" placeholder="Ex.: 2017" type="text"/></div>
+<div><label>Origem</label><input id="srch_origin" placeholder="Ex.: Japão" type="text"/></div>
+</div>
+<div style="margin:.5rem 0">
+<button data-i18n="validator.motor.validate" id="btnMotor" type="submit">Validar Motor</button>
+</div>
+<div style="margin-top:.5rem">
+<label for="motorPhoto">Foto opcional / Optional photo</label>
+<input accept="image/*" id="motorPhoto" type="file"/>
+</div>
+<div id="motorOut" style="margin-top:.75rem"></div>
+</form>
+</div>
+</section>
+</main>
+<footer class="footer" id="fallback-footer">IDMAR — v2.2.7-baseline+merge-r3.3</footer>
+<script src="js/idmar-layout.r3b.js?v=r3b"></script>
+<script src="js/validador-win.r3b.js?v=r3b"></script>
+<script src="js/validador-motor.r3b.js?v=r3b"></script>
+</body>
+</html>

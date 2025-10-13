@@ -1,0 +1,12 @@
+/* Soft, unobtrusive animations */
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+.panel, header, .app-header, main .panel, table { animation: fadeInUp .28s ease-out; }
+
+/* Buttons subtle hover */
+a.btn, button, .btn {
+  transition: transform .08s ease, box-shadow .12s ease;
+}
+a.btn:hover, button:hover, .btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 10px rgba(0,0,0,.06);
+}

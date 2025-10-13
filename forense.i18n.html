@@ -1,0 +1,115 @@
+
+<!DOCTYPE html>
+
+<html lang="pt">
+<head>
+<script>
+(function(){
+  if (window.__IDMAR_QSA_PATCHED_V2__) return;
+  function makeSafeQSA(orig){
+    return function(selector){
+      try { return orig.call(this, selector); }
+      catch(e){
+        try{
+          var sel = String(selector).replace(/\[data-x\]\("([^"]+)"\)/g, ':contains("$1")');
+          var parts = sel.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+          var out = [];
+          for (var i=0;i<parts.length;i++){
+            var part = parts[i], m = part.match(/^(.*?):contains\("([^"]+)"\)$/);
+            if (m){
+              var base = m[1] || '*', text = m[2].toLowerCase();
+              var nodes = orig.call(this, base);
+              for (var j=0;j<nodes.length;j++){
+                var el = nodes[j];
+                if ((el.textContent||'').toLowerCase().indexOf(text) > -1) out.push(el);
+              }
+            } else {
+              try { var nodes2 = orig.call(this, part);
+                for (var k=0;k<nodes2.length;k++) out.push(nodes2[k]); } catch(_){}
+            }
+          }
+          out.forEach = Array.prototype.forEach; return out;
+        }catch(_){ var empty=[]; empty.forEach = Array.prototype.forEach; return empty; }
+      }
+    };
+  }
+  if (!Document.prototype.__idmar_qsa_v2){
+    Document.prototype.querySelectorAll = makeSafeQSA(Document.prototype.querySelectorAll);
+    Document.prototype.__idmar_qsa_v2 = true;
+  }
+  if (!Element.prototype.__idmar_qsa_v2){
+    Element.prototype.querySelectorAll = makeSafeQSA(Element.prototype.querySelectorAll);
+    Element.prototype.__idmar_qsa_v2 = true;
+  }
+  window.__IDMAR_QSA_PATCHED_V2__ = true;
+  console.info("[IDMAR shim] qSA v2: Document+Element protegidos (:contains + [data-x](..)).");
+})();
+</script>
+
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<title>IDMAR  Forense</title>
+<link href="img/logo-pm.png" rel="icon"/>
+<script defer="" src="js/idmar-header-only.all.js?v=1"></script>
+</head>
+<body>
+<header id="fallback-topbar"></header>
+<main class="container">
+<h1 data-i18n="forense.title">Forense  Índice</h1>
+<section class="panel">
+<h2>Carregar evidências</h2>
+<div class="row" style="display:flex;gap:.5rem;flex-wrap:wrap">
+<input accept="image/*" id="evPhotos" multiple="" type="file"/>
+<select id="evContext">
+<option data-i18n="forense.context_win" value="win">Contexto: WIN/HIN</option>
+<option data-i18n="forense.context_motor" value="motor">Contexto: Motor</option>
+</select>
+<button id="evAttach">Anexar ao histórico mais recente</button>
+</div>
+<div class="meta" id="evMeta" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.5rem;margin-top:.5rem"></div>
+<div class="thumbs" id="evThumbs" style="display:flex;gap:.5rem;flex-wrap:wrap"></div>
+</section>
+<section class="panel">
+<h2>Workspace</h2>
+<div class="row" style="display:flex;gap:.5rem;flex-wrap:wrap">
+<button data-i18n="forense.lightbox" id="lbOpen">Abrir lightbox</button>
+<label>Comparar <input id="cmpRange" max="100" min="0" type="range" value="50"/></label>
+<button data-i18n="forense.annotate" id="addRect">Anotar (rect)</button>
+<button data-i18n="forense.clear" id="clearRects">Limpar anotações</button>
+<button data-i18n="forense.export_png" id="exportPNG">Exportar PNG anotado</button>
+<button data-i18n="forense.save_bundle" id="saveBundle">Guardar bundle (JSON)</button>
+<input accept=".json" id="loadBundle" type="file"/>
+</div>
+<div class="canvas-wrap" style="position:relative;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#f1f5f9;height:540px">
+<canvas id="evCanvas" style="display:block;width:100%;height:100%"></canvas>
+</div>
+<small>Dica: a comparação usa a 1ª e a 2ª foto; as anotações servem para redacção/realce.</small>
+</section>
+<section class="panel">
+<h2>Checklist forense</h2>
+<div class="checkboxes" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.35rem">
+<label><input id="chk_rebites" type="checkbox"/> Rebites inconsistentes/añadidos</label>
+<label><input id="chk_solda" type="checkbox"/> Cordões de solda anómalos</label>
+<label><input id="chk_placa" type="checkbox"/> Placa remarcada/substituída</label>
+<label><input id="chk_tinta" type="checkbox"/> Camadas de tinta/abrasões</label>
+<label><input id="chk_etq" type="checkbox"/> Etiqueta adulterada/ausente (motor)</label>
+<label><input id="chk_core" type="checkbox"/> Core plug danificado/removido (motor)</label>
+<label><input id="chk_boss" type="checkbox"/> Solda/corrosão anómala no boss (motor)</label>
+<label><input id="chk_bloco" type="checkbox"/> Remarcação no bloco (motor)</label>
+</div>
+<label>Notas</label>
+<textarea data-i18n-placeholder="forense.notes" id="notes" placeholder="Observações técnicas" rows="4" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:.5rem .6rem;background:#fff"></textarea>
+</section>
+</main>
+<footer class="footer" style="border-top:1px solid var(--border);padding:1rem;opacity:.85;background:var(--bg-elev)">IDMAR  v2.2.7-baseline+merge-r3.3</footer>
+<div class="lightbox" id="lightbox" style="position:fixed;inset:0;background:rgba(15,23,42,.85);display:none;align-items:center;justify-content:center;z-index:50">
+<img alt="" id="lbImg" style="max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.5)"/>
+</div>
+<!-- Layout com header unificado -->
+<script src="js/idmar-layout.r3c.js?v=r3c"></script>
+<!-- Módulo forense (já existente no teu projeto) -->
+<script src="js/forense.r3b.js?v=r3b"></script>
+</body>
+</html>
+
+

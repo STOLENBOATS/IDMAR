@@ -1,50 +1,28 @@
 <!doctype html>
-<html lang="pt"><head>
-<link rel="icon" type="image/png" href="img/favicon.png">
-<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>IDMAR — Início</title>
-<link rel="stylesheet" href="css/styles.css">
-  <link rel="stylesheet" href="css/header-tweaks.css"/>
-<script>window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{if(!/login\.html$/.test(location.href)) location.href='login.html';},200);});</script>
-  <link rel="stylesheet" href="css/soft-anim.css"/>
-\1<body>
-
-
-<script>(function(){try{const ok=sessionStorage.getItem('NAV_SESSION')==='ok'||sessionStorage.getItem('IDMAR_SESSION')==='ok'||sessionStorage.getItem('nav_session')==='ok'||sessionStorage.getItem((NAV&&NAV.STORAGE&&NAV.STORAGE.SESSION)||'nav_session')==='ok'; if(!ok) location.href='login.html';}catch(e){}})();</script>
-
-<header class="app-header">
-  <div class="brand">
-    <img src="img/logo-pm.png" alt="Polícia Marítima" class="logo">
-    <div class="titles">
-      <h1>IDMAR <span class="title-descriptor">Identificação Marítima — Cascos &amp; Motores</span></h1>
-      <p class="subtitle"><span class="sub-en">(Maritime Identifications — WIN/HIN &amp; Engines)</span></p>
-    </div>
+<html lang="pt">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>IDMAR — 404</title>
+  <meta http-equiv="refresh" content="0; url=./index.html">
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#0b6bcb">
+  <link rel="apple-touch-icon" href="./img/icon-192.png">
+  <style>
+    body{font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif;
+         margin:0; padding:2rem; display:flex; align-items:center; justify-content:center; min-height:100vh;}
+    .card{max-width:680px; padding:1.5rem; border:1px solid #e5e7eb; border-radius:16px}
+    h1{font-size:1.25rem; margin:0 0 .75rem}
+    p{margin:.25rem 0}
+    code{background:#f3f4f6; padding:.1rem .3rem; border-radius:6px}
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>404 — página não encontrada</h1>
+    <p>A redirecionar para <code>index.html</code>…</p>
+    <p>Se não fores redirecionado automaticamente, <a href="./index.html">clica aqui</a>.</p>
   </div>
-  <nav class="main-nav">
-    <a href="validador.html">Validador</a>
-    <a href="historico_win.html">Histórico WIN</a>
-    <a href="historico_motor.html">Histórico Motor</a>
-    <a href="forense.html">Forense</a>
-    <a href="login.html" onclick="try{sessionStorage.clear();localStorage.setItem('IDMAR_LAST_LOGOUT',Date.now())}catch(e){}">Sair</a>
-    <button id="themeToggle" class="btn-icon" title="Alternar tema">🌙</button>
-  </nav>
-</header>
-
-<main class="container">
-  <section class="card">
-    <h2>Abrir sessão</h2>
-    <p>Se não for redirecionado, clique em <a class="btn" href="login.html">Login</a>.</p>
-  </section>
-</main>
-<footer class="app-footer">
-  <p>IDMAR — v2.2.7-baseline+merge-r1 — 2025-09-11</p>
-</footer>
-<script src="js/config.js"></script><script src="js/app.js"></script>
-  <script src="js/theme.js"></script>
-  <script defer src="js/idmar-version.js"></script>
-
-  <!-- PWA / SW -->
-<link rel="manifest" href="./manifest.webmanifest">
-<script defer src="./js/sw-register.js"></script>
-
-\1</html>
+  <script defer src="./js/sw-register.js"></script>
+</body>
+</html>

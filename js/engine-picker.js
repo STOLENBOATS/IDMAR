@@ -24,44 +24,63 @@
 
   // SUBSTITUI isto no teu ficheiro js/engine-picker.js
 
+// PATCH: aceitar brands como OBJETO (map) além de array
 async function loadCatalog(url) {
   const res = await fetch(url, { credentials: 'same-origin' });
-  if (!res.ok) throw new Error(`Catalog load failed: ${res.status} ${res.statusText}`);
+  if (!res.ok) throw new Error('Catalog load failed: ' + res.status + ' ' + res.statusText);
   const j = await res.json();
 
-  // Aceitar múltiplas formas:
-  // - { brands: [...] }
-  // - { data: { brands: [...] } }
-  // - { manufacturers: [...] }
-  // - [ { id,name,models }, ... ]  (array direto)
-  let brands = null;
-  if (Array.isArray(j)) {
-    brands = j; // array direto
-  } else if (j && typeof j === 'object') {
-    brands =
-      j.brands ||
-      (j.data && j.data.brands) ||
-      j.manufacturers ||
-      (j.data && j.data.manufacturers) ||
-      null;
+  // 1) tentar várias “caixas” conhecidas
+  let raw = null;
+
+  // array raiz
+  if (Array.isArray(j)) raw = j;
+
+  // brands como array
+  else if (Array.isArray(j.brands)) raw = j.brands;
+
+  // brands como OBJETO (map)
+  else if (j.brands && typeof j.brands === 'object') {
+    raw = Object.entries(j.brands).map(([id, b]) => ({ id, ...(b || {}) }));
   }
 
-  if (!Array.isArray(brands) || brands.length === 0) {
-    console.error('[IDMAR][engine_picker] catalog shape seen:', j);
+  // data.brands como array
+  else if (j.data && Array.isArray(j.data.brands)) raw = j.data.brands;
+
+  // data.brands como OBJETO (map)
+  else if (j.data && j.data.brands && typeof j.data.brands === 'object') {
+    raw = Object.entries(j.data.brands).map(([id, b]) => ({ id, ...(b || {}) }));
+  }
+
+  // manufacturers (array)
+  else if (Array.isArray(j.manufacturers)) raw = j.manufacturers;
+
+  // manufacturers como OBJETO (map)
+  else if (j.manufacturers && typeof j.manufacturers === 'object') {
+    raw = Object.entries(j.manufacturers).map(([id, b]) => ({ id, ...(b || {}) }));
+  }
+
+  if (!Array.isArray(raw) || raw.length === 0) {
+    console.error('[IDMAR][engine_picker] unexpected catalog shape:', j);
     throw new Error('No brands array found in catalog');
   }
 
-  // Normalizar marcas
-  const norm = brands.map(b => {
+  // 2) normalização
+  const norm = raw.map(b => {
     const id = (b.id || b.code || b.slug || b.name || '').toString().trim();
     const name = (b.name || b.label || id).toString().trim();
-    const models = b.models || b.variants || b.items || [];
+
+    // models pode ser array… ou OBJETO (map)
+    let models = b.models || b.variants || b.items || [];
+    if (!Array.isArray(models) && models && typeof models === 'object') {
+      models = Object.values(models);
+    }
+
     return { id, name, models };
   }).filter(b => b.id);
 
   return { brands: norm };
 }
-
 
   function ensureContainer(sel) {
     var root = d.querySelector(sel);

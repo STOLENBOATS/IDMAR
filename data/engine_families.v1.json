@@ -1,6 +1,6 @@
 {
   "schema": "engine_families.v1",
-  "generated_at": "2025-10-14T09:11:05",
+  "generated_at": "2025-10-14T10:58:39",
   "brands": [
     {
       "id": "yamaha",
@@ -22,7 +22,7 @@
                   "to": 1999999
                 }
               ],
-              "notes": "PLACEHOLDER — ajustar com dados oficiais/forenses."
+              "notes": "PLACEHOLDER"
             },
             {
               "code": "F40G",

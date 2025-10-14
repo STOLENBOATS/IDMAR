@@ -1,5 +1,4 @@
 // js/engine-family-picker.v1.js
-// IDMAR — constrain Version & Power by brand/model; show Serial ranges (families v1)
 (function(w, d){
   'use strict';
 
@@ -8,20 +7,22 @@
     versionSelectId: 'engineVersion',
     powerSelectId: 'enginePower',
     serialPanelId: 'engineSerialInfo',
-    brandSource: () => w.EnginePickerState?.brand || d.getElementById('engineBrand')?.value || '',
-    modelSource: () => w.EnginePickerState?.model || d.getElementById('engineModel')?.value || ''
+    brandSource: function(){ return w.EnginePickerState && w.EnginePickerState.brand || d.getElementById('engineBrand')?.value || ''; },
+    modelSource: function(){ return w.EnginePickerState && w.EnginePickerState.model || d.getElementById('engineModel')?.value || ''; }
   };
 
   const state = { catalog:null };
 
-  function el(tag, attrs={}, kids=[]){
+  function el(tag, attrs, kids){
+    attrs = attrs || {}; kids = kids || [];
     const e = d.createElement(tag);
-    for (const [k,v] of Object.entries(attrs)) {
+    for (const kv of Object.entries(attrs)){
+      const k = kv[0], v = kv[1];
       if (k==='class') e.className = v;
       else if (k==='text') e.textContent = v;
       else e.setAttribute(k,v);
     }
-    kids.forEach(k => e.appendChild(k));
+    kids.forEach(function(k){ e.appendChild(k); });
     return e;
   }
 
@@ -38,10 +39,10 @@
     return null;
   }
 
-  function findFamily(cat, brandKey, model){
-    const b = (cat.brands || []).find(x => x.id === brandKey);
+  function findFamily(cat, bkey, model){
+    const b = (cat.brands||[]).find(function(x){ return x.id === bkey; });
     if (!b) return null;
-    const fam = (b.families || []).find(x => (x.model || '').toLowerCase() === (model||'').toLowerCase());
+    const fam = (b.families||[]).find(function(x){ return (x.model||'').toLowerCase() === (model||'').toLowerCase(); });
     return fam || null;
   }
 
@@ -49,7 +50,7 @@
     select.innerHTML = '';
     select.appendChild(el('option', {value:'', text:'—'}));
     if (!family) return;
-    (family.versions || []).forEach(v => {
+    (family.versions||[]).forEach(function(v){
       select.appendChild(el('option', {value: v.code, text: v.code + (v.years ? (' ['+v.years+']') : '')}));
     });
   }
@@ -58,7 +59,7 @@
     select.innerHTML = '';
     select.appendChild(el('option', {value:'', text:'—'}));
     if (!version) return;
-    (version.power_options_hp || []).forEach(hp => {
+    (version.power_options_hp||[]).forEach(function(hp){
       select.appendChild(el('option', {value: String(hp), text: hp + ' hp'}));
     });
   }
@@ -66,13 +67,13 @@
   function showSerials(version, panel){
     panel.innerHTML = '';
     if (!version) return;
-    const list = el('ul', {class:'ef-serials'});
-    (version.serial_ranges || []).forEach(sr => {
+    const ul = el('ul', {class:'ef-serials'});
+    (version.serial_ranges||[]).forEach(function(sr){
       const pretty = (sr.prefix ? sr.prefix+'-' : '') + (sr.from || '') + ' … ' + (sr.to || '');
-      list.appendChild(el('li', {text: pretty}));
+      ul.appendChild(el('li', {text: pretty}));
     });
     panel.appendChild(el('div', {class:'ef-label', text:'Intervalos de SN (conhecidos):'}));
-    panel.appendChild(list);
+    panel.appendChild(ul);
     if (version.notes) panel.appendChild(el('div', {class:'ef-notes', text: version.notes}));
   }
 
@@ -91,23 +92,20 @@
       snPanel.innerHTML = '';
     }
 
-    verSel.addEventListener('change', () => {
+    verSel.addEventListener('change', function(){
       const bKey = brandKey(CFG.brandSource());
       const model = CFG.modelSource();
       const fam = findFamily(state.catalog, bKey, model);
-      const version = (fam?.versions || []).find(v => v.code === verSel.value);
+      const version = (fam && fam.versions || []).find(function(v){ return v.code === verSel.value; });
       hydratePowers(version, powSel);
       showSerials(version, snPanel);
     });
 
-    // Do an initial refresh
     refresh();
-
-    // Also refresh when legacy selects change (if present)
     const brandSel = d.getElementById('engineBrand');
     const modelInput = d.getElementById('engineModel');
-    brandSel && brandSel.addEventListener('change', refresh);
-    modelInput && modelInput.addEventListener('input', refresh);
+    if (brandSel) brandSel.addEventListener('change', refresh);
+    if (modelInput) modelInput.addEventListener('input', refresh);
   }
 
   async function init(){
@@ -115,6 +113,6 @@
     bindUI();
   }
 
-  w.EngineFamilyPicker = { init };
-  w.addEventListener('DOMContentLoaded', () => { init().catch(console.error); });
+  w.EngineFamilyPicker = { init: init };
+  w.addEventListener('DOMContentLoaded', function(){ init().catch(console.error); });
 })(window, document);

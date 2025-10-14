@@ -11,9 +11,9 @@ window.IDMAR_BRAND_CONFIG = {
         { id:'notes', label:'Notas/observações', type:'textarea', placeholder:'Aspetos visuais / anomalias / corrosão / remarcações…' }
       ],
       rules: {
-        validate(form){ 
+        validate: function(form){ 
           const out = { ok:true, issues:[] };
-          const sn = form.sn?.trim() || '';
+          const sn = (form.sn||'').trim();
           if (!sn) { out.ok=false; out.issues.push('Número de Série é obrigatório.'); }
           if (sn && !/^[A-Z0-9\-]{5,20}$/.test(sn)) { out.ok=false; out.issues.push('Formato do SN inesperado.'); }
           if (sn && !/^[A-Z0-9]{2,4}\-/.test(sn)) { out.issues.push('Dica: faltará um prefixo (ex.: 6ML-)?'); }
@@ -30,9 +30,9 @@ window.IDMAR_BRAND_CONFIG = {
         { id:'notes', label:'Notas/observações', type:'textarea', placeholder:'Sinais de remarcação / divergência com etiqueta de modelo…' }
       ],
       rules: {
-        validate(form){
+        validate: function(form){
           const out = { ok:true, issues:[] };
-          const sn = form.sn?.trim() || '';
+          const sn = (form.sn||'').trim();
           if (!sn) { out.ok=false; out.issues.push('Número de Série é obrigatório.'); }
           if (sn && !/^[A-Z0-9\-]{5,20}$/.test(sn)) { out.ok=false; out.issues.push('Formato do SN inesperado.'); }
           return out;

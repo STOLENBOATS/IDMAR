@@ -7,39 +7,39 @@
 
   function el(tag, attrs={}, kids=[]){
     const e = d.createElement(tag);
-    for (const [k,v] of Object.entries(attrs)){
+    for (const kv of Object.entries(attrs)){
+      const k = kv[0], v = kv[1];
       if (k==='class') e.className = v;
       else if (k==='text') e.textContent = v;
       else e.setAttribute(k,v);
     }
-    kids.forEach(k=>e.appendChild(k));
+    kids.forEach(function(k){ e.appendChild(k); });
     return e;
   }
 
   function getBrandKey(raw){
-    if (!raw) return null;
-    const s = raw.toString().trim().toLowerCase();
+    const s = (raw||'').toString().trim().toLowerCase();
     if (s.includes('yamaha')) return 'yamaha';
     if (s.includes('honda')) return 'honda';
     return null;
-    }
+  }
 
   function renderFields(root, brandKey){
     root.innerHTML = '';
     if (!brandKey || !CFG.brands[brandKey]){
-      root.appendChild(el('div',{class:'eb-hint', text:'Selecione uma marca para ver campos específicos.'}));
+      root.appendChild(el('div',{class:'eb-help', text:'Selecione uma marca para ver campos específicos.'}));
       return;
     }
     const B = CFG.brands[brandKey];
     const wrap = el('div',{class:'eb-grid'});
-    B.fields.forEach(f => {
+    (B.fields||[]).forEach(function(f){
       const box = el('div',{class:'eb-field'});
       box.appendChild(el('label',{for:f.id, class:'eb-label', text:f.label + (f.required?' *':'')}));
       let input;
       if (f.type==='select'){
         input = el('select',{id:f.id, class:'eb-select'});
         input.appendChild(el('option',{value:'', text:'—'}));
-        (f.options||[]).forEach(opt => input.appendChild(el('option',{value:opt, text:opt})));
+        (f.options||[]).forEach(function(opt){ input.appendChild(el('option',{value:opt, text:opt})); });
       } else if (f.type==='textarea'){
         input = el('textarea',{id:f.id, class:'eb-textarea', placeholder:f.placeholder||''});
         input.rows = 3;
@@ -58,7 +58,7 @@
 
   function collectForm(root){
     const data = {};
-    root.querySelectorAll('input,select,textarea').forEach(i => data[i.id] = i.value || '');
+    root.querySelectorAll('input,select,textarea').forEach(function(i){ data[i.id] = i.value || ''; });
     return data;
   }
 
@@ -77,19 +77,15 @@
     const root = d.getElementById(CONTAINER_ID);
     if (!brandSel || !root) return;
 
-    const refresh = () => {
+    const refresh = function(){
       const key = getBrandKey(brandSel.value);
       renderFields(root, key);
       validate(root, key);
-      w.EngineBrandState = {
-        brandKey: key,
-        get data(){ return collectForm(root); }
-      };
+      w.EngineBrandState = { brandKey: key, get data(){ return collectForm(root); } };
     };
 
     brandSel.addEventListener('change', refresh);
-    root.addEventListener('input', () => validate(root, w.EngineBrandState?.brandKey));
-
+    root.addEventListener('input', function(){ validate(root, w.EngineBrandState && w.EngineBrandState.brandKey); });
     refresh();
   }
 

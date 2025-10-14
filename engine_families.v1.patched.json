@@ -1,0 +1,238 @@
+{
+  "schema": "engine_families.v1",
+  "generated_at": "2025-10-14T10:58:39",
+  "brands": [
+    {
+      "id": "yamaha",
+      "name": "Yamaha",
+      "families": [
+        {
+          "model": "F40",
+          "versions": [
+            {
+              "code": "F40F",
+              "years": "2010–2015",
+              "power_options_hp": [
+                40
+              ],
+              "serial_ranges": [
+                {
+                  "prefix": "6C5",
+                  "from": 1000001,
+                  "to": 1999999
+                }
+              ],
+              "notes": "PLACEHOLDER"
+            },
+            {
+              "code": "F40G",
+              "years": "2016–2020",
+              "power_options_hp": [
+                40
+              ],
+              "serial_ranges": [
+                {
+                  "prefix": "6BG",
+                  "from": 1000001,
+                  "to": 1999999
+                }
+              ],
+              "notes": "PLACEHOLDER"
+            }
+          ]
+        },
+        {
+          "model": "F60",
+          "versions": [
+            {
+              "code": "F60F",
+              "years": "2006–2014",
+              "power_options_hp": [
+                60
+              ],
+              "serial_ranges": [
+                {
+                  "prefix": "6C6",
+                  "from": 1000001,
+                  "to": 1999999
+                }
+              ],
+              "notes": "PLACEHOLDER"
+            },
+            {
+              "code": "F60G",
+              "years": "2015–2021",
+              "power_options_hp": [
+                60
+              ],
+              "serial_ranges": [
+                {
+                  "prefix": "6C6",
+                  "from": 2000000,
+                  "to": 2999999
+                }
+              ],
+              "notes": "PLACEHOLDER"
+            }
+          ]
+        },
+        {
+          "model": "F115",
+          "versions": [
+            {
+              "code": "F115B",
+              "years": "2014–2020",
+              "power_options_hp": [
+                115
+              ],
+              "serial_ranges": [
+                {
+                  "prefix": "68V",
+                  "from": 1000001,
+                  "to": 1999999
+                }
+              ],
+              "notes": "PLACEHOLDER"
+            },
+            {
+              "code": "F115LB",
+              "years": "2014–2020",
+              "power_options_hp": [
+                115
+              ],
+              "serial_ranges": [
+                {
+                  "prefix": "68V",
+                  "from": 2000000,
+                  "to": 2999999
+                }
+              ],
+              "notes": "PLACEHOLDER"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "honda",
+      "name": "Honda",
+      "families": [
+        {
+          "model": "BF40",
+          "versions": [
+            {
+              "code": "BF40A",
+              "years": "2008–2013",
+              "power_options_hp": [
+                40
+              ],
+              "serial_ranges": [
+                {
+                  "prefix": "BAEJ",
+                  "from": 1000001,
+                  "to": 1999999
+                }
+              ],
+              "notes": "PLACEHOLDER"
+            },
+            {
+              "code": "BF40D",
+              "years": "2014–2020",
+              "power_options_hp": [
+                40
+              ],
+              "serial_ranges": [
+                {
+                  "prefix": "BAXJ",
+                  "from": 1000001,
+                  "to": 1999999
+                }
+              ],
+              "notes": "PLACEHOLDER"
+            }
+          ]
+        },
+        {
+          "model": "BF90",
+          "versions": [
+            {
+              "code": "BF90D",
+              "years": "2010–2017",
+              "power_options_hp": [
+                90
+              ],
+              "serial_ranges": [
+                {
+                  "prefix": "BABJ",
+                  "from": 1000001,
+                  "to": 1999999
+                }
+              ],
+              "notes": "PLACEHOLDER"
+            },
+            {
+              "code": "BF90E",
+              "years": "2018–2023",
+              "power_options_hp": [
+                90
+              ],
+              "serial_ranges": [
+                {
+                  "prefix": "BANJ",
+                  "from": 1000001,
+                  "to": 1999999
+                }
+              ],
+              "notes": "PLACEHOLDER"
+            }
+          ]
+        },
+        {
+          "model": "BF350",
+          "label": "Honda BF350 V8",
+          "versions": [
+            {
+              "code": "BF350LHU",
+              "power_options_hp": [
+                350
+              ],
+              "years": [
+                2023,
+                2024,
+                2025
+              ],
+              "serial_ranges": [
+                {
+                  "prefix": "BAXL",
+                  "from": "1000001",
+                  "to": "1999999",
+                  "note": "DEMO EU"
+                }
+              ]
+            },
+            {
+              "code": "BF350XHU",
+              "power_options_hp": [
+                350
+              ],
+              "years": [
+                2023,
+                2024,
+                2025
+              ],
+              "serial_ranges": [
+                {
+                  "prefix": "BAXX",
+                  "from": "1000001",
+                  "to": "1999999",
+                  "note": "DEMO EU"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "schema_version": 1
+}

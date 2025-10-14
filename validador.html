@@ -45,7 +45,6 @@
     .engine-id-ok{   background:#10b98120; border-color:#10b98180 }
     .engine-id-bad{  background:#ef444420; border-color:#ef444480 }
     .engine-id-warn{ background:#f59e0b20; border-color:#f59e0b80 }
-
   </style>
 
   <!-- Gate de sessão simples -->
@@ -82,129 +81,103 @@
       <!-- WIN -->
       <div class="panel" id="card-win">
         <h2 class="card-title" data-bi-pt="Validador WIN" data-bi-en="WIN Validator"></h2>
-        
         <form id="formWin">
           <label for="win">WIN / HIN</label>
           <input id="win" type="text" placeholder="Ex.: PT-ABC12345D404"/>
-          <div style="margin:.5rem 0">
-            <button id="btnWin" type="submit">Validar WIN</button>
-          </div>
-
+          <div style="margin:.5rem 0"><button id="btnWin" type="submit">Validar WIN</button></div>
           <div style="margin-top:.5rem">
             <label for="winPhoto">Foto opcional / Optional photo</label>
             <input id="winPhoto" type="file" accept="image/*"/>
           </div>
-
           <div id="winOut" style="margin-top:.75rem"></div>
-
           <table>
-            <thead>
-              <tr><th>Campo / Field</th><th>Valor / Value</th><th>Interpretação / Meaning</th></tr>
-            </thead>
+            <thead><tr><th>Campo / Field</th><th>Valor / Value</th><th>Interpretação / Meaning</th></tr></thead>
             <tbody id="interpWinBody"></tbody>
           </table>
         </form>
       </div>
-      
-   
+
       <!-- MOTOR -->
-<div class="panel" id="card-motor">
-  <h2 class="card-title" data-bi-pt="Validador Motor" data-bi-en="Engine Validator"></h2>
+      <div class="panel" id="card-motor">
+        <h2 class="card-title" data-bi-pt="Validador Motor" data-bi-en="Engine Validator"></h2>
 
-  <!-- ✅ Picker VISÍVEL no sítio certo -->
-  <div id="engine-picker"></div>
-  <!-- Modelo dividido: Base + Variante (visível ao utilizador) -->
-<div class="grid" style="margin-top:.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.5rem">
-  <div>
-    <label>Modelo base</label>
-    <input id="modelBase" type="text" placeholder="Ex.: BF40 / DF140" list="modelBaseList" autocomplete="off">
-    <datalist id="modelBaseList"></datalist>
-  </div>
-  <div>
-    <label>Variante / sufixo</label>
-    <input id="modelVariant" type="text" placeholder="Ex.: A / D / AK1" list="modelVariantList" autocomplete="off">
-    <datalist id="modelVariantList"></datalist>
-  </div>
-</div>
+        <!-- Picker visível -->
+        <div id="engine-picker"></div>
 
-
-  <!-- 🔒 Campos legados, escondidos só para compatibilidade -->
-  <div id="legacy-brand-model" style="display:none">
-    <label for="brand">Marca</label>
-    <select id="brand" data-engine-field="brand">
-      <option>Yamaha</option><option>Honda</option><option>Suzuki</option><option>Tohatsu</option>
-      <option>Mercury</option><option>MerCruiser</option><option>Volvo Penta</option>
-      <option>Yanmar</option><option>Evinrude/Johnson</option>
-    </select>
-
-    <div id="brandDynamic"></div>
-
-    <div style="margin-top:.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.5rem">
-      <div>
-        <label>Modelo (pesquisa)</label>
-        <input id="srch_model" type="text" placeholder="Ex.: BF40A / DF140A" data-engine-field="model_code"/>
-      </div>
-      <div>
+        <!-- Rolldown base + variante (VISÍVEL) -->
         <div class="two" style="margin:.5rem 0;grid-template-columns:1fr 1fr;gap:.5rem">
-  <div>
-    <label>Modelo base</label>
-    <select id="modelBaseList"><option value="">—</option></select>
-  </div>
-  <div>
-    <label>Variante / sufixo</label>
-    <select id="modelVariantList"><option value="">—</option></select>
-  </div>
-</div>
-
-<input id="engineBase" type="hidden">
-<input id="engineVariant" type="hidden">
-
-        <label>Potência (hp)</label>
-        <input id="srch_power" type="text" placeholder="Ex.: 150" data-engine-field="power"/>
-      </div>
-      <div>
-        <label>Cilindrada (cc)</label>
-        <input id="srch_disp" type="text" placeholder="Ex.: 2670" data-engine-field="displacement"/>
-      </div>
-      <div>
-        <label>Ano</label>
-        <input id="srch_year" type="text" placeholder="Ex.: 2017" data-engine-field="year"/>
-      </div>
-      <div>
-        <label>Origem</label>
-        <input id="srch_origin" type="text" placeholder="Ex.: Japão" data-engine-field="origin"/>
-      </div>
-    </div>
-  </div>
-
-          <div style="margin:.5rem 0">
-            <button id="btnMotor" type="submit">Validar Motor</button>
+          <div>
+            <label>Modelo base</label>
+            <select id="modelBaseList"><option value="">—</option></select>
           </div>
+          <div>
+            <label>Variante / sufixo</label>
+            <select id="modelVariantList"><option value="">—</option></select>
+          </div>
+        </div>
+        <!-- hidden para a ponte família/versão -->
+        <input id="engineBase" type="hidden">
+        <input id="engineVariant" type="hidden">
 
-          <!-- Family Picker (versão / potência / intervalos SN) -->
-          <link rel="stylesheet" href="./css/engine-family.css">
-          <div class="ef-grid">
-            <div class="ef-field">
-              <label for="engineVersion" class="ef-label">Versão</label>
-              <select id="engineVersion" class="ef-select"><option value="">—</option></select>
+        <!-- Campos legados (escondidos) só para compatibilidade -->
+        <div id="legacy-brand-model" style="display:none">
+          <label for="brand">Marca</label>
+          <select id="brand" data-engine-field="brand">
+            <option>Yamaha</option><option>Honda</option><option>Suzuki</option><option>Tohatsu</option>
+            <option>Mercury</option><option>MerCruiser</option><option>Volvo Penta</option>
+            <option>Yanmar</option><option>Evinrude/Johnson</option>
+          </select>
+
+          <div id="brandDynamic"></div>
+
+          <div style="margin-top:.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.5rem">
+            <div>
+              <label>Modelo (pesquisa)</label>
+              <input id="srch_model" type="text" placeholder="Ex.: BF40A / DF140A" data-engine-field="model_code"/>
             </div>
-            <div class="ef-field">
-              <label for="enginePower" class="ef-label">Potência</label>
-              <select id="enginePower" class="ef-select"><option value="">—</option></select>
+            <div>
+              <label>Potência (hp)</label>
+              <input id="srch_power" type="text" placeholder="Ex.: 150" data-engine-field="power"/>
             </div>
-            <div class="ef-field">
-              <label class="ef-label">Nº Série (intervalos)</label>
-              <div id="engineSerialInfo"></div>
+            <div>
+              <label>Cilindrada (cc)</label>
+              <input id="srch_disp" type="text" placeholder="Ex.: 2670" data-engine-field="displacement"/>
+            </div>
+            <div>
+              <label>Ano</label>
+              <input id="srch_year" type="text" placeholder="Ex.: 2017" data-engine-field="year"/>
+            </div>
+            <div>
+              <label>Origem</label>
+              <input id="srch_origin" type="text" placeholder="Ex.: Japão" data-engine-field="origin"/>
             </div>
           </div>
-        </form>
+        </div>
+
+        <div style="margin:.5rem 0"><button id="btnMotor" type="submit">Validar Motor</button></div>
+
+        <!-- Family Picker (versão / potência / intervalos SN) -->
+        <link rel="stylesheet" href="./css/engine-family.css">
+        <div class="ef-grid">
+          <div class="ef-field">
+            <label for="engineVersion" class="ef-label">Versão</label>
+            <select id="engineVersion" class="ef-select"><option value="">—</option></select>
+          </div>
+          <div class="ef-field">
+            <label for="enginePower" class="ef-label">Potência</label>
+            <select id="enginePower" class="ef-select"><option value="">—</option></select>
+          </div>
+          <div class="ef-field">
+            <label class="ef-label">Nº Série (intervalos)</label>
+            <div id="engineSerialInfo"></div>
+          </div>
+        </div>
       </div>
 
       <!-- Nº do motor / Serial -->
       <div class="panel" id="card-serial">
         <h2 class="card-title" data-bi-pt="Nº do motor / Engine serial" data-bi-en="Engine serial"></h2>
-        <input id="engine-sn-raw" type="text"
-               placeholder="Ex.: BF40A-BAAL-1234567, BAAL-1234567, 1B123456" autocomplete="off" />
+        <input id="engine-sn-raw" type="text" placeholder="Ex.: BF40A-BAAL-1234567, BAAL-1234567, 1B123456" autocomplete="off" />
         <div class="sn-kind" style="margin-top:.5rem">
           <label><input type="radio" name="engine-sn-kind" value="auto" checked> Auto</label>
           <label><input type="radio" name="engine-sn-kind" value="exterior"> Exterior</label>
@@ -214,11 +187,10 @@
         <small id="engine-sn-hints" class="muted"></small>
         <div id="engine-sn-result" class="mt-2"></div>
         <div id="engine-id-visor" class="engine-id-visor" aria-live="polite">
-        <div class="engine-id-title">Identificador / Identifier</div>
-        <div id="engine-id-line" class="engine-id-line">—</div>
-       <div id="engine-id-status" class="engine-id-status">Aguarda campos… / Waiting…</div>
-   </div>
-
+          <div class="engine-id-title">Identificador / Identifier</div>
+          <div id="engine-id-line" class="engine-id-line">—</div>
+          <div id="engine-id-status" class="engine-id-status">Aguarda campos… / Waiting…</div>
+        </div>
       </div>
     </section>
   </main>
@@ -232,9 +204,6 @@
 
   <!-- Validador de combinações -->
   <script defer src="js/engine_validation.v1.js"></script>
-
-  <!-- Admin rápido embutido (opcional) -->
-  <!-- <script defer src="js/engine_admin_embed.v1.js"></script> -->
 
   <!-- Ribbon Admin -->
   <script>window.IDMAR_ADMIN_URL = 'admin-engines.html';</script>
@@ -250,7 +219,6 @@
   <!-- Engine Picker UNIFICADO -->
   <link rel="stylesheet" href="./css/engine-picker.css">
   <script defer src="./js/engine-picker.js?v=r4"></script>
- 
 
   <!-- INIT picker com fallback v2→v1 e espera pelo script -->
   <script data-picker-init>
@@ -291,33 +259,33 @@
 
   <!-- Sync seguro (2 vias): #srch_model ↔ #engineModel e #brand ↔ picker -->
   <script>
-  window.addEventListener('DOMContentLoaded', () => {
-    function connectOnce() {
-      const legacyBrand = document.getElementById('brand');
-      const legacyModel = document.getElementById('srch_model');
-      const pickerInput = document.getElementById('engineModel');   // criado pelo picker
-      const pickerBrand = document.getElementById('engineBrand');   // criado pelo picker
-      if (!legacyModel || !pickerInput) return;
+    window.addEventListener('DOMContentLoaded', () => {
+      function connectOnce() {
+        const legacyBrand = document.getElementById('brand');
+        const legacyModel = document.getElementById('srch_model');
+        const pickerInput = document.getElementById('engineModel');   // criado pelo picker
+        const pickerBrand = document.getElementById('engineBrand');   // criado pelo picker
+        if (!legacyModel || !pickerInput) return;
 
-      // Modelo: bidirecional
-      legacyModel.addEventListener('input', () => pickerInput.value = legacyModel.value);
-      pickerInput.addEventListener('input', () => legacyModel.value = pickerInput.value);
+        // Modelo: bidirecional
+        legacyModel.addEventListener('input', () => pickerInput.value = legacyModel.value);
+        pickerInput.addEventListener('input', () => legacyModel.value = pickerInput.value);
 
-      // Marca: refletir alterações do legacy para o picker (sem loops)
-      if (legacyBrand && pickerBrand) {
-        if (legacyBrand.value) {
-          pickerBrand.value = legacyBrand.value;
-          pickerBrand.dispatchEvent(new Event('change'));
+        // Marca: refletir alterações do legacy para o picker (sem loops)
+        if (legacyBrand && pickerBrand) {
+          if (legacyBrand.value) {
+            pickerBrand.value = legacyBrand.value;
+            pickerBrand.dispatchEvent(new Event('change'));
+          }
+          legacyBrand.addEventListener('change', () => {
+            pickerBrand.value = legacyBrand.value;
+            pickerBrand.dispatchEvent(new Event('change'));
+          });
         }
-        legacyBrand.addEventListener('change', () => {
-          pickerBrand.value = legacyBrand.value;
-          pickerBrand.dispatchEvent(new Event('change'));
-        });
       }
-    }
-    // quando o picker injetar os campos, ligamos
-    setTimeout(connectOnce, 0);
-  });
+      // quando o picker injetar os campos, ligamos
+      setTimeout(connectOnce, 0);
+    });
   </script>
 
   <!-- Campos por marca -->
@@ -329,18 +297,17 @@
   <!-- Family picker -->
   <script defer src="./js/engine-family-picker.v1.js"></script>
 
-  <!-- Nº Motor: parser + ranges + painel (se existirem estes ficheiros no repo) -->
+  <!-- Nº Motor: parser + ranges + painel -->
   <script defer src="js/validators/engine-sn.v1.js?v=r7"></script>
   <script defer src="js/engine-serial-range-check.v1.js?v=r8"></script>
   <script defer src="js/engine-sn-panel.v2.js?v=r2"></script>
 
-  <!-- Stubs de segurança: se os ficheiros acima não existirem, evita erros -->
+  <!-- Stubs de segurança se não houver ficheiro real -->
   <script>
     (function(w,d){
       if(!w.EngineSNRange){
         w.EngineSNRange = { check: sn => ({ ok: !!(sn && sn.trim()), ranges: [], notes: '' }) };
       }
-      // painel mínimo se não houver ficheiro real
       if(!w.__SN_PANEL_FALLBACK__){
         w.__SN_PANEL_FALLBACK__ = true;
         const input = d.getElementById('engine-sn-raw');
@@ -361,7 +328,7 @@
   <script defer src="./js/engine-collect.v1.js"></script>
   <script defer src="./js/i18n-bilingual.v1.js"></script>
 
-   <!-- Hooks de validação/submissão (debug) -->
+  <!-- Hooks de validação/submissão (debug) -->
   <script>
     document.getElementById('btnMotor')?.addEventListener('click', () => {
       const data = window.EngineCollect?.collect?.() || {
@@ -371,7 +338,6 @@
       };
       console.log('[IDMAR] Motor VALIDAR:', data);
     });
-
     document.getElementById('formMotor')?.addEventListener('submit', (ev) => {
       const data = window.EngineCollect?.collect?.() || {
         brand: window.EnginePickerState?.brand,
@@ -382,7 +348,7 @@
     });
   </script>
 
-  <!-- Visor do identificador composto (sempre por último) -->
+  <!-- Visor do identificador composto -->
   <script>
   (function (w, d) {
     const j = (...xs) => xs.filter(Boolean).join(' ');
@@ -446,10 +412,11 @@
       scheduleUpdate();
     });
   })(window, document);
-  
-    </script>
-  
-    <script defer src="js/model-split-bridge.v1.js"></script>
+  </script>
 
-  </body>
+  <!-- Ponte Modelo Split (depois de tudo) -->
+  <script defer src="js/model-split-bridge.v1.js"></script>
+
+</body>
 </html>
+

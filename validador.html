@@ -143,6 +143,23 @@
             <button id="btnMotor" type="submit">Validar Motor</button>
           </div>
 
+<link rel="stylesheet" href="./css/engine-family.css">
+<div class="ef-grid">
+  <div class="ef-field">
+    <label for="engineVersion" class="ef-label">Versão</label>
+    <select id="engineVersion" class="ef-select"><option value="">—</option></select>
+  </div>
+  <div class="ef-field">
+    <label for="enginePower" class="ef-label">Potência</label>
+    <select id="enginePower" class="ef-select"><option value="">—</option></select>
+  </div>
+  <div class="ef-field">
+    <label class="ef-label">Nº Série (intervalos)</label>
+    <div id="engineSerialInfo"></div>
+  </div>
+</div>
+<script defer src="./js/engine-family-picker.v1.js"></script>
+          
 <script>
   // Exemplo: ao clicar no botão validar
   document.getElementById('btnValidar')?.addEventListener('click', () => {
@@ -205,14 +222,23 @@
 <script>
   
   // chama só DEPOIS do <script src="./js/engine-picker.js">
-  window.addEventListener('DOMContentLoaded', () => {
-    if (window.EnginePicker) {
-      EnginePicker.init({ dataUrl: './data/engines_catalog.v2.json' });
-    } else {
-      console.error('EnginePicker não está carregado — verifica o caminho do JS.');
+<script>
+  window.addEventListener('DOMContentLoaded', async () => {
+    const tryUrl = './data/engines_catalog.v2.json';
+    try {
+      const r = await fetch(tryUrl);
+      const j = await r.json();
+      const hasBrands = Array.isArray(j.brands) || Array.isArray(j?.data?.brands) || Array.isArray(j.manufacturers);
+      const dataUrl = hasBrands ? tryUrl : './data/engines_catalog.v1.json';
+      EnginePicker.init({ dataUrl });
+      console.log('[IDMAR] EnginePicker usando', dataUrl);
+    } catch (e) {
+      console.warn('[IDMAR] Falha no v2; a usar v1:', e);
+      EnginePicker.init({ dataUrl: './data/engines_catalog.v1.json' });
     }
   });
 </script>
+
 
   <link rel="stylesheet" href="./css/engine-brand.css">
   <div id="engine-brand-fields"></div>

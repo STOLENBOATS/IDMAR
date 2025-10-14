@@ -143,6 +143,18 @@
             <button id="btnMotor" type="submit">Validar Motor</button>
           </div>
 
+<script>
+  // Exemplo: ao clicar no botão validar
+  document.getElementById('btnValidar')?.addEventListener('click', () => {
+    const brand = window.EnginePickerState?.brand;
+    const model = window.EnginePickerState?.model;
+    const extra = window.EngineBrandState?.data;
+    console.log('Pronto para submeter:', { brand, model, extra });
+    // TODO: integra no teu payload/validação
+  });
+</script>
+        
+
           <div style="margin-top:.5rem">
             <label for="motorPhoto">Foto opcional / Optional photo</label>
             <input id="motorPhoto" type="file" accept="image/*"/>
@@ -200,6 +212,17 @@
     }
   });
 </script>
+
+  <link rel="stylesheet" href="./css/engine-brand.css">
+  <div id="engine-brand-fields"></div>
+  <script defer src="./js/engine-brand-config.v1.js"></script>
+  <script defer src="./js/engine-brand-fields.v1.js"></script>
+
+  <script defer src="./js/engine-collect.v1.js"></script>
+  <script defer src="./js/i18n-bilingual.v1.js"></script>
+
+  const data = window.EngineCollect.collect(); // => { brand, model, extra }
+
 
 
 </body>

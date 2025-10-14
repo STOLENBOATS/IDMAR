@@ -113,6 +113,20 @@
 
   <!-- ✅ Picker VISÍVEL no sítio certo -->
   <div id="engine-picker"></div>
+  <!-- Modelo dividido: Base + Variante (visível ao utilizador) -->
+<div class="grid" style="margin-top:.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.5rem">
+  <div>
+    <label>Modelo base</label>
+    <input id="modelBase" type="text" placeholder="Ex.: BF40 / DF140" list="modelBaseList" autocomplete="off">
+    <datalist id="modelBaseList"></datalist>
+  </div>
+  <div>
+    <label>Variante / sufixo</label>
+    <input id="modelVariant" type="text" placeholder="Ex.: A / D / AK1" list="modelVariantList" autocomplete="off">
+    <datalist id="modelVariantList"></datalist>
+  </div>
+</div>
+
 
   <!-- 🔒 Campos legados, escondidos só para compatibilidade -->
   <div id="legacy-brand-model" style="display:none">
@@ -418,6 +432,134 @@
       scheduleUpdate();
     });
   })(window, document);
+
+<script>
+/**
+ * Engine Model Split (Base + Variante) → sincroniza com #engineModel do picker
+ * e dá sugestões a partir de data/engine_families.v1.json (se existir).
+ */
+(function (w, d) {
+  const FAMILIES_URL = './data/engine_families.v1.json';
+  let famIdx = null; // { [brand]: { base: { versions:[...], variants:[...] }, ... } }
+
+  async function buildIndex() {
+    if (famIdx !== null) return famIdx;
+    famIdx = {};
+    try {
+      const r = await fetch(FAMILIES_URL, { credentials: 'same-origin' });
+      if (!r.ok) return famIdx;
+      const j = await r.json();
+      (j.brands || []).forEach(b => {
+        const byBase = {};
+        (b.families || []).forEach(f => {
+          const base = f.code || ''; // ex.: BF40, DF140
+          const variants = new Set();
+          (f.versions || []).forEach(v => {
+            const vcode = v.code || '';
+            // variante = parte depois do base (se começar pelo base)
+            let suf = '';
+            if (vcode && base && vcode.toUpperCase().startsWith(base.toUpperCase())) {
+              suf = vcode.slice(base.length);
+            }
+            if (suf) variants.add(suf);
+          });
+          byBase[base] = {
+            versions: (f.versions || []).map(v => v.code).filter(Boolean),
+            variants: Array.from(variants).sort()
+          };
+        });
+        famIdx[b.id] = byBase;
+      });
+    } catch(e) {
+      console.warn('[model-split] famílias não disponíveis:', e);
+    }
+    return famIdx;
+  }
+
+  function getBrand() {
+    // do picker (preferido) ou do legacy escondido
+    return (w.EnginePickerState && w.EnginePickerState.brand) ||
+           d.getElementById('brand')?.value || '';
+  }
+  function engineModelInput() {
+    return d.getElementById('engineModel'); // criado pelo engine-picker.js
+  }
+
+  function composeModel(base, variant) {
+    base = (base || '').trim();
+    variant = (variant || '').trim();
+    return variant ? (base + variant) : base;
+  }
+
+  // aplica sugestões aos datalists
+  function fillList(el, arr) {
+    if (!el) return;
+    el.innerHTML = '';
+    (arr || []).forEach(v => {
+      const o = d.createElement('option');
+      o.value = v;
+      el.appendChild(o);
+    });
+  }
+
+  async function refreshSuggestions() {
+    const baseList = d.getElementById('modelBaseList');
+    const varList  = d.getElementById('modelVariantList');
+    const brand = getBrand();
+    const idx = await buildIndex();
+    const brandIdx = idx[brand] || {};
+    // bases = chaves do índice desta marca
+    fillList(baseList, Object.keys(brandIdx).sort());
+    const base = d.getElementById('modelBase')?.value || '';
+    if (base && brandIdx[base]) {
+      fillList(varList, brandIdx[base].variants);
+    } else {
+      fillList(varList, []);
+    }
+  }
+
+  function syncToPicker() {
+    const base = d.getElementById('modelBase')?.value || '';
+    const variant = d.getElementById('modelVariant')?.value || '';
+    const full = composeModel(base, variant);
+    const modelInput = engineModelInput();
+    if (modelInput) {
+      modelInput.value = full;
+      modelInput.dispatchEvent(new Event('input', { bubbles:true })); // deixa o coletor apanhar
+      modelInput.dispatchEvent(new Event('change', { bubbles:true }));
+    }
+  }
+
+  // quando o utilizador muda a marca → refaz sugestões
+  function hookBrandChanges() {
+    const pickerBrand = d.getElementById('engineBrand');
+    const legacyBrand = d.getElementById('brand');
+    [pickerBrand, legacyBrand].forEach(el => {
+      if (!el) return;
+      el.addEventListener('change', () => {
+        refreshSuggestions();
+        // limpar variante quando muda marca
+        const v = d.getElementById('modelVariant');
+        if (v) v.value = '';
+        syncToPicker();
+      });
+    });
+  }
+
+  w.addEventListener('DOMContentLoaded', () => {
+    const base = d.getElementById('modelBase');
+    const variant = d.getElementById('modelVariant');
+    if (!base || !variant) return;
+
+    // altera base/variante → sincroniza com picker e re-sugere variantes
+    base.addEventListener('input', () => { refreshSuggestions(); syncToPicker(); });
+    variant.addEventListener('input', syncToPicker);
+
+    hookBrandChanges();
+    // 1ª carga
+    refreshSuggestions().then(syncToPicker);
+  });
+})(window, document);
   </script>
-</body>
+  </body>
 </html>

@@ -1,7 +1,7 @@
 // ribbon-admin.v1.js  injeta boto "Admin" ao lado do "Validador" com o MESMO estilo
 (function () {
   const ADMIN_URL = window.IDMAR_ADMIN_URL || 'admin-engines.html';
-  const LABEL = 'Item Novo / New Item';
+  const LABEL = 'Win/Motor Novo';
 
   function findRibbonContainer() {
     return (

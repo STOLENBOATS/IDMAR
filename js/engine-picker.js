@@ -29,23 +29,46 @@
     return el;
   }
 
-  async function loadCatalog(url) {
-    const res = await fetch(url, { credentials: 'same-origin' });
-    if (!res.ok) throw new Error(`Catalog load failed: ${res.status} ${res.statusText}`);
-    const json = await res.json();
-    const sv = json.schema_version || json.schemaVersion || null;
-    const brands = json.brands || (json.data && json.data.brands) || json.manufacturers || [];
-    if (!Array.isArray(brands) || brands.length === 0) {
-      throw new Error('No brands array found in catalog');
-    }
-    const normBrands = brands.map(b => {
-      const id = (b.id || b.code || b.slug || b.name || '').toString().trim();
-      const name = (b.name || b.label || id).toString().trim();
-      const models = b.models || b.variants || b.items || [];
-      return { id, name, models };
-    }).filter(b => b.id);
-    return { schema_version: sv, brands: normBrands };
+  // SUBSTITUI isto no teu ficheiro js/engine-picker.js
+
+async function loadCatalog(url) {
+  const res = await fetch(url, { credentials: 'same-origin' });
+  if (!res.ok) throw new Error(`Catalog load failed: ${res.status} ${res.statusText}`);
+  const j = await res.json();
+
+  // Aceitar múltiplas formas:
+  // - { brands: [...] }
+  // - { data: { brands: [...] } }
+  // - { manufacturers: [...] }
+  // - [ { id,name,models }, ... ]  (array direto)
+  let brands = null;
+  if (Array.isArray(j)) {
+    brands = j; // array direto
+  } else if (j && typeof j === 'object') {
+    brands =
+      j.brands ||
+      (j.data && j.data.brands) ||
+      j.manufacturers ||
+      (j.data && j.data.manufacturers) ||
+      null;
   }
+
+  if (!Array.isArray(brands) || brands.length === 0) {
+    console.error('[IDMAR][engine_picker] catalog shape seen:', j);
+    throw new Error('No brands array found in catalog');
+  }
+
+  // Normalizar marcas
+  const norm = brands.map(b => {
+    const id = (b.id || b.code || b.slug || b.name || '').toString().trim();
+    const name = (b.name || b.label || id).toString().trim();
+    const models = b.models || b.variants || b.items || [];
+    return { id, name, models };
+  }).filter(b => b.id);
+
+  return { brands: norm };
+}
+
 
   function buildUI(root, opts, catalog) {
     root.innerHTML = '';

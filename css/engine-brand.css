@@ -1,0 +1,14 @@
+/* css/engine-brand.css (r1) */
+#engine-brand-fields { margin-top: 1rem; }
+.eb-grid { display: grid; gap: .75rem; grid-template-columns: repeat(2,minmax(0,1fr)); }
+.eb-field { display:flex; flex-direction:column; gap:.25rem; }
+.eb-label { font-weight:600; font-size:.95rem; }
+.eb-input, .eb-select, .eb-textarea { padding:.5rem .6rem; border:1px solid #e5e7eb; border-radius:.5rem; font-size:.95rem; }
+.eb-help { font-size:.85rem; color:#4b5563; }
+.eb-badge { display:inline-block; padding:.15rem .45rem; border-radius:.5rem; font-size:.8rem; background:#e5e7eb; color:#111827; }
+.eb-error { color:#b91c1c; font-weight:600; font-size:.9rem; }
+@media (prefers-color-scheme: dark){
+  .eb-input,.eb-select,.eb-textarea{ border-color:#374151; background:#111827; color:#e5e7eb; }
+  .eb-help{ color:#9ca3af; }
+  .eb-badge{ background:#1f2937; color:#e5e7eb; }
+}

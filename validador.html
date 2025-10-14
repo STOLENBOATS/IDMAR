@@ -145,6 +145,20 @@
         <input id="srch_model" type="text" placeholder="Ex.: BF40A / DF140A" data-engine-field="model_code"/>
       </div>
       <div>
+        <div class="two" style="margin:.5rem 0;grid-template-columns:1fr 1fr;gap:.5rem">
+  <div>
+    <label>Modelo base</label>
+    <select id="modelBaseList"><option value="">—</option></select>
+  </div>
+  <div>
+    <label>Variante / sufixo</label>
+    <select id="modelVariantList"><option value="">—</option></select>
+  </div>
+</div>
+
+<input id="engineBase" type="hidden">
+<input id="engineVariant" type="hidden">
+
         <label>Potência (hp)</label>
         <input id="srch_power" type="text" placeholder="Ex.: 150" data-engine-field="power"/>
       </div>
@@ -433,7 +447,7 @@
     });
   })(window, document);
 
-  </script>
+  <script>
 /**
  * Engine Model Split (Base + Variante) → sincroniza com #engineModel do picker
  * e dá sugestões a partir de data/engine_families.v1.json (se existir).

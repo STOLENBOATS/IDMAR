@@ -1,0 +1,12 @@
+/* css/engine-picker.css (r1) */
+.engine-picker { margin-top: .5rem; }
+.ep-field { display: flex; flex-direction: column; gap: .25rem; }
+.ep-label { font-weight: 600; font-size: .95rem; }
+.ep-input { padding: .5rem .6rem; border: 1px solid #e5e7eb; border-radius: .5rem; font-size: .95rem; }
+.ep-error { color: #b91c1c; font-weight: 600; margin:.5rem 0; }
+.ep-hint { color: #374151; font-size:.9rem; }
+@media (prefers-color-scheme: dark) {
+  .ep-input { border-color: #374151; background: #111827; color: #e5e7eb; }
+  .ep-label { color: #e5e7eb; }
+  .ep-hint { color: #9ca3af; }
+}

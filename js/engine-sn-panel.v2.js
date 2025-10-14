@@ -1,17 +1,17 @@
 // js/engine-sn-panel.v2.js (uses CurrentBrandPolicy)
 (function(w,d){
   const $ = s => d.querySelector(s);
-  const input = '#engine-sn-raw';
-  const hints = '#engine-sn-hints';
-  const out   = '#engine-sn-result';
+  const inputSel = '#engine-sn-raw';
+  const hintsSel = '#engine-sn-hints';
+  const outSel   = '#engine-sn-result';
 
   function Q(sel){ return d.querySelector(sel); }
-  if(!Q(input) || !Q(out)) return;
+  if(!Q(inputSel) || !Q(outSel)) return;
 
   function li(t){ const x=d.createElement('li'); x.textContent=t; return x; }
 
   function renderVerdict(v){
-    const outEl = Q(out), hintsEl = Q(hints);
+    const outEl = Q(outSel), hintsEl = Q(hintsSel);
     outEl.innerHTML = '';
     const box = d.createElement('div');
     box.style.padding = '.5rem .6rem';
@@ -58,7 +58,7 @@
   }
 
   function update(){
-    const raw = Q(input).value || '';
+    const raw = Q(inputSel).value || '';
     const ranges = currentRanges();
     const policy = w.CurrentBrandPolicy || null;
     let verdict = null;

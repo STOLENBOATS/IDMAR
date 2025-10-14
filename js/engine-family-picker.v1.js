@@ -1,4 +1,4 @@
-// js/engine-family-picker.v1.js  (policy-enabled)
+// js/engine-family-picker.v1.js  (policy-enabled, bridge-aware)
 (function (w, d) {
   'use strict';
   const CFG = {
@@ -52,26 +52,13 @@
   function pickFamily(brandObj, modelStr) {
     if (!brandObj) return null;
     const m = (modelStr || '').toString().trim().toUpperCase();
+    const baseFromHidden = (d.getElementById(CFG.baseInputId)?.value || '').toUpperCase();
+    const m2 = baseFromHidden || m;
     const families = Array.isArray(brandObj.families) ? brandObj.families : [];
     return families.find(f => {
       const base = (f.model || f.code || '').toString().trim().toUpperCase();
-      return base && (m === base || m.startsWith(base));
+      return base && (m2 === base || m2.startsWith(base));
     }) || null;
-  }
-
-  function familyRules(fam) {
-    return {
-      suffixRe: fam?.suffix_regex ? new RegExp(fam.suffix_regex, 'i') : null,
-      suffixExamples: Array.isArray(fam?.suffix_examples) ? fam.suffix_examples : []
-    };
-  }
-
-  function validateVariant(family, base, variant) {
-    const rules = familyRules(family);
-    const v = (variant || '').trim().toUpperCase();
-    if (!rules.suffixRe) return { ok: true, code: (base||'').toUpperCase() + v };
-    const ok = rules.suffixRe.test(v);
-    return { ok, code: (base||'').toUpperCase() + v, examples: rules.suffixExamples };
   }
 
   function hydrateVersions(family, sel) {
@@ -134,7 +121,7 @@
 
     function refresh() {
       const brand = pickBrand(S.cat, CFG.brandSource());
-      const family = pickFamily(brand, baseEl?.value || CFG.modelSource());
+      const family = pickFamily(brand, CFG.modelSource());
       hydrateVersions(family, vSel);
       pSel.innerHTML = '<option value="">—</option>';
       snPanel.innerHTML = '';
@@ -144,17 +131,15 @@
       const base = (baseEl?.value || '').toUpperCase();
       const variant = (varEl?.value || '').toUpperCase();
       if (base) {
-        const res = validateVariant(family, base, variant);
-        if (res.ok) {
-          const opt = [...vSel.options].find(o => o.value === res.code);
-          if (opt) { vSel.value = opt.value; vSel.dispatchEvent(new Event('change')); }
-        }
+        const code = base + variant;
+        const opt = [...vSel.options].find(o => o.value === code);
+        if (opt) { vSel.value = opt.value; vSel.dispatchEvent(new Event('change')); }
       }
     }
 
     vSel.addEventListener('change', () => {
       const brand = pickBrand(S.cat, CFG.brandSource());
-      const family = pickFamily(brand, baseEl?.value || CFG.modelSource());
+      const family = pickFamily(brand, CFG.modelSource());
       const version = (family?.versions || []).find(v => v.code === vSel.value);
       hydratePowers(version, pSel);
       renderRanges(version, snPanel);
@@ -167,7 +152,7 @@
       }
     });
 
-    // refresh inicial e em alterações (picker e legados)
+    // refresh inicial e em alterações (picker e legados + bridge)
     const brandPick = d.getElementById('engineBrand');
     const modelPick = d.getElementById('engineModel');
     const brandLegacy = d.getElementById('brand');

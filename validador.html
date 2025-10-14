@@ -222,22 +222,27 @@
 <script>
   
   // chama só DEPOIS do <script src="./js/engine-picker.js">
+  <script>
   window.addEventListener('DOMContentLoaded', async () => {
     const tryUrl = './data/engines_catalog.v2.json';
+    const fallback = './data/engines_catalog.v1.json';
     try {
       const r = await fetch(tryUrl);
       const j = await r.json();
-      const hasBrands = Array.isArray(j.brands) || Array.isArray(j?.data?.brands) || Array.isArray(j.manufacturers);
-      const dataUrl = hasBrands ? tryUrl : './data/engines_catalog.v1.json';
-      EnginePicker.init({ dataUrl });
-      console.log('[IDMAR] EnginePicker usando', dataUrl);
-    } catch (e) {
-      console.warn('[IDMAR] Falha no v2; a usar v1:', e);
-      EnginePicker.init({ dataUrl: './data/engines_catalog.v1.json' });
+      const hasBrands =
+        Array.isArray(j.brands) ||
+        Array.isArray(j?.data?.brands) ||
+        Array.isArray(j.manufacturers) ||
+        Array.isArray(j?.data?.manufacturers) ||
+        Array.isArray(j); // se o ficheiro for um array direto
+      EnginePicker.init({ dataUrl: hasBrands ? tryUrl : fallback });
+      console.log('[IDMAR] EnginePicker usando', hasBrands ? tryUrl : fallback);
+    } catch {
+      EnginePicker.init({ dataUrl: fallback });
+      console.warn('[IDMAR] Falha no v2; a usar v1.');
     }
   });
 </script>
-
 
   <link rel="stylesheet" href="./css/engine-brand.css">
   <div id="engine-brand-fields"></div>

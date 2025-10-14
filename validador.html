@@ -100,6 +100,13 @@
         <h2>Validador Motor</h2>
         <form id="formMotor">
           <label for="brand">Marca</label>
+
+          <!-- IDMAR — Engine Picker (drop-in) -->
+<link rel="stylesheet" href="./css/engine-picker.css">
+<div id="engine-picker"></div>
+<script defer src="./js/engine-picker.js"></script>
+<script>EnginePicker.init();</script>
+
           <!-- marca -->
           <select id="brand" data-engine-field="brand">
             <option>Yamaha</option><option>Honda</option><option>Suzuki</option><option>Tohatsu</option>

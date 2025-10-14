@@ -130,17 +130,17 @@
       };
 
     } catch (err) {
-      console.error('[IDMAR][engine_picker] failed:', err);
-      const errBox = document.createElement('div');
-      errBox.className = 'ep-error';
-      errBox.textContent = 'Não foi possível carregar o catálogo de motores.';
-      const hint = document.createElement('div');
-      hint.className = 'ep-hint';
-      hint.textContent = 'Verifica data/engines_catalog.v2.json.';
-      root.innerHTML = '';
-      root.appendChild(errBox);
-      root.appendChild(hint);
-    }
+  console.error('[IDMAR][engine_picker] failed:', err);
+  const errBox = document.createElement('div');
+  errBox.className = 'ep-error';
+  errBox.textContent = 'Não foi possível carregar o catálogo de motores.';
+  const hint = document.createElement('div');
+  hint.className = 'ep-hint';
+  hint.textContent = 'Verifica data/engines_catalog.v2.json.';
+  root.innerHTML = '';
+  root.appendChild(errBox);
+  root.appendChild(hint);
+}
   }
 
   w.EnginePicker = { init };

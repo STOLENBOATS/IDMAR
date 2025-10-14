@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>IDMAR  Validador</title>
   <link rel="icon" href="img/logo-pm.png" />
+  <link rel="apple-touch-icon" href="img/logo-pm.png" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#0b6bcb">
 
   <!-- CSS base -->
   <link rel="stylesheet" href="css/styles.css">
@@ -17,10 +22,10 @@
     body{background:var(--bg);color:var(--fg);margin:0;display:flex;flex-direction:column;
          font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif}
     main{flex:1}
-    .container{max-width:1100px;margin:1.25rem auto;padding:0 1rem}
+    .container{max-width:1200px;margin:1.25rem auto;padding:0 1rem}
     .panel{background:var(--bg-elev);border:1px solid var(--border);border-radius:12px;padding:1rem;margin:.75rem 0}
-    .two{display:grid;grid-template-columns:1fr;gap:1rem}
-    @media(min-width:980px){ .two{grid-template-columns:1fr 1fr} }
+    .three{display:grid;grid-template-columns:1fr;gap:1rem}
+    @media(min-width:1100px){ .three{grid-template-columns:1fr 1fr 1fr} }
     label{display:block;margin:.35rem 0 .25rem}
     input[type="text"], input[type="search"], input[type="file"], select, textarea{
       width:100%;border:1px solid var(--border);background:#fff;border-radius:10px;padding:.5rem .6rem;
@@ -29,7 +34,27 @@
     table{width:100%;border-collapse:collapse;margin-top:.5rem}
     th,td{border-bottom:1px solid var(--border);padding:.6rem .5rem;text-align:left}
     .footer{border-top:1px solid var(--border);padding:1rem;text-align:left;opacity:.85;background:var(--bg-elev)}
+    /* utilidades para SN */
+    .muted{opacity:.75}
+    #engine-sn-window .chip{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:.15rem .5rem;margin:.15rem .25rem 0 0}
+    #engine-sn-result ul{margin:.25rem 0 0 .9rem}
   </style>
+
+  <!-- Polyfills leves (só quando necessário) -->
+  <script>
+  (function(){
+    if (!('fetch' in window)) {
+      var s=document.createElement('script');
+      s.src='https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.20/dist/fetch.umd.min.js';
+      document.head.appendChild(s);
+    }
+    if (!('Promise' in window)) {
+      var p=document.createElement('script');
+      p.src='https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js';
+      document.head.appendChild(p);
+    }
+  })();
+  </script>
 
   <!-- Gate de sessão simples -->
   <script>
@@ -61,9 +86,9 @@
   <main class="container">
     <h1 class="card-title" data-bi-pt="Validador" data-bi-en="Validator"></h1>
 
-    <section class="two">
+    <section class="three">
       <!-- WIN -->
-      <div class="panel">
+      <div class="panel" id="card-win">
         <h2 class="card-title" data-bi-pt="Validador WIN" data-bi-en="WIN Validator"></h2>
         <form id="formWin">
           <label for="win">WIN / HIN</label>
@@ -89,11 +114,10 @@
       </div>
 
       <!-- MOTOR -->
-      <div class="panel">
+      <div class="panel" id="card-motor">
         <h2 class="card-title" data-bi-pt="Validador Motor" data-bi-en="Engine Validator"></h2>
         <form id="formMotor">
           <label for="brand">Marca</label>
-
           <select id="brand" data-engine-field="brand">
             <option>Yamaha</option><option>Honda</option><option>Suzuki</option><option>Tohatsu</option>
             <option>Mercury</option><option>MerCruiser</option><option>Volvo Penta</option>
@@ -105,28 +129,23 @@
           <div style="margin-top:.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.5rem">
             <div>
               <label>Modelo (pesquisa)</label>
-              <input id="srch_model" type="text" placeholder="Ex.: DF140A"
-                     data-engine-field="model_code"/>
+              <input id="srch_model" type="text" placeholder="Ex.: BF40A / DF140A" data-engine-field="model_code"/>
             </div>
             <div>
               <label>Potência (hp)</label>
-              <input id="srch_power" type="text" placeholder="Ex.: 150"
-                     data-engine-field="power"/>
+              <input id="srch_power" type="text" placeholder="Ex.: 150" data-engine-field="power"/>
             </div>
             <div>
               <label>Cilindrada (cc)</label>
-              <input id="srch_disp" type="text" placeholder="Ex.: 2670"
-                     data-engine-field="displacement"/>
+              <input id="srch_disp" type="text" placeholder="Ex.: 2670" data-engine-field="displacement"/>
             </div>
             <div>
               <label>Ano</label>
-              <input id="srch_year" type="text" placeholder="Ex.: 2017"
-                     data-engine-field="year"/>
+              <input id="srch_year" type="text" placeholder="Ex.: 2017" data-engine-field="year"/>
             </div>
             <div>
               <label>Origem</label>
-              <input id="srch_origin" type="text" placeholder="Ex.: Japão"
-                     data-engine-field="origin"/>
+              <input id="srch_origin" type="text" placeholder="Ex.: Japão" data-engine-field="origin"/>
             </div>
           </div>
 
@@ -134,7 +153,7 @@
             <button id="btnMotor" type="submit">Validar Motor</button>
           </div>
 
-          <!-- Family Picker -->
+          <!-- Family Picker (versão / potência / intervalos SN) -->
           <link rel="stylesheet" href="./css/engine-family.css">
           <div class="ef-grid">
             <div class="ef-field">
@@ -152,6 +171,21 @@
           </div>
         </form>
       </div>
+
+      <!-- Nº do motor / Serial (ligado ao cartão Motor) -->
+      <div class="panel" id="card-serial">
+        <h2 class="card-title" data-bi-pt="Nº do motor / Engine serial" data-bi-en="Engine serial"></h2>
+        <input id="engine-sn-raw" type="text"
+               placeholder="Ex.: BF40A-BAAL-1234567, BAAL-1234567, 1B123456" autocomplete="off" />
+        <div class="sn-kind" style="margin-top:.5rem">
+          <label><input type="radio" name="engine-sn-kind" value="auto" checked> Auto</label>
+          <label><input type="radio" name="engine-sn-kind" value="exterior"> Exterior</label>
+          <label><input type="radio" name="engine-sn-kind" value="interior"> Interior</label>
+        </div>
+        <div id="engine-sn-window" class="mt-2"></div>
+        <small id="engine-sn-hints" class="muted"></small>
+        <div id="engine-sn-result" class="mt-2"></div>
+      </div>
     </section>
   </main>
 
@@ -162,32 +196,27 @@
   <script src="js/validador-motor.r3d.js?v=r3d"></script>
   <script defer src="js/validator-enhancements.v4.js"></script>
 
-  <!-- Validador de combinações (usa o mesmo catálogo v2/v1 que o picker) -->
+  <!-- Validador de combinações -->
   <script defer src="js/engine_validation.v1.js"></script>
 
   <!-- Admin rápido embutido (opcional) -->
   <!-- <script defer src="js/engine_admin_embed.v1.js"></script> -->
 
-  <!-- Botão "Admin" no ribbon -->
+  <!-- Ribbon Admin -->
   <script>window.IDMAR_ADMIN_URL = 'admin-engines.html';</script>
   <script defer src="js/ribbon-admin.v1.js"></script>
 
-  <!-- AUTOCOMPLETE ANTIGO (schema v1) -->
-  <script type="module"
-    src="js/engine_autocomplete_addon.v1.js"
-    data-catalog="data/engines_catalog.v1.json"></script>
+  <!-- Autocomplete antigo (schema v1) -->
+  <script type="module" src="js/engine_autocomplete_addon.v1.js" data-catalog="data/engines_catalog.v1.json"></script>
   <script defer src="js/patch-forense-i18n-ribbon.r1.js?v=r1"></script>
 
   <!-- PWA / SW -->
-  <link rel="manifest" href="./manifest.webmanifest">
   <script defer src="./js/sw-register.js"></script>
 
-  <!-- Engine Picker (unificado) -->
+  <!-- Engine Picker UNIFICADO (um só!) -->
   <link rel="stylesheet" href="./css/engine-picker.css">
   <script defer src="./js/engine-picker.js"></script>
   <div id="engine-picker"></div>
-
-  <!-- INIT: tenta v2 e faz fallback para v1; hidrata logo modelos se já houver marca -->
   <script data-picker-init>
     window.addEventListener('DOMContentLoaded', async () => {
       const tryUrl = './data/engines_catalog.v2.json';
@@ -198,20 +227,14 @@
         const j = await r.json();
         const hasBrands =
           Array.isArray(j) ||
-          Array.isArray(j.brands) ||
-          (j.brands && typeof j.brands === 'object') ||
-          Array.isArray(j?.data?.brands) ||
-          (j?.data?.brands && typeof j.data.brands === 'object') ||
-          Array.isArray(j.manufacturers) ||
-          (j.manufacturers && typeof j.manufacturers === 'object');
+          Array.isArray(j.brands) || (j.brands && typeof j.brands === 'object') ||
+          Array.isArray(j?.data?.brands) || (j?.data?.brands && typeof j.data.brands === 'object') ||
+          Array.isArray(j.manufacturers) || (j.manufacturers && typeof j.manufacturers === 'object');
         url = hasBrands ? tryUrl : fallback;
       } catch {}
       EnginePicker.init({ dataUrl: url });
-      // se a <select id="brand"> tiver valor inicial, hidratar já os modelos
       const legacy = document.getElementById('brand');
-      if (legacy && legacy.value) {
-        setTimeout(() => legacy.dispatchEvent(new Event('change')), 0);
-      }
+      if (legacy && legacy.value) setTimeout(() => legacy.dispatchEvent(new Event('change')), 0);
       console.log('[IDMAR] EnginePicker usando', url);
     });
   </script>
@@ -225,9 +248,33 @@
   <!-- Family picker -->
   <script defer src="./js/engine-family-picker.v1.js"></script>
 
+  <!-- Nº Motor: parser + ranges + painel (se existirem estes ficheiros no repo) -->
+  <script defer src="js/validators/engine-sn.v1.js?v=r7"></script>
+  <script defer src="js/engine-serial-range-check.v1.js?v=r8"></script>
+  <script defer src="js/engine-sn-panel.v2.js?v=r2"></script>
+
   <!-- Coletor + Bilingue -->
   <script defer src="./js/engine-collect.v1.js"></script>
   <script defer src="./js/i18n-bilingual.v1.js"></script>
+
+  <!-- Hooks de validação/submissão (debug) -->
+  <script>
+    document.getElementById('btnMotor')?.addEventListener('click', () => {
+      const data = window.EngineCollect?.collect?.() || {
+        brand: window.EnginePickerState?.brand,
+        model: window.EnginePickerState?.model,
+        extra: window.EngineBrandState?.data
+      };
+      console.log('[IDMAR] Motor VALIDAR:', data);
+    });
+    document.getElementById('formMotor')?.addEventListener('submit', (ev) => {
+      const data = window.EngineCollect?.collect?.() || {
+        brand: window.EnginePickerState?.brand,
+        model: window.EnginePickerState?.model,
+        extra: window.EngineBrandState?.data
+      };
+      console.log('[IDMAR] Motor SUBMIT:', data);
+    });
+  </script>
 </body>
 </html>
-

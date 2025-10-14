@@ -16,7 +16,7 @@
     }
   };
 
-  const log = (...a) => console.info('[IDMAR][engine_picker]', ...a);
+  const log = (...a) => console.info('[IDMAR][EnginePicker]', ...a);
 
   function createEl(tag, attrs = {}, children = []) {
     const el = d.createElement(tag);

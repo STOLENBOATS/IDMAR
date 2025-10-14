@@ -16,7 +16,7 @@
     }
   };
 
-  const log = (...a) => console.info('[IDMAR][EnginePicker]', ...a);
+  const log = (...a) => console.info('[IDMAR][engine_picker]', ...a);
 
   function createEl(tag, attrs = {}, children = []) {
     const el = d.createElement(tag);
@@ -153,7 +153,7 @@ async function loadCatalog(url) {
       };
 
     } catch (err) {
-  console.error('[IDMAR][EnginePicker] failed:', err);
+  console.error('[IDMAR][engine_picker] failed:', err);
   const errBox = document.createElement('div');
   errBox.className = 'ep-error';
   errBox.textContent = 'Não foi possível carregar o catálogo de motores.';

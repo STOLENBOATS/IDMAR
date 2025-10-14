@@ -73,6 +73,7 @@
       <!-- WIN -->
       <div class="panel" id="card-win">
         <h2 class="card-title" data-bi-pt="Validador WIN" data-bi-en="WIN Validator"></h2>
+        
         <form id="formWin">
           <label for="win">WIN / HIN</label>
           <input id="win" type="text" placeholder="Ex.: PT-ABC12345D404"/>
@@ -95,42 +96,49 @@
           </table>
         </form>
       </div>
-
+      
+   
       <!-- MOTOR -->
-      <div class="panel" id="card-motor">
-        <h2 class="card-title" data-bi-pt="Validador Motor" data-bi-en="Engine Validator"></h2>
-        <form id="formMotor">
-          <label for="brand">Marca</label>
-          <select id="brand" data-engine-field="brand">
-            <option>Yamaha</option><option>Honda</option><option>Suzuki</option><option>Tohatsu</option>
-            <option>Mercury</option><option>MerCruiser</option><option>Volvo Penta</option>
-            <option>Yanmar</option><option>Evinrude/Johnson</option>
-          </select>
+<div class="panel" id="card-motor">
+  <h2 class="card-title" data-bi-pt="Validador Motor" data-bi-en="Engine Validator"></h2>
 
-          <div id="brandDynamic"></div>
+  <!-- ✅ Picker VISÍVEL no sítio certo -->
+  <div id="engine-picker"></div>
 
-          <div style="margin-top:.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.5rem">
-            <div>
-              <label>Modelo (pesquisa)</label>
-              <input id="srch_model" type="text" placeholder="Ex.: BF40A / DF140A" data-engine-field="model_code"/>
-            </div>
-            <div>
-              <label>Potência (hp)</label>
-              <input id="srch_power" type="text" placeholder="Ex.: 150" data-engine-field="power"/>
-            </div>
-            <div>
-              <label>Cilindrada (cc)</label>
-              <input id="srch_disp" type="text" placeholder="Ex.: 2670" data-engine-field="displacement"/>
-            </div>
-            <div>
-              <label>Ano</label>
-              <input id="srch_year" type="text" placeholder="Ex.: 2017" data-engine-field="year"/>
-            </div>
-            <div>
-              <label>Origem</label>
-              <input id="srch_origin" type="text" placeholder="Ex.: Japão" data-engine-field="origin"/>
-            </div>
-          </div>
+  <!-- 🔒 Campos legados, escondidos só para compatibilidade -->
+  <div id="legacy-brand-model" style="display:none">
+    <label for="brand">Marca</label>
+    <select id="brand" data-engine-field="brand">
+      <option>Yamaha</option><option>Honda</option><option>Suzuki</option><option>Tohatsu</option>
+      <option>Mercury</option><option>MerCruiser</option><option>Volvo Penta</option>
+      <option>Yanmar</option><option>Evinrude/Johnson</option>
+    </select>
+
+    <div id="brandDynamic"></div>
+
+    <div style="margin-top:.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.5rem">
+      <div>
+        <label>Modelo (pesquisa)</label>
+        <input id="srch_model" type="text" placeholder="Ex.: BF40A / DF140A" data-engine-field="model_code"/>
+      </div>
+      <div>
+        <label>Potência (hp)</label>
+        <input id="srch_power" type="text" placeholder="Ex.: 150" data-engine-field="power"/>
+      </div>
+      <div>
+        <label>Cilindrada (cc)</label>
+        <input id="srch_disp" type="text" placeholder="Ex.: 2670" data-engine-field="displacement"/>
+      </div>
+      <div>
+        <label>Ano</label>
+        <input id="srch_year" type="text" placeholder="Ex.: 2017" data-engine-field="year"/>
+      </div>
+      <div>
+        <label>Origem</label>
+        <input id="srch_origin" type="text" placeholder="Ex.: Japão" data-engine-field="origin"/>
+      </div>
+    </div>
+  </div>
 
           <div style="margin:.5rem 0">
             <button id="btnMotor" type="submit">Validar Motor</button>
@@ -199,7 +207,7 @@
   <!-- Engine Picker UNIFICADO -->
   <link rel="stylesheet" href="./css/engine-picker.css">
   <script defer src="./js/engine-picker.js?v=r4"></script>
-  <div id="engine-picker"></div>
+ 
 
   <!-- INIT picker com fallback v2→v1 e espera pelo script -->
   <script data-picker-init>

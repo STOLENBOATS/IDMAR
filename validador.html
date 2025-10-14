@@ -34,27 +34,10 @@
     table{width:100%;border-collapse:collapse;margin-top:.5rem}
     th,td{border-bottom:1px solid var(--border);padding:.6rem .5rem;text-align:left}
     .footer{border-top:1px solid var(--border);padding:1rem;text-align:left;opacity:.85;background:var(--bg-elev)}
-    /* utilidades para SN */
     .muted{opacity:.75}
     #engine-sn-window .chip{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:.15rem .5rem;margin:.15rem .25rem 0 0}
     #engine-sn-result ul{margin:.25rem 0 0 .9rem}
   </style>
-
-  <!-- Polyfills leves (só quando necessário) -->
-  <script>
-  (function(){
-    if (!('fetch' in window)) {
-      var s=document.createElement('script');
-      s.src='https://cdn.jsdelivr.net/npm/whatwg-fetch@3.6.20/dist/fetch.umd.min.js';
-      document.head.appendChild(s);
-    }
-    if (!('Promise' in window)) {
-      var p=document.createElement('script');
-      p.src='https://cdn.jsdelivr.net/npm/promise-polyfill@8/dist/polyfill.min.js';
-      document.head.appendChild(p);
-    }
-  })();
-  </script>
 
   <!-- Gate de sessão simples -->
   <script>
@@ -172,7 +155,7 @@
         </form>
       </div>
 
-      <!-- Nº do motor / Serial (ligado ao cartão Motor) -->
+      <!-- Nº do motor / Serial -->
       <div class="panel" id="card-serial">
         <h2 class="card-title" data-bi-pt="Nº do motor / Engine serial" data-bi-en="Engine serial"></h2>
         <input id="engine-sn-raw" type="text"
@@ -213,10 +196,12 @@
   <!-- PWA / SW -->
   <script defer src="./js/sw-register.js"></script>
 
-  <!-- Engine Picker UNIFICADO (um só!) -->
+  <!-- Engine Picker UNIFICADO -->
   <link rel="stylesheet" href="./css/engine-picker.css">
-  <script defer src="./js/engine-picker.js"></script>
+  <script defer src="./js/engine-picker.js?v=r4"></script>
   <div id="engine-picker"></div>
+
+  <!-- INIT picker com fallback v2→v1 e espera pelo script -->
   <script data-picker-init>
     window.addEventListener('DOMContentLoaded', async () => {
       const tryUrl = './data/engines_catalog.v2.json';
@@ -232,11 +217,56 @@
           Array.isArray(j.manufacturers) || (j.manufacturers && typeof j.manufacturers === 'object');
         url = hasBrands ? tryUrl : fallback;
       } catch {}
-      EnginePicker.init({ dataUrl: url });
-      const legacy = document.getElementById('brand');
-      if (legacy && legacy.value) setTimeout(() => legacy.dispatchEvent(new Event('change')), 0);
-      console.log('[IDMAR] EnginePicker usando', url);
+      const wait = (test, cb, tries = 50) => {
+        const t = setInterval(() => {
+          if (test()) { clearInterval(t); cb(); }
+          else if (!--tries) clearInterval(t);
+        }, 100);
+      };
+      wait(() => window.EnginePicker && typeof EnginePicker.init === 'function', () => {
+        EnginePicker.init({ dataUrl: url });
+        console.log('[IDMAR] EnginePicker usando', url);
+
+        // Se houver marca legacy já selecionada, reflete no picker
+        const legacyBrand = document.getElementById('brand');
+        const pickerBrand = document.getElementById('engineBrand');
+        if (legacyBrand && pickerBrand && legacyBrand.value) {
+          pickerBrand.value = legacyBrand.value;
+          pickerBrand.dispatchEvent(new Event('change'));
+        }
+      });
     });
+  </script>
+
+  <!-- Sync seguro (2 vias): #srch_model ↔ #engineModel e #brand ↔ picker -->
+  <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    function connectOnce() {
+      const legacyBrand = document.getElementById('brand');
+      const legacyModel = document.getElementById('srch_model');
+      const pickerInput = document.getElementById('engineModel');   // criado pelo picker
+      const pickerBrand = document.getElementById('engineBrand');   // criado pelo picker
+      if (!legacyModel || !pickerInput) return;
+
+      // Modelo: bidirecional
+      legacyModel.addEventListener('input', () => pickerInput.value = legacyModel.value);
+      pickerInput.addEventListener('input', () => legacyModel.value = pickerInput.value);
+
+      // Marca: refletir alterações do legacy para o picker (sem loops)
+      if (legacyBrand && pickerBrand) {
+        if (legacyBrand.value) {
+          pickerBrand.value = legacyBrand.value;
+          pickerBrand.dispatchEvent(new Event('change'));
+        }
+        legacyBrand.addEventListener('change', () => {
+          pickerBrand.value = legacyBrand.value;
+          pickerBrand.dispatchEvent(new Event('change'));
+        });
+      }
+    }
+    // quando o picker injetar os campos, ligamos
+    setTimeout(connectOnce, 0);
+  });
   </script>
 
   <!-- Campos por marca -->
@@ -252,6 +282,29 @@
   <script defer src="js/validators/engine-sn.v1.js?v=r7"></script>
   <script defer src="js/engine-serial-range-check.v1.js?v=r8"></script>
   <script defer src="js/engine-sn-panel.v2.js?v=r2"></script>
+
+  <!-- Stubs de segurança: se os ficheiros acima não existirem, evita erros -->
+  <script>
+    (function(w,d){
+      if(!w.EngineSNRange){
+        w.EngineSNRange = { check: sn => ({ ok: !!(sn && sn.trim()), ranges: [], notes: '' }) };
+      }
+      // painel mínimo se não houver ficheiro real
+      if(!w.__SN_PANEL_FALLBACK__){
+        w.__SN_PANEL_FALLBACK__ = true;
+        const input = d.getElementById('engine-sn-raw');
+        const out = d.getElementById('engine-sn-result');
+        if (input && out) {
+          input.addEventListener('input', () => {
+            const res = (w.EngineSNRange && w.EngineSNRange.check)
+              ? w.EngineSNRange.check(input.value || '')
+              : { ok: !!(input.value||'').trim(), ranges: [], notes: '' };
+            out.innerHTML = '<pre style="margin:0">'+JSON.stringify(res,null,2)+'</pre>';
+          });
+        }
+      }
+    })(window,document);
+  </script>
 
   <!-- Coletor + Bilingue -->
   <script defer src="./js/engine-collect.v1.js"></script>

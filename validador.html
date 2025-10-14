@@ -190,50 +190,51 @@
   <script src="js/validador-motor.r3d.js?v=r3d"></script>
   <script defer src="js/validator-enhancements.v4.js"></script>
 
-  <!-- CONFIGURADOR (schema v2) 
-  <script type="module"
-    src="js/engine_picker.v2.4.js"
-    data-catalog="data/engines_catalog.v2.json"></script>
+ <!-- CONFIGURADOR (schema v2) — DESATIVADO para não duplicar o picker
+<script type="module"
+  src="js/engine_picker.v2.4.js"
+  data-catalog="data/engines_catalog.v2.json"></script>
+-->
 
-  <!-- Validador de combinações (usa o mesmo catálogo v2) -->
-  <script defer src="js/engine_validation.v1.js"></script>
+<!-- Validador de combinações (usa o mesmo catálogo v2) -->
+<script defer src="js/engine_validation.v1.js"></script>
 
-  <!-- Admin rápido embutido (motores + WIN)  se NO quiseres este bloco na página, comenta esta linha -->
-  <!-- <script defer src="js/engine_admin_embed.v1.js"></script>
+<!-- Admin rápido embutido (motores + WIN) — se NÃO quiseres este bloco na página, comenta a linha de baixo -->
+<!-- <script defer src="js/engine_admin_embed.v1.js"></script> -->
 
-  <!-- Botão "Admin" no ribbon -->
-  <script>window.IDMAR_ADMIN_URL = 'admin-engines.html';</script>
-  <script defer src="js/ribbon-admin.v1.js"></script>
+<!-- Botão "Admin" no ribbon -->
+<script>window.IDMAR_ADMIN_URL = 'admin-engines.html';</script>
+<script defer src="js/ribbon-admin.v1.js"></script>
 
-  <!-- AUTOCOMPLETE ANTIGO (schema v1) -->
-  <script type="module"
-    src="js/engine_autocomplete_addon.v1.js"
-    data-catalog="data/engines_catalog.v1.json"></script>
-  <script defer src="js/patch-forense-i18n-ribbon.r1.js?v=r1"></script>
-  
-  <!-- PWA / SW -->
+<!-- AUTOCOMPLETE ANTIGO (schema v1) -->
+<script type="module"
+  src="js/engine_autocomplete_addon.v1.js"
+  data-catalog="data/engines_catalog.v1.json"></script>
+<script defer src="js/patch-forense-i18n-ribbon.r1.js?v=r1"></script>
+
+<!-- PWA / SW -->
 <link rel="manifest" href="./manifest.webmanifest">
 <script defer src="./js/sw-register.js"></script>
 
-  <!-- IDMAR — Engine Picker -->
+<!-- IDMAR — Engine Picker (unificado) -->
 <link rel="stylesheet" href="./css/engine-picker.css">
 <script defer src="./js/engine-picker.js"></script>
 <div id="engine-picker"></div>
-<script>
-  
-  // chama só DEPOIS do <script src="./js/engine-picker.js">
-   window.addEventListener('DOMContentLoaded', async () => {
+
+<!-- Init com fallback v2→v1 (apenas UM <script>) -->
+<script data-picker-init>
+  window.addEventListener('DOMContentLoaded', async () => {
     const tryUrl = './data/engines_catalog.v2.json';
     const fallback = './data/engines_catalog.v1.json';
     try {
       const r = await fetch(tryUrl);
       const j = await r.json();
       const hasBrands =
+        Array.isArray(j) ||
         Array.isArray(j.brands) ||
         Array.isArray(j?.data?.brands) ||
         Array.isArray(j.manufacturers) ||
-        Array.isArray(j?.data?.manufacturers) ||
-        Array.isArray(j); // se o ficheiro for um array direto
+        Array.isArray(j?.data?.manufacturers);
       EnginePicker.init({ dataUrl: hasBrands ? tryUrl : fallback });
       console.log('[IDMAR] EnginePicker usando', hasBrands ? tryUrl : fallback);
     } catch {
@@ -242,6 +243,7 @@
     }
   });
 </script>
+
 
   <link rel="stylesheet" href="./css/engine-brand.css">
   <div id="engine-brand-fields"></div>

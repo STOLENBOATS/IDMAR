@@ -1,0 +1,11 @@
+/* css/engine-family.css (r1) */
+.ef-grid { display:grid; gap:.75rem; grid-template-columns: repeat(3, minmax(0,1fr)); margin-top:.5rem; }
+.ef-field { display:flex; flex-direction:column; gap:.25rem; }
+.ef-label { font-weight:600; font-size:.95rem; }
+.ef-select { padding:.5rem .6rem; border:1px solid #e5e7eb; border-radius:.5rem; font-size:.95rem; }
+.ef-serials { margin:.25rem 0 0 .95rem; }
+.ef-notes { color:#6b7280; font-size:.85rem; margin-top:.25rem; }
+@media (prefers-color-scheme: dark){
+  .ef-select{ border-color:#374151; background:#111827; color:#e5e7eb; }
+  .ef-notes{ color:#9ca3af; }
+}

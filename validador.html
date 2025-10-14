@@ -37,6 +37,15 @@
     .muted{opacity:.75}
     #engine-sn-window .chip{display:inline-block;border:1px solid var(--border);border-radius:999px;padding:.15rem .5rem;margin:.15rem .25rem 0 0}
     #engine-sn-result ul{margin:.25rem 0 0 .9rem}
+
+    .engine-id-visor{ margin-top:.75rem; padding:.75rem .9rem; border:1px solid var(--border); border-radius:12px; background:#f1f5f9; }
+    .engine-id-title{ font-weight:700; margin-bottom:.25rem; }
+    .engine-id-line{ font-weight:800; font-size:1.05rem; letter-spacing:.2px; word-break:break-word; }
+    .engine-id-status{ margin-top:.35rem; font-size:.9rem; opacity:.8 }
+    .engine-id-ok{   background:#10b98120; border-color:#10b98180 }
+    .engine-id-bad{  background:#ef444420; border-color:#ef444480 }
+    .engine-id-warn{ background:#f59e0b20; border-color:#f59e0b80 }
+
   </style>
 
   <!-- Gate de sessão simples -->
@@ -176,6 +185,12 @@
         <div id="engine-sn-window" class="mt-2"></div>
         <small id="engine-sn-hints" class="muted"></small>
         <div id="engine-sn-result" class="mt-2"></div>
+        <div id="engine-id-visor" class="engine-id-visor" aria-live="polite">
+        <div class="engine-id-title">Identificador / Identifier</div>
+        <div id="engine-id-line" class="engine-id-line">—</div>
+       <div id="engine-id-status" class="engine-id-status">Aguarda campos… / Waiting…</div>
+   </div>
+
       </div>
     </section>
   </main>
@@ -318,7 +333,7 @@
   <script defer src="./js/engine-collect.v1.js"></script>
   <script defer src="./js/i18n-bilingual.v1.js"></script>
 
-  <!-- Hooks de validação/submissão (debug) -->
+   <!-- Hooks de validação/submissão (debug) -->
   <script>
     document.getElementById('btnMotor')?.addEventListener('click', () => {
       const data = window.EngineCollect?.collect?.() || {
@@ -328,6 +343,7 @@
       };
       console.log('[IDMAR] Motor VALIDAR:', data);
     });
+
     document.getElementById('formMotor')?.addEventListener('submit', (ev) => {
       const data = window.EngineCollect?.collect?.() || {
         brand: window.EnginePickerState?.brand,
@@ -336,6 +352,72 @@
       };
       console.log('[IDMAR] Motor SUBMIT:', data);
     });
+  </script>
+
+  <!-- Visor do identificador composto (sempre por último) -->
+  <script>
+  (function (w, d) {
+    const j = (...xs) => xs.filter(Boolean).join(' ');
+    const visor   = d.getElementById('engine-id-visor');
+    const lineEl  = d.getElementById('engine-id-line');
+    const statusEl= d.getElementById('engine-id-status');
+
+    function buildReadableId(payload){
+      const b = payload.brand || '';
+      const m = payload.model || '';
+      const fam = payload.family?.family || '';
+      const ver = payload.family?.version || '';
+      const hp  = payload.family?.power ? `${payload.family.power}hp` : '';
+      const x = payload.extra || {};
+      const tags = [x.rigging,x.shaft,x.rotation,x.color,x.gearcase].filter(Boolean).join(' · ');
+      const left = j(b, m || fam, ver, hp);
+      const right = payload.serial?.raw ? `SN: ${payload.serial.raw}` : '';
+      const mid = tags ? `[${tags}]` : '';
+      return j(left, mid, right).replace(/\s{2,}/g,' ');
+    }
+
+    function verdictToClass(v){ if(!v) return 'engine-id-warn'; return v.ok ? 'engine-id-ok' : 'engine-id-bad'; }
+
+    let t=null;
+    function scheduleUpdate(){ clearTimeout(t); t=setTimeout(update,80); }
+
+    function update(){
+      try{
+        const data = (w.EngineCollect && w.EngineCollect.collect) ? w.EngineCollect.collect() : {};
+        lineEl.textContent = buildReadableId(data) || '—';
+
+        const ranges = data.family?.ranges || [];
+        const raw = (d.getElementById('engine-sn-raw')?.value || '').trim();
+        let verdict=null;
+        if(raw && w.EngineSNRange && typeof w.EngineSNRange.check==='function'){
+          verdict = w.EngineSNRange.check(raw, ranges);
+        }
+
+        visor.classList.remove('engine-id-ok','engine-id-bad','engine-id-warn');
+        visor.classList.add(verdictToClass(verdict));
+        if(!raw){
+          statusEl.textContent='Selecione versão/potência e introduza o nº de motor.';
+        }else if(!verdict){
+          statusEl.textContent='Validação simples (sem tabela de intervalos ativa).';
+        }else if(verdict.ok){
+          statusEl.textContent = verdict.match
+            ? `✓ Dentro do intervalo ${verdict.match.from} → ${verdict.match.to}`
+            : '✓ Dentro do intervalo.';
+        }else{
+          statusEl.textContent = verdict.reason
+            ? `✗ Fora do intervalo (${verdict.reason}).`
+            : '✗ Fora do intervalo conhecido.';
+        }
+      }catch(e){ console.warn('[engine-id-visor] update error:', e); }
+    }
+
+    w.addEventListener('DOMContentLoaded', () => {
+      d.addEventListener('input',  scheduleUpdate, true);
+      d.addEventListener('change', scheduleUpdate, true);
+      const sn=d.getElementById('engine-sn-raw'); if(sn) sn.addEventListener('input', scheduleUpdate);
+      scheduleUpdate();
+    });
+  })(window, document);
   </script>
 </body>
 </html>

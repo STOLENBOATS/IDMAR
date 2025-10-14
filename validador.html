@@ -69,22 +69,14 @@
   <link rel="stylesheet" href="./css/engine-picker.css">
   <script defer src="./js/engine-picker.js"></script>
   <div id="engine-picker"></div>
-  <script data-picker-init>
-    window.addEventListener('DOMContentLoaded', async () => {
-      const tryUrl = './data/engines_catalog.v2.json';
-      const fallback = './data/engines_catalog.v1.json';
-      try {
-        const r = await fetch(tryUrl);
-        const j = await r.json();
-        const hasBrands = Array.isArray(j) || Array.isArray(j.brands) || Array.isArray(j?.data?.brands) || Array.isArray(j.manufacturers) || Array.isArray(j?.data?.manufacturers);
-        EnginePicker.init({ dataUrl: hasBrands ? tryUrl : fallback });
-        console.log('[IDMAR] EnginePicker usando', hasBrands ? tryUrl : fallback);
-      } catch {
-        EnginePicker.init({ dataUrl: fallback });
-        console.warn('[IDMAR] Falha no v2; a usar v1.');
-      }
-    });
-  </script>
+  
+    <script>
+  window.addEventListener('DOMContentLoaded', () => {
+    EnginePicker.init({ dataUrl: './data/engines_catalog.v1.json' });
+    console.log('[IDMAR] EnginePicker a usar ./data/engines_catalog.v1.json');
+  });
+</script>
+
 
   <!-- Brand fields -->
   <link rel="stylesheet" href="./css/engine-brand.css">

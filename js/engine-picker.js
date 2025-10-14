@@ -4,7 +4,7 @@
   'use strict';
 
   const DEFAULTS = {
-    container: '#engine_picker',
+    container: '#engine-picker',
     brandSelectId: 'engineBrand',
     modelInputId: 'engineModel',
     modelDatalistId: 'engineModelList',

@@ -1,7 +1,5 @@
-// sw.js (IDMAR)
-// Bump this to force refresh after asset changes
-const CACHE_VERSION = 'idmar-v1.0.1-2025-10-14';
-
+// sw.js (IDMAR) — safe cloning + guards
+const CACHE_VERSION = 'idmar-v1.0.2-2025-10-14'; // ⬅️ sobe sempre isto ao editar
 const BASE = new URL('./', self.location).pathname;
 
 const ASSETS = [
@@ -36,27 +34,44 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   const req = event.request;
   const url = new URL(req.url);
+
+  // Só mesma origem
   if (url.origin !== location.origin) return;
 
+  // HTML → network-first com fallback
   const acceptsHTML = req.mode === 'navigate' || req.headers.get('accept')?.includes('text/html');
   if (acceptsHTML) {
-    event.respondWith(
-      fetch(req).then((res) => {
-        caches.open(CACHE_NAME).then((c) => c.put(req, res.clone()));
-        return res;
-      }).catch(() => caches.match(req).then((r) => r || caches.match(`${BASE}index.html`)))
-    );
+    event.respondWith((async () => {
+      try {
+        const netRes = await fetch(req, { cache: 'no-store' });
+        // clona já, uma vez só
+        const copy = netRes.clone();
+        // tenta gravar sem quebrar navegação
+        caches.open(CACHE_NAME).then(c => c.put(req, copy)).catch(()=>{});
+        return netRes;
+      } catch {
+        const cached = await caches.match(req);
+        return cached || caches.match(`${BASE}index.html`);
+      }
+    })());
     return;
   }
 
+  // Estáticos → cache-first; em miss, rede + put seguro
   if (req.method === 'GET') {
-    event.respondWith(
-      caches.match(req).then((r) =>
-        r || fetch(req).then((net) => {
-          if (net.ok) caches.open(CACHE_NAME).then((c) => c.put(req, net.clone()));
-          return net;
-        })
-      )
-    );
+    event.respondWith((async () => {
+      const cached = await caches.match(req);
+      if (cached) return cached;
+
+      const netRes = await fetch(req);
+      // só cacheia respostas OK e "basic" (mesma origem, não opacas)
+      if (netRes && netRes.ok && netRes.type === 'basic') {
+        try {
+          const copy = netRes.clone();
+          caches.open(CACHE_NAME).then(c => c.put(req, copy)).catch(()=>{});
+        } catch {}
+      }
+      return netRes;
+    })());
   }
 });

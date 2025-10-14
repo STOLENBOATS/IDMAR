@@ -3,10 +3,31 @@
   "brands": [
     {
       "id": "honda",
+      "serial_policy": {
+        "prefix": {
+          "required": true,
+          "min_len": 3,
+          "max_len": 4
+        },
+        "body": {
+          "kind": "number",
+          "min_len": 6,
+          "max_len": 7
+        },
+        "normalize": {
+          "upper": true,
+          "auto_hyphen": true
+        }
+      },
       "families": [
         {
           "model": "BF350",
           "label": "Honda BF350 V8",
+          "suffix_examples": [
+            "LHU",
+            "XHU",
+            "XXHU"
+          ],
           "versions": [
             {
               "code": "BF350LHU",
@@ -49,6 +70,24 @@
           ]
         }
       ]
+    },
+    {
+      "id": "mercruiser",
+      "serial_policy": {
+        "prefix": {
+          "required": false
+        },
+        "body": {
+          "kind": "alnum",
+          "min_len": 6,
+          "max_len": 9
+        },
+        "normalize": {
+          "upper": true,
+          "auto_hyphen": false
+        }
+      },
+      "families": []
     }
   ]
 }

@@ -47,17 +47,7 @@
     .engine-id-warn{ background:#f59e0b20; border-color:#f59e0b80 }
   </style>
 
-  <!-- Gate de sessão simples -->
-  <script>
-    (function(){
-      try{
-        var ok = sessionStorage.getItem('IDMAR_SESSION')==='ok' || sessionStorage.getItem('NAV_SESSION')==='ok';
-        if(!ok) location.replace('login.html');
-      }catch(e){}
-    })();
-  </script>
-
-  <!-- Versão + branding -->
+    <!-- Versão + branding -->
   <script>window.IDMAR_VERSION="Vs 1.3";</script>
   <script defer src="js/idmar-config.v4.js"></script>
 

@@ -1,30 +1,50 @@
 <!doctype html>
-<html lang="pt">
-<head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>IDMAR</title>
-  <script>
-  (function(){
-    const KEY='IDMAR_SESSION';
-    const base = (location.pathname.replace(/[^\/]+$/, '') || '/'); // ex.: /IDMAR/
+<html lang="pt"><head>
+<link rel="icon" type="image/png" href="img/favicon.png">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IDMAR — Início</title>
+<link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/header-tweaks.css"/>
+<script>window.addEventListener('DOMContentLoaded',()=>{setTimeout(()=>{if(!/login\.html$/.test(location.href)) location.href='login.html';},200);});</script>
+  <link rel="stylesheet" href="css/soft-anim.css"/>
+\1<body>
 
-    // se vier de logout, limpa e remove o parâmetro
-    const q = new URLSearchParams(location.search);
-    if (q.get('logout') === '1') {
-      try{ localStorage.removeItem(KEY); }catch(e){}
-      try{ sessionStorage.removeItem(KEY); }catch(e){}
-      history.replaceState({}, '', location.pathname);
-    }
 
-    function hasSession(){
-      try { return !!JSON.parse(localStorage.getItem(KEY)); } catch(e){ return false; }
-    }
+<script>(function(){try{const ok=sessionStorage.getItem('NAV_SESSION')==='ok'||sessionStorage.getItem('IDMAR_SESSION')==='ok'||sessionStorage.getItem('nav_session')==='ok'||sessionStorage.getItem((NAV&&NAV.STORAGE&&NAV.STORAGE.SESSION)||'nav_session')==='ok'; if(!ok) location.href='login.html';}catch(e){}})();</script>
 
-    location.replace(base + (hasSession() ? 'validador.html' : 'login.html'));
-  })();
-  </script>
-</head>
-<body></body>
-</html>
+<header class="app-header">
+  <div class="brand">
+    <img src="img/logo-pm.png" alt="Polícia Marítima" class="logo">
+    <div class="titles">
+      <h1>IDMAR <span class="title-descriptor">Identificação Marítima — Cascos &amp; Motores</span></h1>
+      <p class="subtitle"><span class="sub-en">(Maritime Identifications — WIN/HIN &amp; Engines)</span></p>
+    </div>
+  </div>
+  <nav class="main-nav">
+    <a href="validador.html">Validador</a>
+    <a href="historico_win.html">Histórico WIN</a>
+    <a href="historico_motor.html">Histórico Motor</a>
+    <a href="forense.html">Forense</a>
+    <a href="login.html" onclick="try{sessionStorage.clear();localStorage.setItem('IDMAR_LAST_LOGOUT',Date.now())}catch(e){}">Sair</a>
+    <button id="themeToggle" class="btn-icon" title="Alternar tema">🌙</button>
+  </nav>
+</header>
 
+<main class="container">
+  <section class="card">
+    <h2>Abrir sessão</h2>
+    <p>Se não for redirecionado, clique em <a class="btn" href="login.html">Login</a>.</p>
+  </section>
+</main>
+<footer class="app-footer">
+  <p>IDMAR — v2.2.7-baseline+merge-r1 — 2025-09-11</p>
+</footer>
+<script src="js/config.js"></script><script src="js/app.js"></script>
+  <script src="js/theme.js"></script>
+  <script defer src="js/idmar-version.js"></script>
+
+  <!-- PWA / SW -->
+<link rel="manifest" href="./manifest.webmanifest">
+<script defer src="./js/sw-register.js"></script>
+
+\1</html>

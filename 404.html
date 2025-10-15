@@ -3,15 +3,26 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>404 · IDMAR</title>
+  <title>IDMAR — 404</title>
   <meta http-equiv="refresh" content="0; url=./index.html">
-  <script>
-    setTimeout(function(){
-      var base = (location.pathname.replace(/[^\/]+$/, '') || '/');
-      location.replace(base + 'index.html');
-    }, 0);
-  </script>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <meta name="theme-color" content="#0b6bcb">
+  <link rel="apple-touch-icon" href="./img/icon-192.png">
+  <style>
+    body{font-family: system-ui, -apple-system, Segoe UI, Roboto, Ubuntu, Cantarell, Noto Sans, Arial, sans-serif;
+         margin:0; padding:2rem; display:flex; align-items:center; justify-content:center; min-height:100vh;}
+    .card{max-width:680px; padding:1.5rem; border:1px solid #e5e7eb; border-radius:16px}
+    h1{font-size:1.25rem; margin:0 0 .75rem}
+    p{margin:.25rem 0}
+    code{background:#f3f4f6; padding:.1rem .3rem; border-radius:6px}
+  </style>
 </head>
-<body>Redirecionando…</body>
+<body>
+  <div class="card">
+    <h1>404 — página não encontrada</h1>
+    <p>A redirecionar para <code>index.html</code>…</p>
+    <p>Se não fores redirecionado automaticamente, <a href="./index.html">clica aqui</a>.</p>
+  </div>
+  <script defer src="./js/sw-register.js"></script>
+</body>
 </html>
-

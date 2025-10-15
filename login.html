@@ -9,26 +9,11 @@
   <link rel="stylesheet" href="css/nav-ribbon.v5.css">
 
   <script>
-(function(){
-  // Se vieres de Sair, limpa tudo e tira o parâmetro da barra de endereços
-  const q = new URLSearchParams(location.search);
-  if (q.get('logout') === '1') {
-    try { localStorage.removeItem('IDMAR_SESSION'); } catch {}
-    try { sessionStorage.removeItem('IDMAR_SESSION'); } catch {}
-    history.replaceState({}, '', location.pathname);
-  }
-})();
-</script>
-
-  <script>
   window.IDMAR_VERSION="Vs 1.3";
   window.IDMAR_HIDE_NAV = true;   // esconde os links no header do login
   window.IDMAR_FOOTER_TEXT = "IDMAR · Identificação Marítima — Cascos & Motores";
 </script>
 <script defer src="js/idmar-config.v4.js"></script>
-
-  <!-- 🔐 Gate de sessão (NOVA LINHA) 
-<script defer src="js/session-gate.js"></script>-->
 
 <script defer src="js/idmar-i18n.js"></script>
 <script defer src="js/idmar-header-only.all.v4.js"></script>
@@ -104,47 +89,21 @@
     <div class="small">IDMAR · <span data-i18n="app.subtitle">Identificação Marítima — Cascos & Motores</span></div>
   </footer>
 
-  <!-- Handler de login (robusto para subpastas /IDMAR/) -->
-<script>
-(function () {
-  const KEY = 'IDMAR_SESSION';
-
-  function baseUrl(file) {
-    // ex.: /IDMAR/login.html -> /IDMAR/ + file
-    return location.pathname.replace(/[^\/]+$/, '') + file;
-  }
-
-  // Se já tens sessão, salta o login (evita loop)
-  try {
-    if (localStorage.getItem(KEY)) {
-      location.replace(baseUrl('validador.html'));
-      return;
-    }
-  } catch (e) {}
-
-  function setSession(user, remember) {
-    const sess = { user, role: 'operator', ts: Date.now() };
-    try { localStorage.setItem(KEY, JSON.stringify(sess)); } catch (e) { console.error('localStorage set fail', e); }
-    if (!remember) { try { sessionStorage.setItem(KEY, JSON.stringify(sess)); } catch (e) {} }
-    console.log('[LOGIN] sessão ->', localStorage.getItem(KEY));
-  }
-
-  function login() {
-    const u = (document.getElementById('user')?.value || '').trim();
-    const p = document.getElementById('pass')?.value || '';
-    const remember = !!document.getElementById('remember')?.checked;
-
-    if (u.toLowerCase() === 'admin' && p === 'Admin2025') {
-      setSession(u, remember);
-      const dest = baseUrl('validador.html');
-      console.log('[LOGIN] redirect ->', dest);
-      location.href = dest;
-    } else {
-      alert('Credenciais inválidas');
-    }
-  }
-
-  document.getElementById('btnLogin')?.addEventListener('click', (e)=>{ e.preventDefault(); login(); });
-  document.getElementById('pass')?.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ e.preventDefault(); login(); }});
-})();
-</script>
+  <!-- Handler mínimo de login (simples) -->
+  <script>
+    (function(){
+      function go(){
+        try{
+          // guarda a sessão simples
+          sessionStorage.setItem('IDMAR_SESSION','ok');
+        }catch(e){}
+        // vai para o validador (ou para a página que preferires)
+        location.href = 'validador.html';
+      }
+      document.getElementById('btnLogin')?.addEventListener('click', (e)=>{ e.preventDefault(); go(); });
+      // Enter para submeter
+      document.getElementById('pass')?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); go(); }});
+    })();
+  </script>
+</body>
+</html>

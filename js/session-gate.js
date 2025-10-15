@@ -7,13 +7,16 @@
     const sess = { user:"dev@idmar", role:"tester", ts:Date.now() };
     localStorage.setItem(KEY, JSON.stringify(sess));
   }
-  if (w.MIEC_CONFIG?.devAutologin && !hasSession()) createDevSession();
+  if (w.MIEC_CONFIG && w.MIEC_CONFIG.devAutologin && !hasSession()) createDevSession();
 
-  const isLogin = /(^|\/)login\.html?$/.test(location.pathname) || location.pathname === '/';
+  // Enforce login on any page except login.html (works under subfolders like /IDMAR/login.html)
+  var path = (location.pathname||"") + "";
+  var isLogin = /(^|\/)login\.html?$/i.test(path);
   if (!hasSession() && !isLogin) {
     location.replace('login.html');
   }
 
+  // Expose logout helper
   w.IDMAR = w.IDMAR || {};
   w.IDMAR.logout = function(){
     localStorage.removeItem(KEY);

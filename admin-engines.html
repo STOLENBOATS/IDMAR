@@ -32,23 +32,20 @@
   </style>
 
   <!-- Gate de sessão simples -->
-  <script>
-    (function(){
-      try{
-        var ok = sessionStorage.getItem('IDMAR_SESSION')==='ok' || sessionStorage.getItem('NAV_SESSION')==='ok';
-        if(!ok) location.replace('login.html');
-      }catch(e){}
-    })();
-  </script>
+  
 
   <!-- Versão + header iguais às outras páginas -->
-  <script>window.IDMAR_VERSION="Vs 1.3";</script>
-  <script defer src="js/idmar-config.v4.js"></script>
-  <script defer src="js/idmar-i18n.js"></script>
-  <script defer src="js/idmar-header-only.all.v4.js"></script>
-  <script defer src="js/header-override.v4.js"></script>
-  <script defer src="js/i18n-boot.js"></script>
-  <script defer src="js/idmar-version.v4.js"></script>
+<script>window.IDMAR_VERSION="Vs 1.3";</script>
+<script defer src="js/idmar-config.v4.js?v=20251015"></script>
+<script defer src="js/session-gate.js?v=20251015"></script>
+
+<script defer src="js/idmar-i18n.js"></script>
+<script defer src="js/idmar-header-only.all.v4.js"></script>
+
+<script defer src="js/header-override.v4.js"></script>
+<script defer src="js/i18n-boot.js"></script>
+<script defer src="js/idmar-version.v4.js"></script>
+
 </head>
 
 <body>

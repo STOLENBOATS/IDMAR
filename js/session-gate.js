@@ -9,13 +9,11 @@
   }
   if (w.MIEC_CONFIG?.devAutologin && !hasSession()) createDevSession();
 
-  // 🔐 OBRIGAR LOGIN (exceto página de login)
   const isLogin = /(^|\/)login\.html?$/.test(location.pathname) || location.pathname === '/';
   if (!hasSession() && !isLogin) {
     location.replace('login.html');
   }
 
-  // Helper global para logout
   w.IDMAR = w.IDMAR || {};
   w.IDMAR.logout = function(){
     localStorage.removeItem(KEY);

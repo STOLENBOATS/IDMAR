@@ -97,7 +97,20 @@
               <option value="honda">Honda</option>
             </select>
           </div>
+
+          <!-- Bridge: selects de modelo/variante visíveis (fora de #legacy-brand-model) -->
+          <div class="field">
+            <label for="modelBaseList">Modelo base</label>
+            <select id="modelBaseList"></select>
+          </div>
+          <div class="field">
+            <label for="modelVariantList">Variante</label>
+            <select id="modelVariantList"></select>
+          </div>
+
+          <!-- Campos adaptativos por marca -->
           <div id="brandFields"></div>
+
           <div class="field">
             <label for="motorNotes" data-i18n="motor.notes">Notas / Observações</label>
             <textarea id="motorNotes" rows="3"></textarea>
@@ -136,6 +149,7 @@
   <script defer src="js/history-service.js"></script>
   <script defer src="js/validador-win.js"></script>
   <script defer src="js/validador-motor.js"></script>
+  <script defer src="js/model-split-bridge.v1.js"></script>
   <script defer src="js/pwa-register.js"></script>
   <script>
     document.getElementById('btnLogout')?.addEventListener('click', () => {

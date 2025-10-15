@@ -92,21 +92,60 @@
     <div class="small">IDMAR · <span data-i18n="app.subtitle">Identificação Marítima — Cascos & Motores</span></div>
   </footer>
 
-  <!-- Handler mínimo de login (simples) -->
-  <script>
-    (function(){
-      function go(){
-        try{
-          // guarda a sessão simples
-          sessionStorage.setItem('IDMAR_SESSION','ok');
-        }catch(e){}
-        // vai para o validador (ou para a página que preferires)
-        location.href = 'validador.html';
+  <!-- Handler de login (corrigido) -->
+<script>
+  (function () {
+    const KEY = 'IDMAR_SESSION';
+
+    // (opcional) se já estiver logado, salta o login
+    try {
+      if (localStorage.getItem(KEY)) {
+        // já tens sessão -> vai direto ao validador
+        location.replace('validador.html');
+        return;
       }
-      document.getElementById('btnLogin')?.addEventListener('click', (e)=>{ e.preventDefault(); go(); });
-      // Enter para submeter
-      document.getElementById('pass')?.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ e.preventDefault(); go(); }});
-    })();
-  </script>
+    } catch (e) {}
+
+    function setSession(user, remember) {
+      const sess = { user, role: 'operator', ts: Date.now() };
+      // O GATE lê sempre do localStorage -> garantir aqui
+      try { localStorage.setItem(KEY, JSON.stringify(sess)); } catch (e) {}
+      // Se NÃO marcar "Lembrar sessão", também espelha em sessionStorage (sai ao fechar o browser)
+      if (!remember) {
+        try { sessionStorage.setItem(KEY, JSON.stringify(sess)); } catch (e) {}
+      }
+    }
+
+    function valueOf(id) {
+      return (document.getElementById(id)?.value || '').trim();
+    }
+
+    function login() {
+      const u = valueOf('user');
+      const p = valueOf('pass');
+      const remember = !!document.getElementById('remember')?.checked;
+
+      // Credenciais demo
+      if (u.toLowerCase() === 'admin' && p === 'Admin2025') {
+        setSession(u, remember);
+        location.href = 'validador.html';
+      } else {
+        alert('Credenciais inválidas');
+      }
+    }
+
+    document.getElementById('btnLogin')?.addEventListener('click', function (e) {
+      e.preventDefault();
+      login();
+    });
+
+    document.getElementById('pass')?.addEventListener('keydown', function (e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        login();
+      }
+    });
+  })();
+</script>
 </body>
 </html>

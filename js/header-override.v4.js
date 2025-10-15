@@ -6,40 +6,47 @@
   var APP_SUB  = w.IDMAR_APP_SUB  || "Identificação Marítima — Cascos & Motores";
   var HIDE_NAV = !!w.IDMAR_HIDE_NAV;
 
-  // Mapa de navegação — mantém o teu
+  // ajuda para construir caminhos na mesma pasta (ex.: /IDMAR/)
+  function baseUrl(file){ return (location.pathname.replace(/[^\/]+$/, '') || '/') + file; }
+
+  // Mapa de navegação
   var MAP = [
     { href: "validador.html",       label: "Validador",        id: "validador" },
     { href: "historico_win.html",   label: "Histórico WIN",    id: "hist_win" },
     { href: "historico_motor.html", label: "Histórico Motor",  id: "hist_motor" },
     { href: "forense.html",         label: "Forense",          id: "forense" },
-    { href: "login.html",           label: "Sair",             id: "logout" } // este será ligado ao IDMAR.logout()
+    { href: "login.html",           label: "Sair",             id: "logout" } // ligado ao logout()
   ];
 
   function $(s,c){return (c||d).querySelector(s)}
   function $all(s,c){return Array.from((c||d).querySelectorAll(s))}
 
-  // 🔌 liga o item "Sair" (mapeado para login.html) ao IDMAR.logout()
+  // 🔌 Liga o item "Sair" ao IDMAR.logout()
   function wireLogout(root){
     var a = (root||d).querySelector('a[data-section="logout"]');
     if (!a || a.__wired) return;
     a.__wired = true;
-    a.setAttribute('href', '#'); // evita navegação direta
+
+    // neutraliza navegação direta
+    a.setAttribute('href', '#');
+
     a.addEventListener('click', function(e){
       e.preventDefault();
       if (w.IDMAR && typeof w.IDMAR.logout === 'function') {
         w.IDMAR.logout();
-      } else {
-        // fallback seguro
-        try { localStorage.removeItem('IDMAR_SESSION'); } catch(_){}
-        location.replace('login.html');
+        return;
       }
+      // fallback ultra-seguro
+      try { localStorage.removeItem('IDMAR_SESSION'); } catch(_){}
+      try { sessionStorage.removeItem('IDMAR_SESSION'); } catch(_){}
+      location.replace(baseUrl('login.html'));
     });
   }
 
   function brand(root){
     if(!root) return;
 
-    // Branding textual básico
+    // Branding
     var nameEl = root.querySelector('.brand h1, .brand .name, .app-title, .app-name, h1');
     var subEl  = root.querySelector('.subtitle, .brand .subtitle, .app-subtitle, p');
     if(nameEl) nameEl.textContent = APP_NAME;
@@ -51,8 +58,10 @@
 
     // Etiqueta e acessibilidade dos links
     $all('a', nav||root).forEach(function(a){
-      var href=(a.getAttribute('href')||'').toLowerCase();
-      var m = MAP.find(function(it){ return href.indexOf(it.href) >= 0; });
+      var raw = (a.getAttribute('href') || '').toLowerCase();
+      // extrai apenas o ficheiro, mesmo que venha absoluto ou com query
+      var file = raw.split('/').pop().split('?')[0];
+      var m = MAP.find(function(it){ return it.href === file; });
       if(m){
         a.textContent = m.label;
         a.title = m.label;
@@ -62,16 +71,16 @@
       }
     });
 
-    // Ativo
+    // Link ativo
     try{
-      var path=(location.pathname.split('/').pop()||'').toLowerCase();
+      var current = (location.pathname.split('/').pop()||'').toLowerCase();
       $all('a.nav-ribbon', nav||root).forEach(function(a){
-        var u=(a.getAttribute('href')||'').toLowerCase();
-        if(u===path){ a.classList.add('is-active'); }
+        var file = (a.getAttribute('href')||'').toLowerCase().split('/').pop().split('?')[0];
+        if(file === current){ a.classList.add('is-active'); }
       });
     }catch(e){}
 
-    // ➜ liga o "Sair" após o branding
+    // ➜ liga o "Sair"
     wireLogout(nav||root);
   }
 
@@ -79,10 +88,9 @@
     var c = $('#app-header') || $('header');
     if(!c) return;
 
-    // Se já há conteúdo, brand + wire de imediato
     if(c.children.length){ brand(c); return; }
 
-    // Se é injetado mais tarde, observa e aplica assim que surgir
+    // header é injetado depois — observa e aplica quando surgir
     var mo = new MutationObserver(function(){
       if(c.children.length){
         try { brand(c); } finally { mo.disconnect(); }

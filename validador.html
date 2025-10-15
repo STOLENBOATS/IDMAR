@@ -283,72 +283,101 @@
     });
   </script>
 
-  <!-- Sync seguro (2 vias): #srch_model ↔ #engineModel e #brand ↔ picker -->
-  <script>
-    window.addEventListener('DOMContentLoaded', () => {
-      function connectOnce() {
-        const legacyBrand = document.getElementById('brand');
-        const legacyModel = document.getElementById('srch_model');
-        const pickerInput = document.getElementById('engineModel');   // criado pelo picker
-        const pickerBrand = document.getElementById('engineBrand');   // criado pelo picker
-        if (!legacyModel || !pickerInput) return;
+<script>
+  
+  // ===== Ligação pesquisa ↔ picker (sem saltar foco) =====
+  (function (w, d) {
+    function $(id) { return d.getElementById(id); }
+    const els = {
+      legacyModel: 'srch_model',      // input de pesquisa (Cartão 2)
+      pickerModel: 'engineModel',     // input do EnginePicker
+      baseSel:     'modelBaseList',   // select base
+      varSel:      'modelVariantList',// select variante
+      verSel:      'engineVersion',   // select de versões do family picker
+      snInput:     'engine-sn-raw'    // campo nº série (Cartão 3)
+    };
 
-        // Modelo: bidirecional
-        legacyModel.addEventListener('input', () => pickerInput.value = legacyModel.value);
-        pickerInput.addEventListener('input', () => legacyModel.value = pickerInput.value);
+    // espelha texto da pesquisa para o input do picker (para filtrar/sugerir), sem confirmar
+    function mirrorToPicker() {
+      const src = $(els.legacyModel);
+      const dst = $(els.pickerModel) || d.querySelector('#engine-picker input#engineModel');
+      if (!src || !dst) return;
+      dst.value = src.value || '';
+      // dispara input para o autocomplete do picker reagir
+      dst.dispatchEvent(new Event('input', { bubbles: true }));
+    }
 
-        // Marca: refletir alterações do legacy para o picker (sem loops)
-        if (legacyBrand && pickerBrand) {
-          if (legacyBrand.value) {
-            pickerBrand.value = legacyBrand.value;
-            pickerBrand.dispatchEvent(new Event('change'));
-          }
-          legacyBrand.addEventListener('change', () => {
-            pickerBrand.value = legacyBrand.value;
-            pickerBrand.dispatchEvent(new Event('change'));
-          });
-        }
+    // tenta construir o código de modelo a partir de Base + Variante (ex.: F115 + B = F115B)
+    function buildFromBaseVariant() {
+      const b = ($(els.baseSel)?.value || '').trim();
+      const v = ($(els.varSel)?.value  || '').trim();
+      if (!b) return '';
+      return v ? (b + v) : b; // ex.: F115 + B -> F115B ; se não houver variante, fica só base
+    }
+
+    // COMMIT: quando há uma escolha explícita (enter/change), pede ao wire para aplicar e só então focar SN
+    function commitModel(code, source) {
+      const detail = { model: (code || '').trim(), commit: true, source: source || 'unknown' };
+      w.dispatchEvent(new CustomEvent('idmar:model-commit', { detail }));
+    }
+
+    function onLegacyEnter(e) {
+      if (e.key !== 'Enter') return;
+      const code = ($(els.legacyModel)?.value || '').trim();
+      if (code) commitModel(code, 'legacy-enter');
+    }
+
+    function onPickerChange() {
+      const code = ($(els.pickerModel)?.value || '').trim();
+      if (code) commitModel(code, 'picker-change');
+    }
+
+    function onVersionChange() {
+      const code = ($(els.verSel)?.value || '').trim();
+      if (code) commitModel(code, 'version-change');
+    }
+
+    function onBaseOrVariantChange() {
+      const code = buildFromBaseVariant();
+      if (code) commitModel(code, 'base-variant-change');
+    }
+
+    function arm() {
+      const legacy = $(els.legacyModel);
+      if (legacy && !legacy.__armed) {
+        legacy.__armed = true;
+        legacy.addEventListener('input', mirrorToPicker); // só alimenta sugestões
+        legacy.addEventListener('keydown', onLegacyEnter); // Enter confirma
       }
-      // quando o picker injetar os campos, ligamos
-      setTimeout(connectOnce, 0);
-    });
-  </script>
 
-  <!-- Campos por marca -->
-  <link rel="stylesheet" href="./css/engine-brand.css">
-  <div id="engine-brand-fields"></div>
-  <script defer src="./js/engine-brand-config.v1.js"></script>
-  <script defer src="./js/engine-brand-fields.v1.js"></script>
-
-  <!-- Family picker -->
-  <script defer src="./js/engine-family-picker.v1.js"></script>
-
-  <!-- Nº Motor: parser + ranges + painel -->
-  <script defer src="js/validators/engine-sn.v1.js?v=r7"></script>
-  <script defer src="js/engine-serial-range-check.v1.js?v=r8"></script>
-  <script defer src="js/engine-sn-panel.v2.js?v=r2"></script>
-
-  <!-- Stubs de segurança se não houver ficheiro real -->
-  <script>
-    (function(w,d){
-      if(!w.EngineSNRange){
-        w.EngineSNRange = { check: sn => ({ ok: !!(sn && sn.trim()), ranges: [], notes: '' }) };
+      const picker = $(els.pickerModel) || d.querySelector('#engine-picker input#engineModel');
+      if (picker && !picker.__armed) {
+        picker.__armed = true;
+        picker.addEventListener('change', onPickerChange); // seleção no picker confirma
       }
-      if(!w.__SN_PANEL_FALLBACK__){
-        w.__SN_PANEL_FALLBACK__ = true;
-        const input = d.getElementById('engine-sn-raw');
-        const out = d.getElementById('engine-sn-result');
-        if (input && out) {
-          input.addEventListener('input', () => {
-            const res = (w.EngineSNRange && w.EngineSNRange.check)
-              ? w.EngineSNRange.check(input.value || '')
-              : { ok: !!(input.value||'').trim(), ranges: [], notes: '' };
-            out.innerHTML = '<pre style="margin:0">'+JSON.stringify(res,null,2)+'</pre>';
-          });
-        }
+
+      const ver = $(els.verSel);
+      if (ver && !ver.__armed) {
+        ver.__armed = true;
+        ver.addEventListener('change', onVersionChange); // confirmação pelo family picker
       }
-    })(window,document);
-  </script>
+
+      const base = $(els.baseSel), vari = $(els.varSel);
+      if (base && !base.__armed) {
+        base.__armed = true; base.addEventListener('change', onBaseOrVariantChange);
+      }
+      if (vari && !vari.__armed) {
+        vari.__armed = true; vari.addEventListener('change', onBaseOrVariantChange);
+      }
+    }
+
+    // arma já e também quando o picker injetar elementos
+    d.addEventListener('DOMContentLoaded', arm);
+    const mo = new MutationObserver(arm);
+    mo.observe(d.documentElement, { childList: true, subtree: true });
+  })(window, document);
+</script>
+
 
   <!-- Coletor + Bilingue -->
   <script defer src="./js/engine-collect.v1.js"></script>

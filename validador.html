@@ -45,6 +45,11 @@
     .engine-id-ok{   background:#10b98120; border-color:#10b98180 }
     .engine-id-bad{  background:#ef444420; border-color:#ef444480 }
     .engine-id-warn{ background:#f59e0b20; border-color:#f59e0b80 }
+
+    /* Ficha do modelo (Cartão 2) */
+    .model-facts{ list-style:none; padding:0; margin:.5rem 0 0 0 }
+    .model-facts li{ margin:.25rem 0 }
+    .model-facts small{ opacity:.85 }
   </style>
 
   <!-- Gate de sessão simples -->
@@ -172,6 +177,22 @@
             <div id="engineSerialInfo"></div>
           </div>
         </div>
+
+        <!-- 🔎 Ficha do modelo selecionado (preenchida via JSON) -->
+        <div class="panel" style="margin-top:.75rem">
+          <h3 style="margin:.25rem 0 .5rem">Ficha do modelo</h3>
+          <ul class="model-facts">
+            <li><strong>Potência:</strong> <span id="out-hp">—</span> hp</li>
+            <li><strong>Cilindrada:</strong> <span id="out-cc">—</span></li>
+            <li><strong>Introdução:</strong> <span id="out-years">—</span></li>
+            <li><strong>Comando:</strong> <span id="out-rig">—</span></li>
+            <li><strong>Shaft:</strong> <span id="out-shaft">—</span></li>
+            <li><strong>Rotação:</strong> <span id="out-rot">—</span></li>
+            <li><strong>Caixa:</strong> <span id="out-case">—</span></li>
+            <li><small id="out-sn-obs">—</small></li>
+            <li><small id="out-sn-ranges">—</small></li>
+          </ul>
+        </div>
       </div>
 
       <!-- Nº do motor / Serial -->
@@ -186,6 +207,11 @@
         <div id="engine-sn-window" class="mt-2"></div>
         <small id="engine-sn-hints" class="muted"></small>
         <div id="engine-sn-result" class="mt-2"></div>
+
+        <!-- Notas do nº de série (pedido) -->
+        <label for="engine-sn-notes" style="margin-top:.5rem">Notas (motor)</label>
+        <textarea id="engine-sn-notes" rows="2" placeholder="Observações do nº de série / etiqueta"></textarea>
+
         <div id="engine-id-visor" class="engine-id-visor" aria-live="polite">
           <div class="engine-id-title">Identificador / Identifier</div>
           <div id="engine-id-line" class="engine-id-line">—</div>
@@ -416,6 +442,9 @@
 
   <!-- Ponte Modelo Split (depois de tudo) -->
   <script defer src="js/model-split-bridge.v1.js"></script>
+
+  <!-- 🔗 Wire que lê o JSON por modelo (Yamaha) e preenche a ficha + foca SN -->
+  <script defer src="js/model-meta-wire.v1.js" data-json="data/yamaha_models.v1.json"></script>
 
 </body>
 </html>

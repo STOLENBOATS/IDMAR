@@ -9,6 +9,18 @@
   <link rel="stylesheet" href="css/nav-ribbon.v5.css">
 
   <script>
+(function(){
+  // Se vieres de Sair, limpa tudo e tira o parâmetro da barra de endereços
+  const q = new URLSearchParams(location.search);
+  if (q.get('logout') === '1') {
+    try { localStorage.removeItem('IDMAR_SESSION'); } catch {}
+    try { sessionStorage.removeItem('IDMAR_SESSION'); } catch {}
+    history.replaceState({}, '', location.pathname);
+  }
+})();
+</script>
+
+  <script>
   window.IDMAR_VERSION="Vs 1.3";
   window.IDMAR_HIDE_NAV = true;   // esconde os links no header do login
   window.IDMAR_FOOTER_TEXT = "IDMAR · Identificação Marítima — Cascos & Motores";

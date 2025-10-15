@@ -92,60 +92,47 @@
     <div class="small">IDMAR · <span data-i18n="app.subtitle">Identificação Marítima — Cascos & Motores</span></div>
   </footer>
 
-  <!-- Handler de login (corrigido) -->
+  <!-- Handler de login (robusto para subpastas /IDMAR/) -->
 <script>
-  (function () {
-    const KEY = 'IDMAR_SESSION';
+(function () {
+  const KEY = 'IDMAR_SESSION';
 
-    // (opcional) se já estiver logado, salta o login
-    try {
-      if (localStorage.getItem(KEY)) {
-        // já tens sessão -> vai direto ao validador
-        location.replace('validador.html');
-        return;
-      }
-    } catch (e) {}
+  function baseUrl(file) {
+    // ex.: /IDMAR/login.html -> /IDMAR/ + file
+    return location.pathname.replace(/[^\/]+$/, '') + file;
+  }
 
-    function setSession(user, remember) {
-      const sess = { user, role: 'operator', ts: Date.now() };
-      // O GATE lê sempre do localStorage -> garantir aqui
-      try { localStorage.setItem(KEY, JSON.stringify(sess)); } catch (e) {}
-      // Se NÃO marcar "Lembrar sessão", também espelha em sessionStorage (sai ao fechar o browser)
-      if (!remember) {
-        try { sessionStorage.setItem(KEY, JSON.stringify(sess)); } catch (e) {}
-      }
+  // Se já tens sessão, salta o login (evita loop)
+  try {
+    if (localStorage.getItem(KEY)) {
+      location.replace(baseUrl('validador.html'));
+      return;
     }
+  } catch (e) {}
 
-    function valueOf(id) {
-      return (document.getElementById(id)?.value || '').trim();
+  function setSession(user, remember) {
+    const sess = { user, role: 'operator', ts: Date.now() };
+    try { localStorage.setItem(KEY, JSON.stringify(sess)); } catch (e) { console.error('localStorage set fail', e); }
+    if (!remember) { try { sessionStorage.setItem(KEY, JSON.stringify(sess)); } catch (e) {} }
+    console.log('[LOGIN] sessão ->', localStorage.getItem(KEY));
+  }
+
+  function login() {
+    const u = (document.getElementById('user')?.value || '').trim();
+    const p = document.getElementById('pass')?.value || '';
+    const remember = !!document.getElementById('remember')?.checked;
+
+    if (u.toLowerCase() === 'admin' && p === 'Admin2025') {
+      setSession(u, remember);
+      const dest = baseUrl('validador.html');
+      console.log('[LOGIN] redirect ->', dest);
+      location.href = dest;
+    } else {
+      alert('Credenciais inválidas');
     }
+  }
 
-    function login() {
-      const u = valueOf('user');
-      const p = valueOf('pass');
-      const remember = !!document.getElementById('remember')?.checked;
-
-      // Credenciais demo
-      if (u.toLowerCase() === 'admin' && p === 'Admin2025') {
-        setSession(u, remember);
-        location.href = 'validador.html';
-      } else {
-        alert('Credenciais inválidas');
-      }
-    }
-
-    document.getElementById('btnLogin')?.addEventListener('click', function (e) {
-      e.preventDefault();
-      login();
-    });
-
-    document.getElementById('pass')?.addEventListener('keydown', function (e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        login();
-      }
-    });
-  })();
+  document.getElementById('btnLogin')?.addEventListener('click', (e)=>{ e.preventDefault(); login(); });
+  document.getElementById('pass')?.addEventListener('keydown', (e)=>{ if (e.key==='Enter'){ e.preventDefault(); login(); }});
+})();
 </script>
-</body>
-</html>

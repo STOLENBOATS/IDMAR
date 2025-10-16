@@ -1,115 +1,154 @@
-// js/model-split-bridge.v2.js — v2→Base/Variante com pesquisa por dígitos e fallback v1
-(function(w,d){
+// js/model-split-bridge.v2.js  — v2.2 robusto (Yamaha, base/variante + pesquisa por potência)
+// - Carrega data/engines_catalog.v2.json
+// - Constroi índice: { BASE: { variants:Set([...]), versions:Set([...]), powers:Set([...]) } }
+// - Preenche "Modelo base" logo no load
+// - Filtra por input (F40, F115B, 40, 9.9, 350, etc.)
+// - Emite commit explícito ao escolher base+variante
+
+(function (w, d) {
+  const DEBUG = true;
   const V2_URL = 'data/engines_catalog.v2.json';
-  const V1_URL = 'data/yamaha_models.v1.json';
-  const els = { legacyModel:'srch_model', baseSel:'modelBaseList', varSel:'modelVariantList' };
-  function $(id){ return d.getElementById(id); }
+  const els = {
+    legacyModel: 'srch_model',       // input (pesquisa) — opcional
+    baseSel:     'modelBaseList',    // select base (visível)
+    varSel:      'modelVariantList', // select variante (visível)
+  };
+  const $ = (id) => d.getElementById(id);
 
-  const RX_MODEL = /^([A-Z]+[0-9]+(?:\.[0-9]+)?)([A-Z]*)$/i;
-  let index = null; // { base: { variants:Set, digits:string } }
+  let index = null;   // { BASE: { variants:Set, versions:Set, powers:Set } }
+  let allBases = [];  // sorted
 
-  function splitModel(code){
-    const m = String(code||'').toUpperCase().replace(/\s+/g,'');
-    const mm = m.match(RX_MODEL);
-    if(!mm) return { base:'', variant:'' };
-    return { base:mm[1], variant:mm[2]||'' };
+  const log = (...a) => DEBUG && console.log('[bridge v2]', ...a);
+
+  // Normaliza string de modelo
+  function norm(s) { return String(s||'').trim().toUpperCase().replace(/\s+/g, ''); }
+
+  // Divide versão em base+var (F115B -> base F115, var B)
+  function splitModel(code) {
+    const m = norm(code);
+    // remove comentaros tipo "(2024+)" e sufixos compostos como "/GE"
+    const clean = m.replace(/\(.*?\)/g, '').split('/')[0];
+    const re = /^([A-Z]+[0-9]+(?:\.[0-9])?)([A-Z]*)$/; // suporta F9.9, F2.5B, F115B
+    const mm = clean.match(re);
+    if (!mm) return { base: '', variant: '' };
+    return { base: mm[1], variant: mm[2] || '' };
   }
-  function digitsOfBase(base){
-    const m = String(base||'').match(/(\d+(?:\.[0-9]+)?)/);
-    return m ? m[1] : '';
-  }
-  function ensureEntry(map, base){
-    return map[base] || (map[base] = { variants:new Set(), digits:digitsOfBase(base) });
-  }
-  function buildFromV2(v2){
+
+  function buildIndex(v2) {
+    const yam = v2?.brands?.Yamaha?.families || {};
     const out = {};
-    const yam = v2 && v2.brands && v2.brands.Yamaha && v2.brands.Yamaha.families || {};
-    Object.values(yam).forEach(fam=>{
-      (fam.versions||[]).forEach(v=>{
-        const code = v.version || '';
-        const sp = splitModel(code);
-        if(!sp.base) return;
-        const e = ensureEntry(out, sp.base);
-        e.variants.add(sp.variant);
+    Object.values(yam).forEach(fam => {
+      (fam.versions || []).forEach(v => {
+        const ver = v.version || '';
+        const sp  = splitModel(ver);
+        if (!sp.base) return;
+        const e = out[sp.base] || (out[sp.base] = { variants:new Set(), versions:new Set(), powers:new Set() });
+        e.variants.add(sp.variant);           // '' incluído
+        e.versions.add(ver);
+        if (typeof v.power === 'number') e.powers.add(v.power);
       });
     });
-    return out;
+    index = out;
+    allBases = Object.keys(out).sort((a,b)=>a.localeCompare(b, 'en', {numeric:true}));
+    log('índice construido. bases=', allBases.length);
   }
-  function buildFromV1(v1){
-    const out = {};
-    Object.keys(v1||{}).forEach(k=>{
-      const sp = splitModel(k);
-      if(!sp.base) return;
-      const e = ensureEntry(out, sp.base);
-      e.variants.add(sp.variant);
-    });
-    return out;
-  }
-  function fillSelect(sel, values, placeholder){
-    if(!sel) return;
+
+  function fillSelect(sel, values, placeholder) {
+    if (!sel) return;
     const opts = [`<option value="">${placeholder||'—'}</option>`]
-      .concat(values.map(v=>`<option value="${v}">${v||'—'}</option>`));
+      .concat(values.map(v => `<option value="${v}">${v||'—'}</option>`));
     sel.innerHTML = opts.join('');
   }
-  function filterBasesByQuery(q){
-    if(!index) return [];
-    const Q = String(q||'').toUpperCase().replace(/\s+/g,'');
-    if(!Q) return [];
-    if(/^\d/.test(Q)){
-      return Object.keys(index).filter(b=> (index[b].digits||'').startsWith(Q));
-    }
-    return Object.keys(index).filter(b=> b.startsWith(Q));
-  }
-  function onLegacyInput(){
-    const q = ($(els.legacyModel)?.value || '');
-    const bases = filterBasesByQuery(q);
-    fillSelect($(els.baseSel), bases, '—');
-    fillSelect($(els.varSel), [], '—');
-  }
-  function onBaseChange(ev){
-    if(!ev.isTrusted) return;
-    const base = ($(els.baseSel)?.value || '').toUpperCase();
-    if(!base || !index || !index[base]){ fillSelect($(els.varSel), [], '—'); return; }
+
+  function refreshVariantsFor(base) {
+    const sel = $(els.varSel);
+    if (!sel) return;
+    if (!base || !index[base]) { fillSelect(sel, [], '—'); return; }
     const variants = Array.from(index[base].variants.values()).sort((a,b)=>a.localeCompare(b));
-    fillSelect($(els.varSel), variants, '—');
+    fillSelect(sel, variants, '—');
   }
-  function onVariantChange(ev){
-    if(!ev.isTrusted) return;
-    const base = ($(els.baseSel)?.value || '').toUpperCase();
-    const vari = ($(els.varSel)?.value || '').toUpperCase();
-    if(!base) return;
-    const code = base + (vari||'');
-    w.dispatchEvent(new CustomEvent('idmar:model-commit', { detail:{ model:code, commit:true, source:'bridge-v2' } }));
-  }
-  async function loadIndex(){
-    try{
-      const v2 = await fetch(V2_URL).then(r=>r.json());
-      index = buildFromV2(v2);
-      if(Object.keys(index).length) return;
-      throw new Error('v2 vazio');
-    }catch(e){
-      console.warn('[IDMAR] bridge v2: falhou v2, a usar fallback v1');
-      try{
-        const v1 = await fetch(V1_URL).then(r=>r.json());
-        index = buildFromV1(v1);
-      }catch(err){
-        console.error('[IDMAR] bridge v2: sem catálogos', err);
-        index = {};
-      }
+
+  // Filtro por input:
+  // - Se input tem letras/dígitos (ex: "F40", "F115"), faz prefix match em BASE
+  // - Se input é apenas número/decimal (ex: "40", "9.9", "350"), devolve bases que contenham esse número OU tenham power == número
+  function filterBasesByQuery(qRaw) {
+    const q = norm(qRaw);
+    if (!q) return allBases;
+    const onlyDigits = /^[0-9]+(?:\.[0-9])?$/.test(qRaw.trim());
+    if (onlyDigits) {
+      const num = Number(qRaw.replace(',', '.'));
+      return allBases.filter(b => {
+        if (b.includes(String(num))) return true; // F40 contém 40
+        const e = index[b];
+        if (!e) return false;
+        return e.powers.has(num);
+      });
+    } else {
+      return allBases.filter(b => b.startsWith(q));
     }
   }
-  function arm(){
+
+  // === Handlers ===
+  function onLegacyInput() {
     const legacy = $(els.legacyModel);
-    if(legacy && !legacy.__armB2){ legacy.__armB2=true; legacy.addEventListener('input', onLegacyInput); }
-    const base = $(els.baseSel);
-    if(base && !base.__armB2){ base.__armB2=true; base.addEventListener('change', onBaseChange); }
-    const vari = $(els.varSel);
-    if(vari && !vari.__armB2){ vari.__armB2=true; vari.addEventListener('change', onVariantChange); }
+    if (!legacy) return;
+    const bases = filterBasesByQuery(legacy.value || '');
+    fillSelect($(els.baseSel), bases, '—');
+    // reset variantes até escolher base
+    refreshVariantsFor('');
   }
-  loadIndex().then(()=>{
-    arm();
-    const mo = new MutationObserver(arm);
-    mo.observe(d.documentElement, { childList:true, subtree:true });
-    console.log('[IDMAR] model-split-bridge v2 OK.');
-  });
+
+  function onBaseChange(ev) {
+    if (!ev.isTrusted) return;
+    const base = norm($(els.baseSel)?.value || '');
+    refreshVariantsFor(base);
+    log('base=', base, 'variants=', index[base] ? Array.from(index[base].variants) : []);
+    // não comita já — aguarda escolha explícita de variante (ou Enter no input)
+  }
+
+  function onVariantChange(ev) {
+    if (!ev.isTrusted) return;
+    const base = norm($(els.baseSel)?.value || '');
+    const vari = norm($(els.varSel)?.value || '');
+    if (!base) return;
+    const code = base + (vari || '');
+    log('commit por base+variante:', code);
+    w.dispatchEvent(new CustomEvent('idmar:model-commit', {
+      detail: { model: code, commit: true, source: 'bridge-base-variant' }
+    }));
+  }
+
+  function arm() {
+    const legacy = $(els.legacyModel);
+    const base   = $(els.baseSel);
+    const vari   = $(els.varSel);
+
+    if (legacy && !legacy.__armed_b2) {
+      legacy.__armed_b2 = true;
+      legacy.addEventListener('input', onLegacyInput);
+      legacy.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const txt = legacy.value || '';
+          const sp  = splitModel(txt);
+          const code = sp.base ? (sp.base + (sp.variant||'')) : txt.trim();
+          log('commit Enter no legacy:', code);
+          w.dispatchEvent(new CustomEvent('idmar:model-commit', {
+            detail:{ model: code, commit:true, source:'legacy-enter' }
+          }));
+        }
+      });
+    }
+    if (base && !base.__armed_b2) { base.__armed_b2 = true; base.addEventListener('change', onBaseChange); }
+    if (vari && !vari.__armed_b2) { vari.__armed_b2 = true; vari.addEventListener('change', onVariantChange); }
+
+    // Preenche "Modelo base" logo com TUDO (qualquer coisa aparece)
+    fillSelect(base, allBases, '—');
+    refreshVariantsFor('');
+  }
+
+  // Boot
+  fetch(V2_URL)
+    .then(r => r.json())
+    .then(j => { buildIndex(j); arm(); })
+    .catch(e => console.warn('[bridge v2] falha a carregar índice', e));
 })(window, document);

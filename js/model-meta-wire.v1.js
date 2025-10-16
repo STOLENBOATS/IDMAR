@@ -1,96 +1,90 @@
-// js/model-meta-wire.v1.js — foco APENAS em commits explícitos
+// js/model-meta-wire.v1.js — preenche ficha do modelo e só foca SN em commits explícitos
 (function(w,d){
   function $(id){ return d.getElementById(id); }
   var scriptEl = d.currentScript;
   var jsonUrl  = (scriptEl && scriptEl.getAttribute('data-json')) || './data/yamaha_models.v1.json';
 
   var ID = {
-    selectModel: 'engineModel',
     outHP: 'out-hp', outCC: 'out-cc', outYears: 'out-years',
     outRig: 'out-rig', outShaft: 'out-shaft', outRot: 'out-rot', outCase: 'out-case',
     outSNObs: 'out-sn-obs', outSNRanges: 'out-sn-ranges',
-    snInput: 'engine-sn-raw'
+    snInput: 'engine-sn-raw',
+    baseSel: 'modelBaseList', varSel: 'modelVariantList'
   };
 
   var DB = null;
 
-  function render(info){
-    if(!info) return;
-    $(ID.outHP)      && ($(ID.outHP).textContent      = info.hp || '—');
-    $(ID.outCC)      && ($(ID.outCC).textContent      = info.cc ? (info.cc+' cc') : '—');
-    $(ID.outYears)   && ($(ID.outYears).textContent   = info.years || '—');
-    $(ID.outRig)     && ($(ID.outRig).textContent     = info.rigging || '—');
-    $(ID.outShaft)   && ($(ID.outShaft).textContent   = info.shaft || '—');
-    $(ID.outRot)     && ($(ID.outRot).textContent     = info.rotation || '—');
-    $(ID.outCase)    && ($(ID.outCase).textContent    = info.gearcase || '—');
-    $(ID.outSNObs)   && ($(ID.outSNObs).textContent   = info.sn_observations || '—');
-    $(ID.outSNRanges)&& ($(ID.outSNRanges).textContent= info.sn_ranges || '—');
-
-    w.EngineCollect = w.EngineCollect || {};
-    w.EngineCollect.modelMeta = { brand:'Yamaha', model: info.model || '', ...info };
+  function normKey(k){
+    return String(k||'').toUpperCase().replace(/\s+/g,'').replace(/-/g,'');
   }
 
-  function findModel(raw){
-    if(!raw) return null;
-    var m = String(raw).trim();
-    var key = m.toUpperCase().replace(/\s+/g,'');
-    return DB[m] || DB[key] || DB[key.replace(/[\-]/g,'')] ||
-           (function(){ var hit = Object.keys(DB).find(k => k.toUpperCase().replace(/\s+/g,'') === key); return hit ? DB[hit] : null; })() ||
-           (function(){ var hit = Object.keys(DB).find(k => k.toUpperCase().startsWith(key)); return hit ? DB[hit] : null; })();
+  function bestEntry(code){
+    if(!DB) return null;
+    var key = normKey(code);
+    if(DB[key]) return DB[key];
+    var cand = Object.keys(DB).find(function(k){ return k.startsWith(key); });
+    return cand ? DB[cand] : null;
   }
 
-  // commit: se true -> foca o SN; se false -> só preenche ficha
-  function applyModel(maybeCode, commit){
-    var info = findModel(maybeCode);
-    if(!info) return;
-    info = { ...info, model: maybeCode };
-    render(info);
-    if(commit){ var sn = $(ID.snInput); if (sn) sn.focus(); }
+  function put(id, text){ var el=$(id); if(el) el.textContent = (text && String(text).trim()) ? String(text) : '—'; }
+
+  function applyFacts(modelCode){
+    var e = bestEntry(modelCode);
+    if(!e){
+      put(ID.outHP,''); put(ID.outCC,''); put(ID.outYears,''); put(ID.outRig,''); put(ID.outShaft,'');
+      put(ID.outRot,''); put(ID.outCase,''); put(ID.outSNObs,''); put(ID.outSNRanges,'');
+      return;
+    }
+    put(ID.outHP, e.hp||'');
+    put(ID.outCC, e.cc ? (e.cc+' cc') : '');
+    put(ID.outYears, e.years||'');
+    put(ID.outRig, e.rigging||'');
+    put(ID.outShaft, e.shaft||'');
+    put(ID.outRot, e.rotation||'');
+    put(ID.outCase, e.gearcase||'');
+    put(ID.outSNObs, e.sn_observations||'');
+    put(ID.outSNRanges, e.sn_ranges||'');
+  }
+
+  function onCommit(ev){
+    var det = ev && ev.detail || {};
+    var model = det.model || '';
+    if(!model) return;
+    applyFacts(model);
+    if(det.commit){
+      var sn = $(ID.snInput);
+      if(sn){ try{ sn.focus(); sn.select && sn.select(); }catch(_){ } }
+    }
   }
 
   function arm(){
-    // 1) Mudanças no input do picker NÃO fazem commit (apenas preenchem). Evita salto ao 1º carácter.
-    var el = $(ID.selectModel) || d.querySelector('#engine-picker input#engineModel');
-    if(el && !el.__armed_v4){
-      el.__armed_v4 = true;
-      el.addEventListener('change', function(e){
-        applyModel(e.target.value, false); // <<< sem foco
-      });
+    if(!w.__IDMAR_MODEL_WIRED__){
+      w.addEventListener('idmar:model-commit', onCommit);
+      w.__IDMAR_MODEL_WIRED__ = true;
     }
-
-    // 2) Family picker (versão) emite commit explícito
-    var ver = d.getElementById('engineVersion');
-    if(ver && !ver.__armed_v4){
-      ver.__armed_v4 = true;
-      ver.addEventListener('change', function(e){
-        if(!e.isTrusted) return;
-        var val = ver.value || '';
-        if(val) w.dispatchEvent(new CustomEvent('idmar:model-commit', { detail:{ model: val, source:'family-version' } }));
-      });
+    var base=$(ID.baseSel), vari=$(ID.varSel);
+    function fromBV(){
+      var b=(base&&base.value||'').trim(), v=(vari&&vari.value||'').trim();
+      if(!b) return;
+      applyFacts(b + v);
     }
-
-    // 3) Base/Variante commit explícito é tratado pelo outro bridge → só escutamos o evento
-    if(!w.__IDMAR_MODEL_COMMIT_LISTENER_V4__){
-      w.__IDMAR_MODEL_COMMIT_LISTENER_V4__ = true;
-      w.addEventListener('idmar:model-commit', function(ev){
-        var code = ev.detail && ev.detail.model;
-        if(code) applyModel(code, true); // aqui sim, com foco
-      });
-    }
+    if(base && !base.__wiredFacts){ base.__wiredFacts=true; base.addEventListener('change', fromBV); }
+    if(vari && !vari.__wiredFacts){ vari.__wiredFacts=true; vari.addEventListener('change', fromBV); }
   }
 
-  fetch(jsonUrl).then(r=>r.json()).then(function(db){
+  fetch(jsonUrl).then(function(r){return r.json();}).then(function(db){
     var norm = {};
     Object.keys(db).forEach(function(k){
       var v = db[k];
       norm[k] = v;
-      norm[k.toUpperCase()] = v;
-      norm[k.replace(/[\s\-]/g,'').toUpperCase()] = v;
+      norm[normKey(k)] = v;
     });
     DB = norm;
     arm();
     var mo = new MutationObserver(arm);
     mo.observe(d.documentElement, { childList:true, subtree:true });
-    console.log('[IDMAR] model-meta-wire v1 (commit-explicito) OK:', jsonUrl);
-  }).catch(e=>console.warn('[IDMAR] model-meta-wire: falha JSON', e));
+    console.log('[IDMAR] model-meta-wire v1 pronto:', jsonUrl);
+  }).catch(function(e){
+    console.warn('[IDMAR] model-meta-wire: falha a carregar JSON', e);
+  });
 })(window, document);

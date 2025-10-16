@@ -1,24 +1,100 @@
-/*! IDMAR · validateEngineSN() — Engine Serial Number validator (v1) */
-(function(){
+// js/validators/engine-sn.v2.js
+(function (w) {
   'use strict';
-  function uc(s){ return (s||'').toString().trim().toUpperCase(); }
-  function clean(s){ return uc(s).replace(/[\s\-/.]+/g,''); }
-  function validateEngineSN(input){
-    const raw = (input||'').toString();
-    const norm = uc(raw), flat = clean(raw);
-    const out = { ok:false, brand:null, pattern:null, normalized:norm, flat, parsed:null, errors:[], warnings:[], score:0 };
-    if(!flat){ out.errors.push('Vazio'); return out; }
-    if(/^[0-3][A-Z][0-9]{6}$/.test(flat)){ out.ok=true; out.brand='Mercury/MerCruiser/Mariner'; out.pattern='digit(0-3)+letter+6digits'; out.parsed={prefix:flat.slice(0,2),serial:flat.slice(2)}; out.score=90; return out; }
-    if(/^[245][0-9]{9}$/.test(flat) || /^A.{6}$/.test(flat)){ out.ok=true; out.brand='Volvo Penta'; out.pattern='10d start 2/4/5 OR 7 chars "A"…'; out.parsed={serial:flat}; out.score=85; return out; }
-    const yam = flat.match(/^([0-9A-Z]{2,3})([LSX]?)(\d{5,7})$/);
-    if(yam){ out.ok=true; out.brand='Yamaha'; out.pattern='Prefix(2-3)[L/S/X]? + 5-7 digits'; out.parsed={prefix:yam[1],shaft:yam[2]||null,serial:yam[3]}; out.score=80; return out; }
-    if(/^[A-Z0-9]{7,11}$/.test(flat)){ out.ok=true; out.brand='Honda (genérico)'; out.pattern='7-11 alfanum'; out.parsed={serial:flat}; out.warnings.push('Honda: preferir S/N completo (com prefixo).'); out.score=70; return out; }
-    if(/^[A-Z0-9]{7,10}$/.test(flat)){ out.ok=true; out.brand='Suzuki (genérico)'; out.pattern='7-10 alfanum'; out.parsed={serial:flat}; out.score=65; return out; }
-    out.errors.push('Formato de S/N de motor não reconhecido pelos perfis suportados.');
-    out.warnings.push('Verificar etiqueta no suporte/veio e core plug.');
-    out.score=30; return out;
+
+  // Espera-se que window.EngineSNRules seja carregado (JSON do /data)
+  function normalize(sn) {
+    return (sn || '').trim().toUpperCase()
+      .replace(/\s+/g, '')
+      .replace(/[–—]/g, '-'); // normaliza traços
   }
-  window.IDMARValidators = window.IDMARValidators || {};
-  window.IDMARValidators.validateEngineSN = validateEngineSN;
-  window.IDMARValidators.validateMotor = validateEngineSN; // alias
-})();
+
+  function detectBrand(sn, rules) {
+    for (const [brand, spec] of Object.entries(rules.brands || {})) {
+      for (const d of (spec.detectors || [])) {
+        const re = new RegExp(d.regex);
+        if (re.test(sn)) return { brand, detector: d };
+      }
+    }
+    return { brand: null, detector: null };
+  }
+
+  function extractParts(brand, sn) {
+    if (brand === 'Honda') {
+      const m = sn.match(/^(BF[0-9]{2,3}[A-Z]?)-([A-Z]{4})-([0-9]{7})$/);
+      if (m) return { modelCode: m[1], plant: m[2], serial: +m[3] };
+    }
+    if (brand === 'Mercury') {
+      const m = sn.match(/^([0-9][A-Z])([0-9]{6})$/);
+      if (m) return { series: m[1], serial: +m[2] };
+    }
+    if (brand === 'Yamaha') {
+      const m = sn.match(/^([A-Z0-9]{3,5})-([A-Z]{3,4})-([0-9]{6,7})$/);
+      if (m) return { modelCode: m[1], plant: m[2], serial: +m[3] };
+      const m2 = sn.match(/^([A-Z]{3,5})-?([0-9]{5,7})$/);
+      if (m2) return { modelCode: m2[1], serial: +m2[2] };
+    }
+    return {};
+  }
+
+  function applyKnownRanges(score, reasons, knownRanges, serial) {
+    if (!Array.isArray(knownRanges) || serial == null) return score;
+    const hit = knownRanges.find(r => serial >= (r.from||0) && serial <= (r.to||0));
+    if (hit) { score += 0.3 * (hit.confidence || 0.5); reasons.push(`Dentro de intervalo fornecido.`); }
+    return score;
+  }
+
+  function scoreChecks(brand, parts, spec) {
+    let score = 0, reasons = [];
+
+    if (parts.serial != null) {
+      const len = String(parts.serial).length;
+      if (spec.serial_length?.includes(len)) { score += 0.25; reasons.push(`Comprimento OK (${len}).`); }
+      else reasons.push(`Comprimento atípico (${len}).`);
+    }
+
+    if (brand === 'Mercury' && parts.series && spec.year_series_prefix?.some(p => parts.series.startsWith(p))) {
+      score += 0.25; reasons.push(`Série Mercury reconhecida (${parts.series}).`);
+    }
+
+    if (parts.plant && spec.plant_codes?.includes(parts.plant.slice(0,2))) {
+      score += 0.2; reasons.push(`Planta plausível (${parts.plant}).`);
+    }
+
+    if (parts.__detectorMatch) score += 0.2;
+
+    score = Math.max(0, Math.min(1, score));
+    return { score, reasons };
+  }
+
+  function check(raw, knownRanges) {
+    const sn = normalize(raw);
+    if (!sn) return { ok:false, reason:'vazio', brand:null, score:0, reasons:['Campo vazio.'], parts:{ raw:'' } };
+
+    const rules = w.EngineSNRules || { brands:{} };
+    const det   = detectBrand(sn, rules);
+    const brand = det.brand || 'Yamaha'; // fallback razoável
+    const spec  = rules.brands[brand] || {};
+
+    const parts = extractParts(brand, sn);
+    parts.__detectorMatch = det.detector;
+
+    let { score, reasons } = scoreChecks(brand, parts, spec);
+
+    // aplica ranges conhecidos passados do picker/family (se existirem)
+    if (parts.serial != null) score = applyKnownRanges(score, reasons, knownRanges, parts.serial);
+
+    const verdict = {
+      ok: score >= 0.6,
+      score,
+      brand,
+      parts: { ...parts, raw: sn },
+      reasons: (parts.__detectorMatch ? [`Formato reconhecido (${parts.__detectorMatch.hint||'regex'}).`] : []).concat(reasons)
+    };
+    return verdict;
+  }
+
+  // API pública (mantém nome para compatibilidade)
+  w.EngineSNRange = w.EngineSNRange || {};
+  w.EngineSNRange.check = (raw, knownRanges) => check(raw, knownRanges);
+})(window);

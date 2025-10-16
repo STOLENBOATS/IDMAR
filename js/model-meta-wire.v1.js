@@ -1,4 +1,3 @@
-<script>
 // js/model-meta-wire.v1.js — foco só em commit humano
 (function(w,d){
   function $(id){ return d.getElementById(id); }
@@ -54,7 +53,7 @@
     if(el && !el.__armed_v3){
       el.__armed_v3 = true;
       el.addEventListener('change', function(e){
-        if (!e.isTrusted) return;            // 👈 ignora mudanças programáticas do autocomplete
+        if (!e.isTrusted) return;            // ignora mudanças programáticas do autocomplete
         applyModel(e.target.value, true);
       });
     }
@@ -78,7 +77,7 @@
     if(base && !base.__armed_v3){ base.__armed_v3=true; base.addEventListener('change', tryBaseVariantCommit); }
     if(vari && !vari.__armed_v3){ vari.__armed_v3=true; vari.addEventListener('change', tryBaseVariantCommit); }
 
-    // Enter no campo de pesquisa (vem do patch “sync 2 vias”) → commit explícito
+    // Enter no campo de pesquisa → commit explícito
     if(!w.__IDMAR_MODEL_COMMIT_LISTENER__){
       w.__IDMAR_MODEL_COMMIT_LISTENER__ = true;
       w.addEventListener('idmar:model-commit', function(ev){
@@ -103,4 +102,3 @@
     console.log('[IDMAR] model-meta-wire v1 (trusted-change only) OK:', jsonUrl);
   }).catch(e=>console.warn('[IDMAR] model-meta-wire: falha JSON', e));
 })(window, document);
-</script>

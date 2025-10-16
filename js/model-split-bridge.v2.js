@@ -1,246 +1,172 @@
-// js/model-split-bridge.v2.js — v2.6 (suporta 2 esquemas de catálogo + detecção robusta + UX)
+// js/model-split-bridge.v2.js — v2.6 (catálogo v2 + pesquisa por base/potência + auto-commit)
 (function (w, d) {
   const DEBUG = true;
-  const CATALOG_URL = 'data/engines_catalog.v2.json';
-
-  // IDs/campos no DOM
+  const V2_URL = 'data/engines_catalog.v2.json';
   const els = {
-    legacyModel: 'srch_model',      // input "Modelo (pesquisa)"
-    baseSel:     'modelBaseList',   // select Modelo base
-    varSel:      'modelVariantList' // select Variante / sufixo
+    legacyModel: 'srch_model',     // input "Modelo (pesquisa)"
+    baseSel:     'modelBaseList',  // select "Modelo base"
+    varSel:      'modelVariantList',// select "Variante / sufixo"
+    pickerInput: '#engine-picker input#engineModel' // input interno do EnginePicker
   };
 
-  const $  = (id)  => d.getElementById(id);
+  const $  = (id) => d.getElementById(id);
   const $$ = (sel) => d.querySelector(sel);
-  const log = (...a) => DEBUG && console.log('[split-bridge v2.6]', ...a);
-  const warn = (...a) => console.warn('[split-bridge v2.6]', ...a);
+  const log = (...a) => { if (DEBUG) console.log('[split-bridge v2.6]', ...a); };
 
-  // index = { BASE: { variants:Set, versions:Set, powers:Set } }
-  let index = {};
-  let allBases = [];
+  // Estado
+  let index = null;        // { BASE: { variants:Set, powers:Set } }
+  let allBases = [];       // lista ordenada de bases (F40, F115, …)
 
-  // ===== util =====
-  const norm = (s) => String(s || '').trim().toUpperCase().replace(/\s+/g, '');
+  const norm = (s) => String(s||'').trim().toUpperCase().replace(/\s+/g,'');
 
-  function splitModel(code) {
-    // aceita F9.9, F115B, F150, XF450, XTO450, etc.
-    const m = norm(code).replace(/\(.*?\)/g, '').split('/')[0];
-    // letras + números (opcional .número) seguidos de letras (variante)
+  // F40, F115B, F9.9, F200G/GE → { base:'F40'|'F115'|'F9.9'|'F200', variant:''|'B'|'G/GE' }
+  function splitModel(code){
+    const m = norm(code).replace(/\(.*?\)/g,'').split('/')[0]; // remove parenteses e split “F200G/GE”
     const re = /^([A-Z]+[0-9]+(?:\.[0-9])?)([A-Z]*)$/;
     const mm = m.match(re);
-    return mm ? { base: mm[1], variant: mm[2] || '' } : { base: '', variant: '' };
+    return mm ? { base:mm[1], variant:mm[2]||'' } : { base:'', variant:'' };
   }
 
-  function addToIndex(base, variant, power) {
-    if (!base) return;
-    const e = index[base] || (index[base] = { variants: new Set(), versions: new Set(), powers: new Set() });
-    if (variant != null) e.variants.add(String(variant));
-    if (typeof power === 'number' && !Number.isNaN(power)) e.powers.add(power);
-  }
-
-  // ===== builders por esquema =====
-  function buildFromSchemaV2_readable(j) {
-    // {"schema":"engines_catalog.v2",brands.Yamaha.families.{..}.versions[ {version,power} ]}
-    const fams = j?.brands?.Yamaha?.families || {};
-    let count = 0;
+  function buildIndex(v2){
+    const fams = v2?.brands?.Yamaha?.families || {};
+    const out = {};
     Object.values(fams).forEach(fam => {
       (fam.versions || []).forEach(v => {
         const ver = v.version || '';
-        const sp = splitModel(ver);
+        const sp  = splitModel(ver);
         if (!sp.base) return;
-        addToIndex(sp.base, sp.variant, v.power);
-        index[sp.base].versions.add(ver);
-        count++;
+        const e = out[sp.base] || (out[sp.base] = { variants:new Set(), powers:new Set() });
+        if (sp.variant) e.variants.add(sp.variant);
+        if (typeof v.power === 'number') e.powers.add(v.power);
       });
     });
-    log('build: schema=engines_catalog.v2 | versions lidas =', count);
+    index = out;
+    allBases = Object.keys(out).sort((a,b)=>a.localeCompare(b,'en',{numeric:true}));
+    log('build: schema=engines_catalog.v2 | bases', allBases.length);
   }
 
-  function buildFromSchemaVersion2_compact(j) {
-    // {"schema_version":2, brands.Yamaha.families.{..}.variants[] || hp[]}
-    const fams = j?.brands?.Yamaha?.families || {};
-    let made = 0, hpSynth = 0;
-    Object.values(fams).forEach(fam => {
-      if (Array.isArray(fam.variants) && fam.variants.length) {
-        fam.variants.forEach(v => {
-          const code = v.code || '';
-          const sp = splitModel(code);
-          if (!sp.base) return;
-          addToIndex(sp.base, sp.variant, v.hp);
-          if (code) index[sp.base].versions.add(code);
-          made++;
-        });
-      } else if (Array.isArray(fam.hp) && fam.hp.length) {
-        // sem variants: sintetizamos bases tipo F{hp}
-        fam.hp.forEach(hpVal => {
-          const power = Number(hpVal);
-          if (Number.isFinite(power)) {
-            const base = 'F' + String(power).replace('.','.');
-            addToIndex(base, '', power);
-            index[base].versions.add(base);
-            hpSynth++;
-          }
-        });
-      }
-    });
-    log('build: schema_version=2 | variants=', made, '| bases sintetizadas por hp=', hpSynth);
-  }
-
-  function buildIndexFromCatalog(j) {
-    index = {};
-    // detetar esquema
-    if (j && j.schema === 'engines_catalog.v2') {
-      buildFromSchemaV2_readable(j);
-    } else if (j && j.schema_version === 2) {
-      buildFromSchemaVersion2_compact(j);
-    } else {
-      // fallback heurístico: tenta o “readable”; se nada, tenta “compact”
-      buildFromSchemaV2_readable(j);
-      if (!Object.keys(index).length) buildFromSchemaVersion2_compact(j);
-    }
-    allBases = Object.keys(index).sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
-    if (!allBases.length) warn('ATENÇÃO: índice vazio. Verifica o ficheiro', CATALOG_URL, 'e o esquema/paths.');
-  }
-
-  function fillSelect(sel, values, placeholder) {
+  function fillSelect(sel, values, placeholder){
     if (!sel) return;
-    const opts = [`<option value="">${placeholder || '—'}</option>`]
-      .concat((values || []).map(v => `<option value="${v}">${v || '—'}</option>`));
+    const opts = [`<option value="">${placeholder||'—'}</option>`]
+      .concat((values||[]).map(v=>`<option value="${v}">${v||'—'}</option>`));
     sel.innerHTML = opts.join('');
   }
 
-  function refreshVariantsFor(base) {
+  function refreshVariantsFor(base){
     const sel = $(els.varSel);
     if (!sel) return;
     if (!base || !index[base]) { fillSelect(sel, [], '—'); return; }
-    const list = Array.from(index[base].variants).sort((a,b)=>a.localeCompare(b));
+    const list = Array.from(index[base].variants.values()).sort((a,b)=>a.localeCompare(b));
     fillSelect(sel, list, '—');
   }
 
-  // ===== filtragem =====
-  function filterBases(qRaw) {
-    if (!qRaw) return []; // não lista tudo; só aparece após digitar
+  // Pesquisa: texto “F40” → prefixo; número “40” / “9.9” cruza com base e com powers
+  function filterBases(qRaw){
+    if (!qRaw) return [];
     const q = norm(qRaw);
-
-    // só números (aceita vírgula p/ 9,9)
-    if (/^[0-9]+(?:[.,][0-9])?$/.test(qRaw.trim())) {
-      const num = Number(qRaw.replace(',', '.'));
+    const onlyNum = /^[0-9]+(?:[.,][0-9])?$/.test((qRaw||'').trim());
+    if (onlyNum){
+      const num = Number(String(qRaw).replace(',', '.'));
       return allBases.filter(b => {
-        if (b.includes(String(num))) return true;      // contém dígitos na base (ex.: F40)
-        const e = index[b];
-        return e ? e.powers.has(num) : false;          // bate na potência
+        if (b.includes(String(num))) return true;
+        const e = index[b]; return e ? e.powers.has(num) : false;
       });
     }
-
-    // alfanumérico: CONTAINS (mais tolerante)
-    return allBases.filter(b => b.includes(q));
+    return allBases.filter(b => b.startsWith(q));
   }
 
-  // ===== ligação ao EnginePicker (só para sugestões; não comita, não foca) =====
-  function getPickerInput() {
-    // tenta vários seletores para ser resiliente
-    return (
-      $('#engineModel') ||
-      $$('#engine-picker input#engineModel') ||
-      $$('#engine-picker input[type="text"]') ||
-      $$('#engine-picker input')
-    );
-  }
-
-  function mirrorIntoPicker(text) {
-    const input = getPickerInput();
+  function mirrorIntoPicker(code){
+    const input = $$(els.pickerInput);
     if (!input) return;
-    input.value = text || '';
-    input.dispatchEvent(new Event('input', { bubbles: true }));
+    input.value = code || '';
+    input.dispatchEvent(new Event('input', { bubbles:true }));
   }
 
-  // ===== commit -> deixa o model-meta-wire tratar da ficha e de focar o SN =====
-  function finalizeCommit(code, source) {
-    if (!code) return;
-    mirrorIntoPicker(code); // para manter o picker sincronizado visualmente
-    log('commit:', code, 'via', source);
+  function finalizeCommit(code, source){
+    const model = (code||'').trim();
+    if (!model) return;
+    mirrorIntoPicker(model);
+    log('commit:', model, 'via', source);
     w.dispatchEvent(new CustomEvent('idmar:model-commit', {
-      detail: { model: code, commit: true, source }
+      detail: { model, commit:true, source }
     }));
   }
 
-  // ===== handlers =====
-  function onLegacyInput() {
+  // ===== Handlers =====
+  function onLegacyInput(){
     const q = ($(els.legacyModel)?.value || '');
-    const bases = filterBases(q);
-    fillSelect($(els.baseSel), bases, '—');
+    const baseSel = $(els.baseSel);
+    const matches = filterBases(q);
+
+    // Preenche lista de bases consoante a pesquisa
+    fillSelect(baseSel, matches, '—');
     refreshVariantsFor('');
     mirrorIntoPicker(q);
+
+    // UX: se o agente já escreveu algo e só há 1 base possível → commit imediato
+    if (q.trim() && matches.length === 1){
+      finalizeCommit(matches[0], 'legacy-single-base');
+    }
   }
 
-  function onLegacyEnter(e) {
+  function onLegacyEnter(e){
     if (e.key !== 'Enter') return;
     const raw = ($(els.legacyModel)?.value || '').trim();
     if (!raw) return;
     const sp = splitModel(raw);
-    const code = sp.base ? (sp.base + (sp.variant || '')) : raw;
+    const code = sp.base ? (sp.base + (sp.variant||'')) : raw;
     finalizeCommit(code, 'legacy-enter');
   }
 
-  function onBaseChange(ev) {
+  function onBaseChange(ev){
     if (!ev.isTrusted) return;
     const base = norm($(els.baseSel)?.value || '');
     refreshVariantsFor(base);
     mirrorIntoPicker(base);
+
+    // se não houver variantes, ou só houver 1 → commit
+    const variants = index[base] ? Array.from(index[base].variants) : [];
+    if (!variants.length || variants.length === 1){
+      const code = base + (variants[0] ? String(variants[0]).toUpperCase() : '');
+      finalizeCommit(code, 'bridge-auto-variant');
+    }
   }
 
-  function onVariantChange(ev) {
+  function onVariantChange(ev){
     if (!ev.isTrusted) return;
     const base = norm($(els.baseSel)?.value || '');
     const vari = norm($(els.varSel)?.value || '');
     if (!base) return;
-    finalizeCommit(base + (vari || ''), 'bridge-base-variant');
+    finalizeCommit(base + (vari||''), 'bridge-base-variant');
   }
 
-  // ===== armar =====
-  function arm() {
+  function arm(){
     const legacy = $(els.legacyModel);
     const base   = $(els.baseSel);
     const vari   = $(els.varSel);
 
-    if (!legacy) warn('Elemento não encontrado:', els.legacyModel);
-    if (!base)   warn('Elemento não encontrado:', els.baseSel);
-    if (!vari)   warn('Elemento não encontrado:', els.varSel);
-
-    if (legacy && !legacy.__armed_sb) {
-      legacy.__armed_sb = true;
+    if (legacy && !legacy.__armed_v26){
+      legacy.__armed_v26 = true;
       legacy.addEventListener('input', onLegacyInput);
-      legacy.addEventListener('keydown', onLegacyEnter); // ENTER = commit
+      legacy.addEventListener('keydown', onLegacyEnter);
     }
-    if (base && !base.__armed_sb) {
-      base.__armed_sb = true;
+    if (base && !base.__armed_v26){
+      base.__armed_v26 = true;
       base.addEventListener('change', onBaseChange);
     }
-    if (vari && !vari.__armed_sb) {
-      vari.__armed_sb = true;
+    if (vari && !vari.__armed_v26){
+      vari.__armed_v26 = true;
       vari.addEventListener('change', onVariantChange);
     }
 
-    // inicia vazios
-    if (base) fillSelect(base, [], '—');
+    // Arranque: não despejar tudo; lista aparece quando há input
+    fillSelect(base, [], '—');
     refreshVariantsFor('');
   }
 
-  // ===== boot =====
-  fetch(CATALOG_URL)
-    .then(r => {
-      if (!r.ok) throw new Error(`HTTP ${r.status} ao ler ${CATALOG_URL}`);
-      return r.json();
-    })
-    .then(j => {
-      buildIndexFromCatalog(j);
-      arm();
-      log('OK: catálogo carregado, bases=', allBases.length);
-    })
-    .catch(e => {
-      warn('Falha a carregar catálogo:', e);
-      // ainda assim arma handlers para não quebrar a página
-      arm();
-    });
+  fetch(V2_URL)
+    .then(r => r.json())
+    .then(j => { buildIndex(j); arm(); log('OK: catálogo carregado, bases=', allBases.length); })
+    .catch(e => console.warn('[split-bridge v2.6] falha a carregar', e));
 
 })(window, document);

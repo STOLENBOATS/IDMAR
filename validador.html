@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>IDMAR  Validador</title>
+  <title>IDMAR · Validador</title>
   <link rel="icon" href="img/logo-pm.png" />
   <link rel="apple-touch-icon" href="img/logo-pm.png" />
 
@@ -52,7 +52,7 @@
     .model-facts small{ opacity:.85 }
   </style>
 
-  <!-- Gate de sessão simples -->
+  <!-- Gate de sessão simples (mantém o teu) -->
   <script>
     (function(){
       try{
@@ -138,7 +138,7 @@
           <div style="margin-top:.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.5rem">
             <div>
               <label>Modelo (pesquisa)</label>
-              <input id="srch_model" type="text" placeholder="Ex.: BF40A / DF140A" data-engine-field="model_code"/>
+              <input id="srch_model" type="text" placeholder="Ex.: F40 / F115B / 350" data-engine-field="model_code"/>
             </div>
             <div>
               <label>Potência (hp)</label>
@@ -208,7 +208,7 @@
         <small id="engine-sn-hints" class="muted"></small>
         <div id="engine-sn-result" class="mt-2"></div>
 
-        <!-- Notas do nº de série (pedido) -->
+        <!-- Notas do nº de série -->
         <label for="engine-sn-notes" style="margin-top:.5rem">Notas (motor)</label>
         <textarea id="engine-sn-notes" rows="2" placeholder="Observações do nº de série / etiqueta"></textarea>
 
@@ -221,7 +221,7 @@
     </section>
   </main>
 
-  <footer class="footer" id="fallback-footer">IDMAR  Identificação Marítima</footer>
+  <footer class="footer" id="fallback-footer">IDMAR · Identificação Marítima</footer>
 
   <!-- Scripts específicos WIN/Motor -->
   <script src="js/validador-win.r3b.js?v=r3b"></script>
@@ -272,7 +272,7 @@
         EnginePicker.init({ dataUrl: url });
         console.log('[IDMAR] EnginePicker usando', url);
 
-        // Se houver marca legacy já selecionada, reflete no picker
+        // Reflete marca legacy no picker (se existir)
         const legacyBrand = document.getElementById('brand');
         const pickerBrand = document.getElementById('engineBrand');
         if (legacyBrand && pickerBrand && legacyBrand.value) {
@@ -282,102 +282,6 @@
       });
     });
   </script>
-
-<script>
-  
-  // ===== Ligação pesquisa ↔ picker (sem saltar foco) =====
-  (function (w, d) {
-    function $(id) { return d.getElementById(id); }
-    const els = {
-      legacyModel: 'srch_model',      // input de pesquisa (Cartão 2)
-      pickerModel: 'engineModel',     // input do EnginePicker
-      baseSel:     'modelBaseList',   // select base
-      varSel:      'modelVariantList',// select variante
-      verSel:      'engineVersion',   // select de versões do family picker
-      snInput:     'engine-sn-raw'    // campo nº série (Cartão 3)
-    };
-
-    // espelha texto da pesquisa para o input do picker (para filtrar/sugerir), sem confirmar
-    function mirrorToPicker() {
-      const src = $(els.legacyModel);
-      const dst = $(els.pickerModel) || d.querySelector('#engine-picker input#engineModel');
-      if (!src || !dst) return;
-      dst.value = src.value || '';
-      // dispara input para o autocomplete do picker reagir
-      dst.dispatchEvent(new Event('input', { bubbles: true }));
-    }
-
-    // tenta construir o código de modelo a partir de Base + Variante (ex.: F115 + B = F115B)
-    function buildFromBaseVariant() {
-      const b = ($(els.baseSel)?.value || '').trim();
-      const v = ($(els.varSel)?.value  || '').trim();
-      if (!b) return '';
-      return v ? (b + v) : b; // ex.: F115 + B -> F115B ; se não houver variante, fica só base
-    }
-
-    // COMMIT: quando há uma escolha explícita (enter/change), pede ao wire para aplicar e só então focar SN
-    function commitModel(code, source) {
-      const detail = { model: (code || '').trim(), commit: true, source: source || 'unknown' };
-      w.dispatchEvent(new CustomEvent('idmar:model-commit', { detail }));
-    }
-
-    function onLegacyEnter(e) {
-      if (e.key !== 'Enter') return;
-      const code = ($(els.legacyModel)?.value || '').trim();
-      if (code) commitModel(code, 'legacy-enter');
-    }
-
-    function onPickerChange() {
-      const code = ($(els.pickerModel)?.value || '').trim();
-      if (code) commitModel(code, 'picker-change');
-    }
-
-    function onVersionChange() {
-      const code = ($(els.verSel)?.value || '').trim();
-      if (code) commitModel(code, 'version-change');
-    }
-
-    function onBaseOrVariantChange() {
-      const code = buildFromBaseVariant();
-      if (code) commitModel(code, 'base-variant-change');
-    }
-
-    function arm() {
-      const legacy = $(els.legacyModel);
-      if (legacy && !legacy.__armed) {
-        legacy.__armed = true;
-        legacy.addEventListener('input', mirrorToPicker); // só alimenta sugestões
-        legacy.addEventListener('keydown', onLegacyEnter); // Enter confirma
-      }
-
-      const picker = $(els.pickerModel) || d.querySelector('#engine-picker input#engineModel');
-      if (picker && !picker.__armed) {
-        picker.__armed = true;
-        picker.addEventListener('change', onPickerChange); // seleção no picker confirma
-      }
-
-      const ver = $(els.verSel);
-      if (ver && !ver.__armed) {
-        ver.__armed = true;
-        ver.addEventListener('change', onVersionChange); // confirmação pelo family picker
-      }
-
-      const base = $(els.baseSel), vari = $(els.varSel);
-      if (base && !base.__armed) {
-        base.__armed = true; base.addEventListener('change', onBaseOrVariantChange);
-      }
-      if (vari && !vari.__armed) {
-        vari.__armed = true; vari.addEventListener('change', onBaseOrVariantChange);
-      }
-    }
-
-    // arma já e também quando o picker injetar elementos
-    d.addEventListener('DOMContentLoaded', arm);
-    const mo = new MutationObserver(arm);
-    mo.observe(d.documentElement, { childList: true, subtree: true });
-  })(window, document);
-</script>
-
 
   <!-- Coletor + Bilingue -->
   <script defer src="./js/engine-collect.v1.js"></script>
@@ -469,101 +373,11 @@
   })(window, document);
   </script>
 
- <!-- 1) Wire que preenche a ficha e só foca o SN em commit humano -->
-<script defer src="js/model-meta-wire.v1.js" data-json="data/yamaha_models.v1.json"></script>
+  <!-- 1) Preenche a ficha; só foca SN quando há commit explícito -->
+  <script defer src="js/model-meta-wire.v1.js" data-json="data/yamaha_models.v1.json"></script>
 
-<!-- 2) Bridge v2 → preenche Modelo base/Variante a partir do v2 -->
-<script defer src="js/model-split-bridge.v2.js"></script>
-
-  <script>
-// js/model-split-bridge.v2.js — popula Base/Variante a partir do v2
-(function(w,d){
-  const V2_URL = 'data/engines_catalog.v2.json';
-  const els = {
-    legacyModel: 'srch_model',
-    baseSel:     'modelBaseList',
-    varSel:      'modelVariantList'
-  };
-  function $(id){ return d.getElementById(id); }
-  let index = null; // { base: { variants:Set, display:Set of versions } }
-
-  function splitModel(code){
-    const m = String(code||'').toUpperCase().replace(/\s+/g,'');
-    const r = /^([A-Z]+[0-9]+)([A-Z]*)$/;   // F115B -> base=F115, var=B ; F40 -> base=F40,var=''
-    const mm = m.match(r);
-    if(!mm) return { base:'', variant:'' };
-    return { base:mm[1], variant:mm[2]||'' };
-  }
-
-  function buildIndex(v2){
-    const out = {};
-    const yam = v2?.brands?.Yamaha?.families || {};
-    Object.values(yam).forEach(fam=>{
-      (fam.versions||[]).forEach(v=>{
-        const sp = splitModel(v.version||'');
-        if(!sp.base) return;
-        const entry = out[sp.base] || (out[sp.base] = { variants:new Set(), versions:new Set() });
-        entry.variants.add(sp.variant);   // pode ser ''
-        entry.versions.add(v.version);
-      });
-    });
-    index = out;
-  }
-
-  function fillSelect(sel, values, placeholder){
-    if(!sel) return;
-    const opts = [`<option value="">${placeholder||'—'}</option>`]
-      .concat(values.map(v=>`<option value="${v}">${v||'—'}</option>`));
-    sel.innerHTML = opts.join('');
-  }
-
-  function onLegacyInput(){
-    const q = ($(els.legacyModel)?.value || '').toUpperCase().replace(/\s+/g,'');
-    if(!q || !index) return fillSelect($(els.baseSel), [], '—');
-    const bases = Object.keys(index).filter(b => b.startsWith(q));
-    fillSelect($(els.baseSel), bases, '—');
-    // reset variantes até o utilizador escolher base
-    fillSelect($(els.varSel), [], '—');
-  }
-
-  function onBaseChange(ev){
-    if(!ev.isTrusted) return;
-    const base = ($(els.baseSel)?.value || '').toUpperCase();
-    if(!base || !index || !index[base]){ fillSelect($(els.varSel), [], '—'); return; }
-    const variants = Array.from(index[base].variants.values()).sort((a,b)=>a.localeCompare(b));
-    fillSelect($(els.varSel), variants, '—');
-    // se só houver UMA variante (incluindo vazio), não comprometemos ainda;
-    // aguardamos mudança de variante OU Enter/seleção explícita
-  }
-
-  function onVariantChange(ev){
-    if(!ev.isTrusted) return;
-    const base = ($(els.baseSel)?.value || '').toUpperCase();
-    const vari = ($(els.varSel)?.value || '').toUpperCase();
-    if(!base) return;
-    // Commit explícito: emite evento para o wire preencher ficha e focar SN
-    const code = base + (vari||'');
-    w.dispatchEvent(new CustomEvent('idmar:model-commit', { detail:{ model:code, commit:true, source:'bridge-base-variant' }}));
-  }
-
-  function arm(){
-    const legacy = $(els.legacyModel);
-    if(legacy && !legacy.__armed_b1){ legacy.__armed_b1=true; legacy.addEventListener('input', onLegacyInput); }
-    const base = $(els.baseSel);
-    if(base && !base.__armed_b1){ base.__armed_b1=true; base.addEventListener('change', onBaseChange); }
-    const vari = $(els.varSel);
-    if(vari && !vari.__armed_b1){ vari.__armed_b1=true; vari.addEventListener('change', onVariantChange); }
-  }
-
-  fetch(V2_URL).then(r=>r.json()).then(v2=>{
-    buildIndex(v2);
-    arm();
-    console.log('[IDMAR] model-split-bridge v2 OK (v2 → Base/Variante).');
-  }).catch(e=>console.warn('[IDMAR] model-split-bridge v2: falha', e));
-})(window, document);
-</script>
-
+  <!-- 2) Bridge v2 → Base/Variante (procura por dígitos: 40, 350, 9.9, etc.) -->
+  <script defer src="js/model-split-bridge.v2.js"></script>
 
 </body>
 </html>
-

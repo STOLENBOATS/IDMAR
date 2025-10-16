@@ -1,0 +1,37 @@
+{
+  "schema": "engine_sn_rules.v1",
+  "brands": {
+    "Yamaha": {
+      "detectors": [
+        { "regex": "^([A-Z0-9]{3,5})-([A-Z]{3,4})-([0-9]{6,7})$", "hint": "Etiqueta com modelo+planta+série" },
+        { "regex": "^[A-Z]{3,5}-?[0-9]{5,7}$", "hint": "Etiqueta curta (vários mercados)" }
+      ],
+      "serial_length": [6,7],
+      "year_codes": { "A":"2010","B":"2011","C":"2012","D":"2013","E":"2014","F":"2015","G":"2016","H":"2017","J":"2018","K":"2019","L":"2020","M":"2021","N":"2022","P":"2023","R":"2024","S":"2025" },
+      "plant_codes": ["BA","BB","BC","BD","BE","BF","BG"],
+      "notes": "6–7 dígitos de série; letras no meio podem codificar planta/ano.",
+      "ranges": [
+        { "version": "F40",  "from": 100000, "to": 399999, "confidence": 0.5 },
+        { "version": "F115B","from": 600000, "to": 899999, "confidence": 0.5 }
+      ]
+    },
+
+    "Honda": {
+      "detectors": [
+        { "regex": "^BF[0-9]{2,3}[A-Z]?-[A-Z]{4}-[0-9]{7}$", "hint": "BF40A-BAAL-1234567" }
+      ],
+      "serial_length": [7],
+      "plant_codes": ["BA","BB","BC","BD","BE","BF","BG"],
+      "notes": "Prefixo BF… + planta (4 letras) + 7 dígitos."
+    },
+
+    "Mercury": {
+      "detectors": [
+        { "regex": "^[0-9][A-Z][0-9]{6}$", "hint": "Ex.: 1B123456 (série Mercury)" }
+      ],
+      "serial_length": [8],
+      "year_series_prefix": ["0A","1A","1B","2B","2C","2D","2E"],
+      "notes": "Prefixo dígito+letra define série/época."
+    }
+  }
+}

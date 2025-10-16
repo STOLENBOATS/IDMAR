@@ -469,11 +469,11 @@
   })(window, document);
   </script>
 
-  <!-- Ponte Modelo Split (depois de tudo) -->
-  <script defer src="js/model-split-bridge.v1.js"></script>
+ <!-- 1) Wire que preenche a ficha e só foca o SN em commit humano -->
+<script defer src="js/model-meta-wire.v1.js" data-json="data/yamaha_models.v1.json"></script>
 
-  <!-- 🔗 Wire que lê o JSON por modelo (Yamaha) e preenche a ficha + foca SN -->
-  <script defer src="js/model-meta-wire.v1.js" data-json="data/yamaha_models.v1.json"></script>
+<!-- 2) Bridge v2 → preenche Modelo base/Variante a partir do v2 -->
+<script defer src="js/model-split-bridge.v2.js"></script>
 
   <script>
 // js/model-split-bridge.v2.js — popula Base/Variante a partir do v2

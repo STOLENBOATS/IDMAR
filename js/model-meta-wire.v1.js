@@ -1,9 +1,7 @@
-<!-- se preferires substituir o ficheiro, usa este conteúdo: -->
 <script>
-// js/model-meta-wire.v1.js — foco só em commit
+// js/model-meta-wire.v1.js — foco só em commit humano
 (function(w,d){
   function $(id){ return d.getElementById(id); }
-
   var scriptEl = d.currentScript;
   var jsonUrl  = (scriptEl && scriptEl.getAttribute('data-json')) || './data/yamaha_models.v1.json';
 
@@ -29,65 +27,58 @@
     $(ID.outSNObs)   && ($(ID.outSNObs).textContent   = info.sn_observations || '—');
     $(ID.outSNRanges)&& ($(ID.outSNRanges).textContent= info.sn_ranges || '—');
 
-    // export para EngineCollect (se existir)
     w.EngineCollect = w.EngineCollect || {};
     w.EngineCollect.modelMeta = { brand:'Yamaha', model: info.model || '', ...info };
   }
 
-  // lookup tolerante
   function findModel(raw){
     if(!raw) return null;
     var m = String(raw).trim();
     var key = m.toUpperCase().replace(/\s+/g,'');
     return DB[m] || DB[key] || DB[key.replace(/[\-]/g,'')] ||
-           (function(){ // begins-with
-              var hit = Object.keys(DB).find(k => k.toUpperCase().startsWith(key));
-              return hit ? DB[hit] : null;
-            })();
+           (function(){ var hit = Object.keys(DB).find(k => k.toUpperCase().replace(/\s+/g,'') === key); return hit ? DB[hit] : null; })() ||
+           (function(){ var hit = Object.keys(DB).find(k => k.toUpperCase().startsWith(key)); return hit ? DB[hit] : null; })();
   }
 
-  // aplica info; se commit=true, foca o SN
   function applyModel(maybeCode, commit){
     var info = findModel(maybeCode);
     if(!info) return;
     info = { ...info, model: maybeCode };
     render(info);
-    if(commit){
-      var sn = $(ID.snInput);
-      if (sn) sn.focus();
-    }
+    if(commit){ var sn = $(ID.snInput); if (sn) sn.focus(); }
   }
 
-  function arm(DBready){
-    // 1) Commit implícito por change no #engineModel (picker)
+  function arm(){
+    // change no input do picker: só conta se vier do utilizador (isTrusted)
     var el = $(ID.selectModel) || d.querySelector('#engine-picker input#engineModel');
-    if(el && !el.__armed_v2){
-      el.__armed_v2 = true;
-      el.addEventListener('change', function(e){ applyModel(e.target.value, true); });
-      // NÃO reagimos a 'input' aqui (evita saltos de foco durante digitação)
+    if(el && !el.__armed_v3){
+      el.__armed_v3 = true;
+      el.addEventListener('change', function(e){
+        if (!e.isTrusted) return;            // 👈 ignora mudanças programáticas do autocomplete
+        applyModel(e.target.value, true);
+      });
     }
 
-    // 2) Commit via selects (family picker, base/variante)
+    // family picker (versão) confirma
     var ver = d.getElementById('engineVersion');
-    if(ver && !ver.__armed_v2){
-      ver.__armed_v2 = true;
-      ver.addEventListener('change', function(e){ applyModel(e.target.value, true); });
+    if(ver && !ver.__armed_v3){
+      ver.__armed_v3 = true;
+      ver.addEventListener('change', function(e){ if(e.isTrusted) applyModel(e.target.value, true); });
     }
+
+    // base/variante confirmam
     var base = d.getElementById('modelBaseList');
     var vari = d.getElementById('modelVariantList');
-    function tryBaseVariantCommit(){
+    function tryBaseVariantCommit(ev){
+      if (ev && !ev.isTrusted) return;
       var b = (base?.value||'').trim(), v=(vari?.value||'').trim();
       var code = b ? (v ? (b+v) : b) : '';
       if(code) applyModel(code, true);
     }
-    if(base && !base.__armed_v2){
-      base.__armed_v2 = true; base.addEventListener('change', tryBaseVariantCommit);
-    }
-    if(vari && !vari.__armed_v2){
-      vari.__armed_v2 = true; vari.addEventListener('change', tryBaseVariantCommit);
-    }
+    if(base && !base.__armed_v3){ base.__armed_v3=true; base.addEventListener('change', tryBaseVariantCommit); }
+    if(vari && !vari.__armed_v3){ vari.__armed_v3=true; vari.addEventListener('change', tryBaseVariantCommit); }
 
-    // 3) Commit explícito vindo do “bridge” (Enter no #srch_model, etc.)
+    // Enter no campo de pesquisa (vem do patch “sync 2 vias”) → commit explícito
     if(!w.__IDMAR_MODEL_COMMIT_LISTENER__){
       w.__IDMAR_MODEL_COMMIT_LISTENER__ = true;
       w.addEventListener('idmar:model-commit', function(ev){
@@ -98,7 +89,6 @@
   }
 
   fetch(jsonUrl).then(r=>r.json()).then(function(db){
-    // index normalizado
     var norm = {};
     Object.keys(db).forEach(function(k){
       var v = db[k];
@@ -107,13 +97,10 @@
       norm[k.replace(/[\s\-]/g,'').toUpperCase()] = v;
     });
     DB = norm;
-    arm(true);
-    // observa para quando o picker injeta elementos
-    var mo = new MutationObserver(()=>arm(false));
+    arm();
+    var mo = new MutationObserver(arm);
     mo.observe(d.documentElement, { childList:true, subtree:true });
-    console.log('[IDMAR] model-meta-wire v1 (commit-only focus) OK:', jsonUrl);
-  }).catch(function(e){
-    console.warn('[IDMAR] model-meta-wire: falha a carregar JSON', e);
-  });
+    console.log('[IDMAR] model-meta-wire v1 (trusted-change only) OK:', jsonUrl);
+  }).catch(e=>console.warn('[IDMAR] model-meta-wire: falha JSON', e));
 })(window, document);
 </script>

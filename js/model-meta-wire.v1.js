@@ -1,4 +1,4 @@
-// js/model-meta-wire.v1.js — foco só em commit humano
+// js/model-meta-wire.v1.js — foco APENAS em commits explícitos
 (function(w,d){
   function $(id){ return d.getElementById(id); }
   var scriptEl = d.currentScript;
@@ -39,6 +39,7 @@
            (function(){ var hit = Object.keys(DB).find(k => k.toUpperCase().startsWith(key)); return hit ? DB[hit] : null; })();
   }
 
+  // commit: se true -> foca o SN; se false -> só preenche ficha
   function applyModel(maybeCode, commit){
     var info = findModel(maybeCode);
     if(!info) return;
@@ -48,41 +49,32 @@
   }
 
   function arm(){
-    // change no input do picker: só conta se vier do utilizador (isTrusted)
+    // 1) Mudanças no input do picker NÃO fazem commit (apenas preenchem). Evita salto ao 1º carácter.
     var el = $(ID.selectModel) || d.querySelector('#engine-picker input#engineModel');
-    if(el && !el.__armed_v3){
-      el.__armed_v3 = true;
+    if(el && !el.__armed_v4){
+      el.__armed_v4 = true;
       el.addEventListener('change', function(e){
-        if (!e.isTrusted) return;            // ignora mudanças programáticas do autocomplete
-        applyModel(e.target.value, true);
+        applyModel(e.target.value, false); // <<< sem foco
       });
     }
 
-    // family picker (versão) confirma
+    // 2) Family picker (versão) emite commit explícito
     var ver = d.getElementById('engineVersion');
-    if(ver && !ver.__armed_v3){
-      ver.__armed_v3 = true;
-      ver.addEventListener('change', function(e){ if(e.isTrusted) applyModel(e.target.value, true); });
+    if(ver && !ver.__armed_v4){
+      ver.__armed_v4 = true;
+      ver.addEventListener('change', function(e){
+        if(!e.isTrusted) return;
+        var val = ver.value || '';
+        if(val) w.dispatchEvent(new CustomEvent('idmar:model-commit', { detail:{ model: val, source:'family-version' } }));
+      });
     }
 
-    // base/variante confirmam
-    var base = d.getElementById('modelBaseList');
-    var vari = d.getElementById('modelVariantList');
-    function tryBaseVariantCommit(ev){
-      if (ev && !ev.isTrusted) return;
-      var b = (base?.value||'').trim(), v=(vari?.value||'').trim();
-      var code = b ? (v ? (b+v) : b) : '';
-      if(code) applyModel(code, true);
-    }
-    if(base && !base.__armed_v3){ base.__armed_v3=true; base.addEventListener('change', tryBaseVariantCommit); }
-    if(vari && !vari.__armed_v3){ vari.__armed_v3=true; vari.addEventListener('change', tryBaseVariantCommit); }
-
-    // Enter no campo de pesquisa → commit explícito
-    if(!w.__IDMAR_MODEL_COMMIT_LISTENER__){
-      w.__IDMAR_MODEL_COMMIT_LISTENER__ = true;
+    // 3) Base/Variante commit explícito é tratado pelo outro bridge → só escutamos o evento
+    if(!w.__IDMAR_MODEL_COMMIT_LISTENER_V4__){
+      w.__IDMAR_MODEL_COMMIT_LISTENER_V4__ = true;
       w.addEventListener('idmar:model-commit', function(ev){
         var code = ev.detail && ev.detail.model;
-        if(code) applyModel(code, true);
+        if(code) applyModel(code, true); // aqui sim, com foco
       });
     }
   }
@@ -99,6 +91,6 @@
     arm();
     var mo = new MutationObserver(arm);
     mo.observe(d.documentElement, { childList:true, subtree:true });
-    console.log('[IDMAR] model-meta-wire v1 (trusted-change only) OK:', jsonUrl);
+    console.log('[IDMAR] model-meta-wire v1 (commit-explicito) OK:', jsonUrl);
   }).catch(e=>console.warn('[IDMAR] model-meta-wire: falha JSON', e));
 })(window, document);

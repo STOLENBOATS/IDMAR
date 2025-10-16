@@ -1,35 +1,50 @@
-// js/model-split-bridge.v2.js — popula Base/Variante a partir do v2
+// js/model-split-bridge.v2.js — v2→Base/Variante com pesquisa por dígitos e fallback v1
 (function(w,d){
   const V2_URL = 'data/engines_catalog.v2.json';
-  const els = {
-    legacyModel: 'srch_model',
-    baseSel:     'modelBaseList',
-    varSel:      'modelVariantList'
-  };
+  const V1_URL = 'data/yamaha_models.v1.json'; // fallback
+  const els = { legacyModel:'srch_model', baseSel:'modelBaseList', varSel:'modelVariantList' };
   function $(id){ return d.getElementById(id); }
+
+  const RX = /^([A-Z]+[0-9]+(?:\.[0-9]+)?)([A-Z]*)$/;
   let index = null; // { base: { variants:Set, versions:Set } }
 
   function splitModel(code){
     const m = String(code||'').toUpperCase().replace(/\s+/g,'');
-    const r = /^([A-Z]+[0-9]+)([A-Z]*)$/;
-    const mm = m.match(r);
+    const mm = m.match(RX);
     if(!mm) return { base:'', variant:'' };
     return { base:mm[1], variant:mm[2]||'' };
   }
 
-  function buildIndex(v2){
+  function ensureEntry(map, base){
+    return map[base] || (map[base] = { variants:new Set(), versions:new Set() });
+  }
+
+  function buildFromV2(v2){
     const out = {};
-    const yam = v2?.brands?.Yamaha?.families || {};
-    Object.values(yam).forEach(fam=>{
+    const fams = v2?.brands?.Yamaha?.families || {};
+    Object.values(fams).forEach(fam=>{
       (fam.versions||[]).forEach(v=>{
-        const sp = splitModel(v.version||'');
-        if(!sp.base) return;
-        const entry = out[sp.base] || (out[sp.base] = { variants:new Set(), versions:new Set() });
-        entry.variants.add(sp.variant);   // pode ser ''
-        entry.versions.add(v.version);
+        const code = v.version || '';
+        const {base,variant} = splitModel(code);
+        if(!base) return;
+        const e = ensureEntry(out, base);
+        e.variants.add(variant);
+        e.versions.add(code);
       });
     });
-    index = out;
+    return out;
+  }
+
+  function buildFromV1(v1){
+    const out = {};
+    Object.keys(v1||{}).forEach(code=>{
+      const {base,variant} = splitModel(code);
+      if(!base) return;
+      const e = ensureEntry(out, base);
+      e.variants.add(variant);
+      e.versions.add(code);
+    });
+    return out;
   }
 
   function fillSelect(sel, values, placeholder){
@@ -39,10 +54,27 @@
     sel.innerHTML = opts.join('');
   }
 
+  function matchBases(query){
+    if(!index) return [];
+    const q = String(query||'').toUpperCase().replace(/\s+/g,'');
+    if(!q) return [];
+    const qDigits = q.replace(/^[A-Z]+/, '');
+    const bases = Object.keys(index);
+
+    let hits = bases.filter(b => b.startsWith(q));
+    if(!hits.length && qDigits){
+      hits = bases.filter(b => b.replace(/^[A-Z]+/,'').startsWith(qDigits));
+    }
+    if(!hits.length && qDigits){
+      hits = bases.filter(b => b.replace(/^[A-Z]+/,'').includes(qDigits));
+    }
+    return hits.sort();
+  }
+
   function onLegacyInput(){
-    const q = ($(els.legacyModel)?.value || '').toUpperCase().replace(/\s+/g,'');
-    if(!q || !index) return fillSelect($(els.baseSel), [], '—');
-    const bases = Object.keys(index).filter(b => b.startsWith(q));
+    const legacy = $(els.legacyModel);
+    if(!legacy) return;
+    const bases = matchBases(legacy.value);
     fillSelect($(els.baseSel), bases, '—');
     fillSelect($(els.varSel), [], '—');
   }
@@ -61,21 +93,38 @@
     const vari = ($(els.varSel)?.value || '').toUpperCase();
     if(!base) return;
     const code = base + (vari||'');
-    w.dispatchEvent(new CustomEvent('idmar:model-commit', { detail:{ model:code, commit:true, source:'bridge-base-variant' }}));
+    w.dispatchEvent(new CustomEvent('idmar:model-commit', {
+      detail:{ model:code, commit:true, source:'bridge-base-variant' }
+    }));
   }
 
   function arm(){
     const legacy = $(els.legacyModel);
-    if(legacy && !legacy.__armed_b1){ legacy.__armed_b1=true; legacy.addEventListener('input', onLegacyInput); }
+    if(legacy && !legacy.__armed_b3){ legacy.__armed_b3=true; legacy.addEventListener('input', onLegacyInput); }
     const base = $(els.baseSel);
-    if(base && !base.__armed_b1){ base.__armed_b1=true; base.addEventListener('change', onBaseChange); }
+    if(base && !base.__armed_b3){ base.__armed_b3=true; base.addEventListener('change', onBaseChange); }
     const vari = $(els.varSel);
-    if(vari && !vari.__armed_b1){ vari.__armed_b1=true; vari.addEventListener('change', onVariantChange); }
+    if(vari && !vari.__armed_b3){ vari.__armed_b3=true; vari.addEventListener('change', onVariantChange); }
+    if(legacy && legacy.value) onLegacyInput();
   }
 
-  fetch(V2_URL).then(r=>r.json()).then(v2=>{
-    buildIndex(v2);
-    arm();
-    console.log('[IDMAR] model-split-bridge v2 OK (v2 → Base/Variante).');
-  }).catch(e=>console.warn('[IDMAR] model-split-bridge v2: falha', e));
+  async function loadIndex(){
+    try{
+      const v2 = await fetch(V2_URL).then(r=>r.ok?r.json():Promise.reject(r.status));
+      index = buildFromV2(v2);
+      console.log('[IDMAR] bridge v2: carregado v2; bases=', Object.keys(index).length);
+    }catch(_){
+      console.warn('[IDMAR] bridge v2: falhou v2, a usar fallback v1');
+      try{
+        const v1 = await fetch(V1_URL).then(r=>r.json());
+        index = buildFromV1(v1);
+        console.log('[IDMAR] bridge v2: fallback v1; bases=', Object.keys(index).length);
+      }catch(e){
+        console.error('[IDMAR] bridge v2: não foi possível carregar nenhum catálogo', e);
+        index = {};
+      }
+    }
+  }
+
+  loadIndex().then(()=>{ arm(); });
 })(window, document);

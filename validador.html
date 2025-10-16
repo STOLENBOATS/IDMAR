@@ -235,9 +235,9 @@
   <script>window.IDMAR_ADMIN_URL = 'admin-engines.html';</script>
   <script defer src="js/ribbon-admin.v1.js"></script>
 
-  <!-- Autocomplete antigo (schema v1) -->
+  <!-- Autocomplete antigo (schema v1) 
   <script type="module" src="js/engine_autocomplete_addon.v1.js" data-catalog="data/engines_catalog.v1.json"></script>
-  <script defer src="js/patch-forense-i18n-ribbon.r1.js?v=r1"></script>
+  <script defer src="js/patch-forense-i18n-ribbon.r1.js?v=r1"></script>-->
 
   <!-- PWA / SW -->
   <script defer src="./js/sw-register.js"></script>
@@ -246,31 +246,23 @@
   <link rel="stylesheet" href="./css/engine-picker.css">
   <script defer src="./js/engine-picker.js?v=r4"></script>
 
-  <!-- INIT picker com fallback v2→v1 e espera pelo script -->
-  <script data-picker-init>
-    window.addEventListener('DOMContentLoaded', async () => {
-      const tryUrl = './data/engines_catalog.v2.json';
-      const fallback = './data/engines_catalog.v1.json';
-      let url = fallback;
-      try {
-        const r = await fetch(tryUrl);
-        const j = await r.json();
-        const hasBrands =
-          Array.isArray(j) ||
-          Array.isArray(j.brands) || (j.brands && typeof j.brands === 'object') ||
-          Array.isArray(j?.data?.brands) || (j?.data?.brands && typeof j.data.brands === 'object') ||
-          Array.isArray(j.manufacturers) || (j.manufacturers && typeof j.manufacturers === 'object');
-        url = hasBrands ? tryUrl : fallback;
-      } catch {}
-      const wait = (test, cb, tries = 50) => {
-        const t = setInterval(() => {
-          if (test()) { clearInterval(t); cb(); }
-          else if (!--tries) clearInterval(t);
-        }, 100);
-      };
-      wait(() => window.EnginePicker && typeof EnginePicker.init === 'function', () => {
-        EnginePicker.init({ dataUrl: url });
-        console.log('[IDMAR] EnginePicker usando', url);
+<script>
+  window.addEventListener('DOMContentLoaded', async () => {
+    const url = './data/engines_catalog.v2.json';
+    try {
+      await fetch(url).then(r => r.json()); // só valida que existe e é JSON
+      if (!window.EnginePicker || typeof EnginePicker.init !== 'function') {
+        console.error('[IDMAR] EnginePicker não disponível.');
+        return;
+      }
+      EnginePicker.init({ dataUrl: url });
+      console.log('[IDMAR] EnginePicker (v2) OK:', url);
+    } catch (e) {
+      console.error('[IDMAR] Falha a carregar o catálogo v2:', e);
+      alert('Falha a carregar o catálogo de motores (v2). Verifica data/engines_catalog.v2.json');
+    }
+  });
+</script>
 
         // Reflete marca legacy no picker (se existir)
         const legacyBrand = document.getElementById('brand');
@@ -373,8 +365,9 @@
   })(window, document);
   </script>
 
-  <!-- 1) Preenche a ficha; só foca SN quando há commit explícito -->
-  <script defer src="js/model-meta-wire.v1.js" data-json="data/yamaha_models.v1.json"></script>
+  <script defer src="js/model-meta-wire.v1.js"
+        data-json="data/engines_catalog.v2.json"></script>
+
 
   <!-- 2) Bridge v2 → Base/Variante (procura por dígitos: 40, 350, 9.9, etc.) -->
   <script defer src="js/model-split-bridge.v2.js"></script>

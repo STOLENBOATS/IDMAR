@@ -122,20 +122,27 @@
   }
 
   function onCommit(ev){
-    const { model, commit } = ev.detail || {};
-    if (!model) return;
-    log('commit recebido:', model);
+  const { model, commit } = ev.detail || {};
+  if (!model) return;
+  log('commit recebido:', model);
 
-    // encontra a versão correspondente
-    const hit = findVersion(model) ||
-                findVersion(String(model).replace(/\s+/g,'')); // tentativa com espaços removidos
-    applyFacts(hit);
+  // >>> NOVO: garantir que o estado global reflete o modelo escolhido
+  w.EnginePickerState = w.EnginePickerState || {};
+  w.EnginePickerState.model = model;
+  // como aqui estamos a tratar Yamaha, garante brand (sem sobrepor se já vier do picker)
+  if (!w.EnginePickerState.brand) w.EnginePickerState.brand = 'Yamaha';
 
-    // foca SN apenas quando é um commit humano (não em “mirror”)
-    if (commit && snInput){
-      setTimeout(()=> snInput.focus(), 0);
-    }
+  // encontra a versão correspondente e preenche ficha + family picker
+  const hit = findVersion(model) ||
+              findVersion(String(model).replace(/\s+/g,''));
+  applyFacts(hit);
+
+  // foca o campo do nº de série só em commits humanos
+  if (commit && snInput){
+    setTimeout(()=> snInput.focus(), 0);
   }
+}
+
 
   // botão "Validar nº de motor" (cartão 3)
   function armSerialButton(){

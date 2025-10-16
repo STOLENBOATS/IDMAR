@@ -1,105 +1,128 @@
-// js/model-split-bridge.v2.js — v2.3 (robusto + sincronização com picker)
+// js/model-split-bridge.v2.js — v2.4 (robusto + sincronização com picker + UX melhorada)
 (function (w, d) {
   const DEBUG = true;
   const V2_URL = 'data/engines_catalog.v2.json';
   const els = {
-    legacyModel: 'srch_model',
-    baseSel:     'modelBaseList',
-    varSel:      'modelVariantList',
-    pickerInput:  '#engine-picker input#engineModel'
+    legacyModel: 'srch_model',          // input "Modelo (pesquisa)"
+    baseSel:     'modelBaseList',       // <select> Modelo base
+    varSel:      'modelVariantList',    // <select> Variante / sufixo
+    pickerInput: '#engine-picker input#engineModel' // input interno do EnginePicker (para sugestões)
   };
-  const $ = (id) => d.getElementById(id);
-  const $$ = (sel) => d.querySelector(sel);
-  const log = (...a) => DEBUG && console.log('[bridge v2]', ...a);
 
-  let index = null;   // { BASE: { variants:Set, versions:Set, powers:Set } }
+  const $  = (id)  => d.getElementById(id);
+  const $$ = (sel) => d.querySelector(sel);
+  const log = (...a) => { if (DEBUG) console.log('[bridge v2]', ...a); };
+
+  // Índice construído a partir do catálogo v2
+  // index = { BASE: { variants:Set, versions:Set, powers:Set } }
+  let index = null;
   let allBases = [];
 
-  const norm = s => String(s||'').trim().toUpperCase().replace(/\s+/g, '');
+  // ===== Utilitários =====
+  const norm = (s) => String(s || '').trim().toUpperCase().replace(/\s+/g, '');
   function splitModel(code) {
+    // remove “( … )” e combinações com barras; aceita F9.9 / F115B
     const m = norm(code).replace(/\(.*?\)/g, '').split('/')[0];
-    const re = /^([A-Z]+[0-9]+(?:\.[0-9])?)([A-Z]*)$/; // F9.9 / F115B
+    const re = /^([A-Z]+[0-9]+(?:\.[0-9])?)([A-Z]*)$/; // base=letras+números[.número], variante=letras
     const mm = m.match(re);
-    return mm ? { base:mm[1], variant:mm[2]||'' } : { base:'', variant:'' };
+    return mm ? { base: mm[1], variant: mm[2] || '' } : { base: '', variant: '' };
   }
 
   function buildIndex(v2) {
     const yam = v2?.brands?.Yamaha?.families || {};
     const out = {};
     Object.values(yam).forEach(fam => {
-      (fam.versions||[]).forEach(v => {
+      (fam.versions || []).forEach(v => {
         const ver = v.version || '';
         const sp  = splitModel(ver);
         if (!sp.base) return;
         const e = out[sp.base] || (out[sp.base] = { variants:new Set(), versions:new Set(), powers:new Set() });
-        e.variants.add(sp.variant);
+        e.variants.add(sp.variant);       // pode ser ''
         e.versions.add(ver);
         if (typeof v.power === 'number') e.powers.add(v.power);
       });
     });
     index = out;
     allBases = Object.keys(out).sort((a,b)=>a.localeCompare(b,'en',{numeric:true}));
-    log('índice construído. bases=', allBases.length);
+    log('índice construído. #bases =', allBases.length);
   }
 
   function fillSelect(sel, values, placeholder) {
     if (!sel) return;
-    const opts = [`<option value="">${placeholder||'—'}</option>`]
-      .concat(values.map(v => `<option value="${v}">${v||'—'}</option>`));
+    const opts = [`<option value="">${placeholder || '—'}</option>`]
+      .concat((values || []).map(v => `<option value="${v}">${v || '—'}</option>`));
     sel.innerHTML = opts.join('');
   }
 
   function refreshVariantsFor(base) {
     const sel = $(els.varSel);
     if (!sel) return;
-    if (!base || !index[base]) { fillSelect(sel, [], '—'); return; }
+    if (!base || !index || !index[base]) {
+      fillSelect(sel, [], '—');
+      return;
+    }
     const list = Array.from(index[base].variants).sort((a,b)=>a.localeCompare(b));
     fillSelect(sel, list, '—');
   }
 
+  // ===== Filtragem de bases (UX) =====
   function filterBases(qRaw) {
-    if (!qRaw) return allBases;
+    // Não listar nada sem query (evita “lista infinita” confusa)
+    if (!qRaw) return [];
+
     const q = norm(qRaw);
-    const onlyNum = /^[0-9]+(?:\.[0-9])?$/.test(qRaw.trim());
+    // só números: "40", "350", "9.9" (aceita vírgula)
+    const onlyNum = /^[0-9]+(?:[.,][0-9])?$/.test(qRaw.trim());
     if (onlyNum) {
       const num = Number(qRaw.replace(',', '.'));
       return allBases.filter(b => {
-        if (b.includes(String(num))) return true;
+        if (b.includes(String(num))) return true;    // contém dígitos (ex.: F40)
         const e = index[b];
-        return e ? e.powers.has(num) : false;
+        return e ? e.powers.has(num) : false;        // coincide com potência
       });
     }
-    return allBases.filter(b => b.startsWith(q));
+
+    // alfanumérico: usar CONTAINS (mais tolerante que startsWith)
+    return allBases.filter(b => b.includes(q));
   }
 
-  function mirrorIntoPicker(code) {
+  // Alimenta input interno do EnginePicker (só para sugestões; não altera foco)
+  function mirrorIntoPicker(text) {
     const input = $$(els.pickerInput);
     if (!input) return;
-    input.value = code || '';
-    input.dispatchEvent(new Event('input', { bubbles:true }));
+    input.value = text || '';
+    // dispara input para o autocomplete do picker reagir
+    input.dispatchEvent(new Event('input', { bubbles: true }));
   }
 
-  // ==== Handlers ====
+  // ===== Handlers =====
   function onLegacyInput() {
     const q = ($(els.legacyModel)?.value || '');
-    fillSelect($(els.baseSel), filterBases(q), '—');
+    const bases = filterBases(q);
+    fillSelect($(els.baseSel), bases, '—');
     refreshVariantsFor('');
+    // espelha string “como escrita” no input do picker para ele sugerir
+    mirrorIntoPicker(q);
   }
+
   function onLegacyEnter(e) {
     if (e.key !== 'Enter') return;
     const raw = ($(els.legacyModel)?.value || '').trim();
     if (!raw) return;
     const sp = splitModel(raw);
-    const code = sp.base ? (sp.base + (sp.variant||'')) : raw;
+    const code = sp.base ? (sp.base + (sp.variant || '')) : raw;
     finalizeCommit(code, 'legacy-enter');
   }
+
   function onBaseChange(ev) {
-    if (!ev.isTrusted) return;
+    if (!ev.isTrusted) return; // só interações humanas
     const base = norm($(els.baseSel)?.value || '');
     refreshVariantsFor(base);
+    // coloca a base no picker para sugerir as variantes, mas sem commitar ainda
     mirrorIntoPicker(base);
-    log('base=', base, 'variants=', index[base] ? Array.from(index[base].variants) : []);
+    log('base=', base, 'variants=', index && index[base] ? Array.from(index[base].variants) : []);
   }
+
   function onVariantChange(ev) {
     if (!ev.isTrusted) return;
     const base = norm($(els.baseSel)?.value || '');
@@ -109,6 +132,7 @@
     finalizeCommit(code, 'bridge-base-variant');
   }
 
+  // Emite o evento de commit (o teu model-meta-wire cuida do resto e foca SN)
   function finalizeCommit(code, source) {
     mirrorIntoPicker(code);
     log('commit:', code, 'via', source);
@@ -117,6 +141,7 @@
     }));
   }
 
+  // Armar listeners — e manter selects vazios no arranque
   function arm() {
     const legacy = $(els.legacyModel);
     const base   = $(els.baseSel);
@@ -125,7 +150,7 @@
     if (legacy && !legacy.__armed_b2) {
       legacy.__armed_b2 = true;
       legacy.addEventListener('input', onLegacyInput);
-      legacy.addEventListener('keydown', onLegacyEnter);
+      legacy.addEventListener('keydown', onLegacyEnter); // ENTER confirma
     }
     if (base && !base.__armed_b2) {
       base.__armed_b2 = true;
@@ -136,11 +161,12 @@
       vari.addEventListener('change', onVariantChange);
     }
 
-    // Mostra tudo no arranque
-    fillSelect(base, allBases, '—');
+    // Mantém vazios no arranque — só mostram após pesquisa
+    fillSelect(base, [], '—');
     refreshVariantsFor('');
   }
 
+  // ===== Boot =====
   fetch(V2_URL)
     .then(r => r.json())
     .then(j => { buildIndex(j); arm(); })

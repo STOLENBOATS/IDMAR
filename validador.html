@@ -15,6 +15,8 @@
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/theme-soft-light.v1.css">
   <link rel="stylesheet" href="css/nav-ribbon.v5.css">
+  <link rel="stylesheet" href="./css/engine-family.css">
+  <link rel="stylesheet" href="./css/engine-picker.css">
 
   <style>
     :root{--bg:#f8fafc;--fg:#0f172a;--bg-elev:#ffffff;--border:#e5e7eb;--link:#0b6bcb}
@@ -52,7 +54,7 @@
     .model-facts small{ opacity:.85 }
   </style>
 
-  <!-- Gate de sessão simples -->
+  <!-- Gate de sessão -->
   <script>
     (function(){
       try{
@@ -65,12 +67,8 @@
   <!-- Versão + branding -->
   <script>window.IDMAR_VERSION="Vs 1.3";</script>
   <script defer src="js/idmar-config.v4.js"></script>
-
-  <!-- Core: i18n + header -->
   <script defer src="js/idmar-i18n.js"></script>
   <script defer src="js/idmar-header-only.all.v4.js"></script>
-
-  <!-- Overrides (aplicam labels, ribbons e rodapé) -->
   <script defer src="js/header-override.v4.js"></script>
   <script defer src="js/i18n-boot.js"></script>
   <script defer src="js/idmar-version.v4.js"></script>
@@ -106,10 +104,10 @@
       <div class="panel" id="card-motor">
         <h2 class="card-title" data-bi-pt="Validador Motor" data-bi-en="Engine Validator"></h2>
 
-        <!-- Picker visível (criado por engine-picker.js) -->
+        <!-- Picker visível -->
         <div id="engine-picker"></div>
 
-        <!-- Rolldown base + variante (VISÍVEL) -->
+        <!-- Rolldown base + variante -->
         <div class="two" style="margin:.5rem 0;grid-template-columns:1fr 1fr;gap:.5rem">
           <div>
             <label>Modelo base</label>
@@ -120,7 +118,6 @@
             <select id="modelVariantList"><option value="">—</option></select>
           </div>
         </div>
-        <!-- hidden para a ponte família/versão -->
         <input id="engineBase" type="hidden">
         <input id="engineVariant" type="hidden">
 
@@ -162,7 +159,6 @@
         <div style="margin:.5rem 0"><button id="btnMotor" type="submit">Validar Motor</button></div>
 
         <!-- Family Picker (versão / potência / intervalos SN) -->
-        <link rel="stylesheet" href="./css/engine-family.css">
         <div class="ef-grid">
           <div class="ef-field">
             <label for="engineVersion" class="ef-label">Versão</label>
@@ -178,7 +174,7 @@
           </div>
         </div>
 
-        <!-- 🔎 Ficha do modelo selecionado (preenchida via JSON) -->
+        <!-- Ficha do modelo -->
         <div class="panel" style="margin-top:.75rem">
           <h3 style="margin:.25rem 0 .5rem">Ficha do modelo</h3>
           <ul class="model-facts">
@@ -208,7 +204,6 @@
         <small id="engine-sn-hints" class="muted"></small>
         <div id="engine-sn-result" class="mt-2"></div>
 
-        <!-- Notas do nº de série -->
         <label for="engine-sn-notes" style="margin-top:.5rem">Notas (motor)</label>
         <textarea id="engine-sn-notes" rows="2" placeholder="Observações do nº de série / etiqueta"></textarea>
 
@@ -239,18 +234,14 @@
   <script defer src="./js/sw-register.js"></script>
 
   <!-- Engine Picker UNIFICADO -->
-  <link rel="stylesheet" href="./css/engine-picker.css">
   <script defer src="./js/engine-picker.js?v=r4"></script>
 
-  <!-- INIT do EnginePicker com catálogo v2 -->
+  <!-- Boot do Picker (V2 only) -->
   <script>
     window.addEventListener('DOMContentLoaded', async () => {
       const url = './data/engines_catalog.v2.json';
       try {
-        await fetch(url).then(r => {
-          if (!r.ok) throw new Error('HTTP '+r.status);
-          return r.json();
-        });
+        const j = await fetch(url).then(r => r.json());
         if (!window.EnginePicker || typeof EnginePicker.init !== 'function') {
           console.error('[IDMAR] EnginePicker não disponível.');
           return;
@@ -354,11 +345,12 @@
   })(window, document);
   </script>
 
-  <!-- 1) Wire que preenche a ficha e só foca o SN em commit humano -->
+  <!-- Wire da ficha + commit humano + sem saltos de foco -->
   <script defer src="js/model-meta-wire.v1.js" data-json="data/engines_catalog.v2.json"></script>
 
-  <!-- 2) Bridge v2 → Base/Variante (procura por dígitos: 40, 350, 9.9, etc.) -->
+  <!-- Bridge v2 → Base/Variante (procura também por potências “40”, “9.9”, “350”, etc.) -->
   <script defer src="js/model-split-bridge.v2.js"></script>
 
 </body>
 </html>
+

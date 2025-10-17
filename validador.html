@@ -245,22 +245,12 @@
 
   <!-- Inicia o Picker com o catálogo v2 -->
   <script>
-    window.addEventListener('DOMContentLoaded', async () => {
-      const url = './data/engines_catalog.v2.json';
-      try {
-        await fetch(url).then(r => r.json());
-        if (window.EnginePicker && typeof EnginePicker.init === 'function') {
-          EnginePicker.init({ dataUrl: url });
-          console.log('[IDMAR] EnginePicker (v2) OK:', url);
-        } else {
-          console.error('[IDMAR] EnginePicker não disponível.');
-        }
-      } catch (e) {
-        console.error('[IDMAR] Falha a carregar o catálogo v2:', e);
-        alert('Falha a carregar o catálogo de motores (v2). Verifica data/engines_catalog.v2.json');
-      }
-    });
-  </script>
+  window.addEventListener('DOMContentLoaded', async () => {
+    const url = './data/engines_catalog.v2.json';
+    await fetch(url).then(r=>r.json());
+    EnginePicker.init({ dataUrl: url });
+  });
+</script>
 
   <!-- Coletor + Bilingue -->
   <script defer src="./js/engine-collect.v1.js"></script>

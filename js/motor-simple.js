@@ -1,5 +1,4 @@
 
-// IDMAR - Motor Simple Validator (no external fetch)
 (function(w,d){
   function $(id){ return d.getElementById(id); }
   function val(v){ return (v||"").trim(); }
@@ -17,7 +16,6 @@
     return [b,m,s].filter(Boolean).join("-");
   }
   function basicHeuristics(brand, model, serial){
-    // minimal, deterministic, and explainable heuristics by brand
     var ok = true, notes = [];
     if(!serial || serial.length < 5){ ok=false; notes.push("Número de série muito curto."); }
     if(/[^\w\-\/\.]/.test(serial)){ ok=false; notes.push("Caracteres inesperados no nº de série."); }
@@ -48,18 +46,12 @@
     $("status").className = "result " + (heur.ok?"ok":"bad");
     $("meaning").textContent = meaning;
 
-    // record to localStorage
-    var rec = {
-      date: new Date().toISOString(),
-      brand: brand, model: model, variant: variant, motor: serial,
-      result: status, reason: meaning, photo: photo, loc: chooseLocation(), notes: notes
-    };
+    var rec = {date:new Date().toISOString(), brand, model, variant, motor:serial, result:status, reason:meaning, photo:photo, loc: chooseLocation(), notes: notes};
     try{
       var arr = JSON.parse(localStorage.getItem("hist_motor")||"[]");
       arr.unshift(rec);
       localStorage.setItem("hist_motor", JSON.stringify(arr));
     }catch(e){ console.warn("history save failed", e); }
-
     return rec;
   }
 
@@ -76,4 +68,14 @@
     $("preview").src="";
     $("identifier").textContent="Aguardando..."; $("status").textContent=""; $("meaning").textContent="";
   });
+
+  // load draft if any
+  try{
+    var raw = localStorage.getItem("IDMAR_MOTOR_DRAFT");
+    if(raw){
+      var r = JSON.parse(raw);
+      $("brand").value = r.brand||""; $("model").value=r.model||""; $("variant").value=r.variant||""; $("serial").value=r.motor||r.serial||""; $("notes").value=r.notes||"";
+      localStorage.removeItem("IDMAR_MOTOR_DRAFT");
+    }
+  }catch(e){}
 })(window, document);

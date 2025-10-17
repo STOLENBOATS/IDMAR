@@ -1,4 +1,4 @@
-// js/engine-picker.js — r5 (catalog v2-aware + local overrides)
+// js/engine-picker.js — robust r5 (v1/v2 + overrides v2 + sync legado)
 (function (w, d) {
   'use strict';
 
@@ -11,13 +11,14 @@
     i18n: {
       brand: 'Marca',
       model: 'Modelo (pesquisa)',
-      placeholder: 'Escreve parte do modelo…'
+      placeholderModel: 'Escreve parte do modelo…'
     }
   };
 
-  const OV_KEY = 'IDMAR_ENGINE_OVERRIDES';
+  const OV_KEY_V2 = 'IDMAR_ENGINE_OVERRIDES_V2';
 
-  function el(tag, attrs = {}, kids = []) {
+  // Utils
+  const el = (tag, attrs = {}, kids = []) => {
     const e = d.createElement(tag);
     for (const [k, v] of Object.entries(attrs)) {
       if (k === 'class') e.className = v;
@@ -26,96 +27,145 @@
     }
     kids.forEach(k => e.appendChild(k));
     return e;
-  }
-
-  function ensureContainer(sel) {
+  };
+  const ensureContainer = (sel) => {
     let root = d.querySelector(sel);
-    if (!root) { root = el('div', { id: sel.replace(/^#/, '') }); d.body.appendChild(root); }
+    if (!root) {
+      root = el('div', { id: sel.replace(/^#/, '') });
+      d.body.appendChild(root);
+    }
     return root;
-  }
+  };
+  const uniq = (arr) => Array.from(new Set(arr));
 
-  async function loadJson(url) {
-    const r = await fetch(url, { credentials: 'same-origin' });
-    if (!r.ok) throw new Error(`${r.status} ${r.statusText}`);
-    return r.json();
-  }
-
-  function dedup(arr) { return Array.from(new Set((arr||[]).filter(Boolean))); }
-
-  function normalizeCatalog(j) {
-    if (j && j.brands && typeof j.brands === 'object') {
-      const out = [];
-      for (const [brandName, brandObj] of Object.entries(j.brands)) {
-        const models = [];
-        const fams = brandObj?.families || {};
-        for (const fam of Object.values(fams)) {
-          (fam.versions || []).forEach(v => { const code = (v.version || '').trim(); if (code) models.push(code); });
-          (fam.version_options || []).forEach(v => { if (v) models.push(String(v).trim()); });
-        }
-        out.push({ id: brandName, name: brandName, models: dedup(models) });
+  // ---------- CARGA + MERGE ----------
+  function mergeCatalogV2(base, overrides) {
+    if (!overrides || overrides.schema !== 'engines_catalog.v2') return base;
+    base = base && typeof base === 'object' ? base : { schema: 'engines_catalog.v2', brands: {} };
+    base.schema = 'engines_catalog.v2';
+    base.brands = base.brands || {};
+    const ob = overrides.brands || {};
+    for (const brand of Object.keys(ob)) {
+      base.brands[brand] = base.brands[brand] || { families: {} };
+      const fams = ob[brand]?.families || {};
+      for (const fname of Object.keys(fams)) {
+        // override direto da família (previsível)
+        base.brands[brand].families[fname] = fams[fname];
       }
-      out.sort((a,b)=>a.name.localeCompare(b.name,'en',{numeric:true}));
-      out.forEach(b => b.models.sort((a,b)=>a.localeCompare(b,'en',{numeric:true})));
+    }
+    return base;
+  }
+
+  async function fetchJson(url) {
+    const res = await fetch(url, { credentials: 'same-origin' });
+    if (!res.ok) throw new Error('Catalog load failed: ' + res.status + ' ' + res.statusText);
+    return res.json();
+  }
+
+  async function loadRawCatalog(url) {
+    // carrega base
+    let j = await fetchJson(url);
+
+    // tenta overrides v2
+    let ov = null;
+    try { ov = JSON.parse(localStorage.getItem(OV_KEY_V2) || 'null'); } catch (_) {}
+    if (ov && ov.schema === 'engines_catalog.v2') {
+      j = mergeCatalogV2(j, ov);
+    }
+    return j;
+  }
+
+  // ---------- NORMALIZAÇÃO PARA O PICKER ----------
+  function normalizeToBrandsArray(j) {
+    // Aceita vários formatos; objetivo final: { brands:[{id,name,models:[...]}] }
+    // v2 (preferido): schema engines_catalog.v2
+    if (j && j.schema === 'engines_catalog.v2') {
+      const out = [];
+      const brandsMap = j.brands || {};
+      for (const [brandId, bnode] of Object.entries(brandsMap)) {
+        const families = (bnode && bnode.families) || {};
+        const models = [];
+        for (const fname of Object.keys(families)) {
+          const fam = families[fname] || {};
+          const versions = Array.isArray(fam.versions) ? fam.versions : [];
+          versions.forEach(v => {
+            const vcode = (v && (v.version || v.code)) || '';
+            if (vcode) models.push(String(vcode).trim());
+          });
+          // também aceitar version_options como fallback
+          const vopts = Array.isArray(fam.version_options) ? fam.version_options : [];
+          vopts.forEach(v => { if (v) models.push(String(v).trim()); });
+        }
+        out.push({ id: brandId, name: brandId, models: uniq(models) });
+      }
       return { brands: out };
     }
-    const raw = Array.isArray(j?.brands) ? j.brands : (Array.isArray(j) ? j : []);
-    const brands = raw.map(b => ({
-      id: (b.id || b.code || b.name || '').trim(),
-      name: (b.name || b.label || b.id || '').trim(),
-      models: Array.isArray(b.models) ? b.models.map(x => String(x).trim()) : []
-    })).filter(b => b.id);
-    return { brands };
-  }
 
-  function readOverrides() {
-    try { return JSON.parse(localStorage.getItem(OV_KEY) || '{}'); }
-    catch(e){ return {}; }
-  }
-
-  function applyOverrides(catalog) {
-    const ov = readOverrides();
-    if (!ov || typeof ov !== 'object') return catalog;
-
-    const byId = new Map(catalog.brands.map(b => [b.id, b]));
-    catalog.brands.forEach(b => { if (!byId.has(b.name)) byId.set(b.name, b); });
-
-    for (const [brandName, payload] of Object.entries(ov)) {
-      const target = byId.get(brandName) || (() => {
-        const nb = { id: brandName, name: brandName, models: [] };
-        catalog.brands.push(nb); byId.set(brandName, nb);
-        return nb;
-      })();
-
-      const addModels = (list) => {
-        if (!Array.isArray(list)) return;
-        target.models = dedup(target.models.concat(list.map(x => String(x).trim())));
-      };
-
-      addModels(payload.model_code_list);
-      if (payload.families && typeof payload.families === 'object') {
-        for (const fam of Object.values(payload.families)) addModels(fam.model_code_list);
-      }
+    // v1 e outras variantes (retrocompatibilidade):
+    let raw = null;
+    if (Array.isArray(j)) raw = j;
+    else if (Array.isArray(j?.brands)) raw = j.brands;
+    else if (j?.brands && typeof j.brands === 'object') {
+      raw = Object.entries(j.brands).map(([id, b]) => ({ id, ...(b || {}) }));
+    } else if (Array.isArray(j?.data?.brands)) raw = j.data.brands;
+    else if (j?.data?.brands && typeof j.data.brands === 'object') {
+      raw = Object.entries(j.data.brands).map(([id, b]) => ({ id, ...(b || {}) }));
+    } else if (Array.isArray(j?.manufacturers)) raw = j.manufacturers;
+    else if (j?.manufacturers && typeof j.manufacturers === 'object') {
+      raw = Object.entries(j.manufacturers).map(([id, b]) => ({ id, ...(b || {}) }));
     }
 
-    catalog.brands.sort((a,b) => a.name.localeCompare(b.name,'en',{numeric:true}));
-    catalog.brands.forEach(b => b.models.sort((a,b)=> a.localeCompare(b,'en',{numeric:true})));
-    return catalog;
+    if (!Array.isArray(raw) || raw.length === 0) {
+      console.error('[IDMAR][engine_picker] unexpected catalog shape:', j);
+      throw new Error('No brands array found in catalog');
+    }
+
+    const norm = raw.map(b => {
+      const id = (b.id || b.code || b.slug || b.name || '').toString().trim();
+      const name = (b.name || b.label || id).toString().trim();
+
+      // Modelos: pode ser array, objeto, ou campos mais específicos
+      let models = b.models || b.variants || b.items || [];
+      if (!Array.isArray(models) && models && typeof models === 'object') {
+        models = Object.values(models);
+      }
+      // models como objetos → tenta apanhar "version"/"code"/"name"
+      models = models.map(m => {
+        if (typeof m === 'string') return m;
+        if (m && (m.version || m.code || m.name || m.label)) {
+          return String(m.version || m.code || m.name || m.label);
+        }
+        try { return JSON.stringify(m); } catch { return ''; }
+      }).filter(Boolean);
+
+      return { id, name, models: uniq(models) };
+    }).filter(b => b.id);
+
+    return { brands: norm };
   }
 
+  async function loadCatalog(url) {
+    const raw = await loadRawCatalog(url);
+    return normalizeToBrandsArray(raw);
+  }
+
+  // ---------- UI ----------
   function buildUI(root, opts, catalog) {
     root.innerHTML = '';
 
     const wrap = el('div', { class: 'engine-picker grid gap-3 md:grid-cols-2' });
 
-    const labBrand = el('label', { for: opts.brandSelectId, class: 'ep-label', text: 'Marca' });
+    const labBrand = el('label', { for: opts.brandSelectId, class: 'ep-label', text: opts.i18n.brand });
     const brandSel = el('select', { id: opts.brandSelectId, class: 'ep-input' });
     brandSel.appendChild(el('option', { value: '', text: '—' }));
     catalog.brands.forEach(b => brandSel.appendChild(el('option', { value: b.id, text: b.name })));
     const brandBox = el('div', { class: 'ep-field' }, [labBrand, brandSel]);
 
-    const labModel = el('label', { for: opts.modelInputId, class: 'ep-label', text: 'Modelo (pesquisa)' });
-    const modelInput = el('input', { id: opts.modelInputId, class: 'ep-input', type: 'text',
-      placeholder: 'Escreve parte do modelo…', list: opts.modelDatalistId, autocomplete: 'off' });
+    const labModel = el('label', { for: opts.modelInputId, class: 'ep-label', text: opts.i18n.model });
+    const modelInput = el('input', {
+      id: opts.modelInputId, class: 'ep-input', type: 'text',
+      placeholder: opts.i18n.placeholderModel, list: opts.modelDatalistId, autocomplete: 'off'
+    });
     const dataList = el('datalist', { id: opts.modelDatalistId });
     const modelBox = el('div', { class: 'ep-field' }, [labModel, modelInput, dataList]);
 
@@ -123,52 +173,82 @@
     wrap.appendChild(modelBox);
     root.appendChild(wrap);
 
-    function hydrateModels() {
-      const bid = brandSel.value;
-      const brand = catalog.brands.find(b => b.id === bid || b.name === bid);
-      dataList.innerHTML = '';
-      (brand?.models || []).forEach(m => dataList.appendChild(el('option', { value: m })));
-    }
-    brandSel.addEventListener('change', hydrateModels);
-
-    const legacy = d.querySelector('select[data-engine-field="brand"], #brand, select[name="motor-marca"]');
-    if (legacy && !legacy.dataset._boundSync) {
-      legacy.dataset._boundSync = '1';
-      legacy.addEventListener('change', () => {
-        brandSel.value = legacy.value || '';
-        brandSel.dispatchEvent(new Event('change'));
-      });
-    }
-
-    w.EnginePickerState = {
-      get brand(){ return brandSel.value; },
-      get model(){ return modelInput.value; }
-    };
-
-    hydrateModels();
+    return { brandSel, modelInput, dataList };
   }
 
-  let _opts = null, _root = null;
+  function hydrateModels(list, brand) {
+    list.innerHTML = '';
+    if (!brand || !Array.isArray(brand.models)) return;
+    // ordenar com “inteligência” (alfa com numérico)
+    const models = [...brand.models].sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
+    models.forEach(m => list.appendChild(el('option', { value: m })));
+  }
+
+  const findBrandByIdOrName = (brands, idOrName) => {
+    const id = (idOrName || '').trim();
+    const low = id.toLowerCase();
+    return brands.find(b => b.id === id) || brands.find(b => (b.name || '').toLowerCase() === low) || null;
+  };
+
+  // ---------- INIT ----------
   async function init(userOpts = {}) {
-    _opts = Object.assign({}, DEFAULTS, userOpts);
-    _root = ensureContainer(_opts.container);
+    const opts = Object.assign({}, DEFAULTS, userOpts);
+    const root = ensureContainer(opts.container);
 
     try {
-      const raw = await loadJson(_opts.dataUrl);
-      let cat = normalizeCatalog(raw);
-      cat = applyOverrides(cat);
-      buildUI(_root, _opts, cat);
-      console.log('[IDMAR] EnginePicker pronto (v2 + overrides).');
+      const cat = await loadCatalog(opts.dataUrl);
+      const ui = buildUI(root, opts, cat);
+
+      // 1) on brand change → preenche datalist
+      ui.brandSel.addEventListener('change', () => {
+        const b = findBrandByIdOrName(cat.brands, ui.brandSel.value);
+        hydrateModels(ui.dataList, b);
+      });
+
+      // 2) Sincronização com select legado (#brand) → 2 vias
+      const legacy = d.querySelector('select[data-engine-field="brand"], #brand, select[name="motor-marca"]');
+      if (legacy && !legacy.dataset._boundSync) {
+        legacy.dataset._boundSync = '1';
+        // legado → picker
+        legacy.addEventListener('change', () => {
+          ui.brandSel.value = legacy.value || '';
+          ui.brandSel.dispatchEvent(new Event('change'));
+        });
+        // picker → legado
+        ui.brandSel.addEventListener('change', () => {
+          if (legacy.value !== ui.brandSel.value) {
+            legacy.value = ui.brandSel.value;
+            legacy.dispatchEvent(new Event('change'));
+          }
+        });
+        // estado inicial caso legado já tenha valor
+        if (legacy.value) {
+          ui.brandSel.value = legacy.value;
+          ui.brandSel.dispatchEvent(new Event('change'));
+        }
+      }
+
+      // 3) Estado exposto (não força foco; não “commita”)
+      w.EnginePickerState = {
+        get brand(){ return ui.brandSel.value; },
+        get model(){ return ui.modelInput.value; }
+      };
+
+      console.log('[IDMAR] EnginePicker pronto (v2-aware).');
+
     } catch (err) {
-      console.error('[IDMAR][engine_picker] falha:', err);
-      _root.innerHTML = '<div class="ep-error">Não foi possível carregar o catálogo de motores.</div>' +
-                        '<div class="ep-hint">Verifica data/engines_catalog.v2.json.</div>';
+      console.error('[IDMAR][engine_picker] failed:', err);
+      const errBox = d.createElement('div');
+      errBox.className = 'ep-error';
+      errBox.textContent = 'Não foi possível carregar o catálogo de motores.';
+      const hint = d.createElement('div');
+      hint.className = 'ep-hint';
+      hint.textContent = 'Verifica data/engines_catalog.v2.json e/ou overrides locais.';
+      root.innerHTML = '';
+      root.appendChild(errBox);
+      root.appendChild(hint);
     }
   }
-
-  w.addEventListener('idmar:engine-overrides-changed', () => {
-    if (_opts) init(_opts);
-  });
 
   w.EnginePicker = { init };
 })(window, document);

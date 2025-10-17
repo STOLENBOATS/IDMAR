@@ -69,7 +69,6 @@
     $("identifier").textContent="Aguardando..."; $("status").textContent=""; $("meaning").textContent="";
   });
 
-  // load draft if any
   try{
     var raw = localStorage.getItem("IDMAR_MOTOR_DRAFT");
     if(raw){

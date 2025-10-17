@@ -60,6 +60,16 @@
   <script defer src="js/header-override.v4.js"></script>
   <script defer src="js/i18n-boot.js"></script>
   <script defer src="js/idmar-version.v4.js"></script>
+
+<style>
+  .cards-row{display:grid !important; grid-template-columns:1fr 1fr !important; gap:1rem !important; align-items:start !important;}
+  .cards-row > .card{width:auto !important; max-width:100% !important; margin:0 !important;}
+  .cards-row > .card *{box-sizing:border-box;}
+  @media (max-width: 1024px){
+    .cards-row{grid-template-columns:1fr !important;}
+  }
+</style>
+
 </head>
 
 <body>
@@ -151,8 +161,7 @@
         </form>
       </div>
     </section>
-  
-<section id="card-motor-quick" class="card" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1rem;box-shadow:0 1px 2px rgba(0,0,0,.04);margin-top:1rem">
+  <section id="card-motor-quick" class="card" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1rem;box-shadow:0 1px 2px rgba(0,0,0,.04);margin-top:1rem">
   <h2 style="margin:.25rem 0">Nº de Motor - Pesquisa / Engine No. - Search</h2>
   <div style="display:grid;gap:.5rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
     <label><b>Marca / Brand</b><input id="mq-brand" placeholder="Yamaha, Honda, Mercury..."></label>
@@ -166,7 +175,6 @@
   </div>
   <div id="mq-feedback" class="muted" style="margin-top:.5rem;opacity:.8"></div>
 </section>
-
 </main>
 
   <footer class="footer" id="fallback-footer">IDMAR — Identificação Marítima</footer>

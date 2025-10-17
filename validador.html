@@ -60,16 +60,6 @@
   <script defer src="js/header-override.v4.js"></script>
   <script defer src="js/i18n-boot.js"></script>
   <script defer src="js/idmar-version.v4.js"></script>
-
-<style>
-  .cards-row{display:grid !important; grid-template-columns:1fr 1fr !important; gap:1rem !important; align-items:start !important;}
-  .cards-row > .card{width:auto !important; max-width:100% !important; margin:0 !important;}
-  .cards-row > .card *{box-sizing:border-box;}
-  @media (max-width: 1024px){
-    .cards-row{grid-template-columns:1fr !important;}
-  }
-</style>
-
 </head>
 
 <body>
@@ -161,21 +151,7 @@
         </form>
       </div>
     </section>
-  <section id="card-motor-quick" class="card" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1rem;box-shadow:0 1px 2px rgba(0,0,0,.04);margin-top:1rem">
-  <h2 style="margin:.25rem 0">Nº de Motor - Pesquisa / Engine No. - Search</h2>
-  <div style="display:grid;gap:.5rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
-    <label><b>Marca / Brand</b><input id="mq-brand" placeholder="Yamaha, Honda, Mercury..."></label>
-    <label><b>Modelo / Model</b><input id="mq-model" placeholder="F350, BF150, DF90..."></label>
-    <label><b>Variante / Variant</b><input id="mq-variant" placeholder="NSA, A, X, L..."></label>
-    <label><b>Nº Série / Serial</b><input id="mq-serial" placeholder="6ML-1005843 / BAAL-1234567"></label>
-  </div>
-  <div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap">
-    <button id="mq-validate" class="btn" style="padding:.6rem 1rem;border:1px solid #0b6bcb;border-radius:10px;background:#0b6bcb;color:#fff;cursor:pointer">Validar nº de motor / Validate</button>
-    <a class="btn secondary" href="validador_motor_simplificado.html" style="padding:.6rem 1rem;border:1px solid #0b6bcb;border-radius:10px;background:#fff;color:#0b6bcb;cursor:pointer;text-decoration:none">Abrir página avançada / Open advanced</a>
-  </div>
-  <div id="mq-feedback" class="muted" style="margin-top:.5rem;opacity:.8"></div>
-</section>
-</main>
+  </main>
 
   <footer class="footer" id="fallback-footer">IDMAR — Identificação Marítima</footer>
 
@@ -203,6 +179,7 @@
   <script type="module"
     src="js/engine_autocomplete_addon.v1.js"
     data-catalog="data/engines_catalog.v1.json"></script>
+<script defer src="js/cards-layout-fix.js"></script>
 </body>
 </html>
 

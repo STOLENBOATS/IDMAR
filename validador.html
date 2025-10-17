@@ -181,76 +181,99 @@
     data-catalog="data/engines_catalog.v1.json"></script>
 <script defer src="js/cards-layout-fix2.js"></script>
 
-<!-- IDMAR patch: Cartão 3 ao lado do Cartão 2 (runtime, blindado) -->
+<!-- IDMAR: força Cartão 3 ao lado do Cartão 2 dentro da mesma coluna -->
 <script>
 (function(d){
-  function style(){var s=d.createElement('style');
-    s.textContent='.cards-row{display:grid!important;grid-template-columns:1fr 1fr!important;gap:1rem!important;align-items:start!important}'
-                 +'.cards-row>.card{width:auto!important;max-width:100%!important;margin:0!important}'
-                 +'@media(max-width:1024px){.cards-row{grid-template-columns:1fr!important}}';
-    d.head.appendChild(s);}
-  function buildCard(){
+  function css(){
+    var s=d.createElement('style');
+    s.textContent=[
+      '.two-cards-row{display:grid!important;grid-template-columns:1fr 1fr!important;gap:1rem!important;align-items:start!important}',
+      '.two-cards-row>.card{width:auto!important;max-width:100%!important;margin:0!important}',
+      '@media(max-width:1024px){.two-cards-row{grid-template-columns:1fr!important}}'
+    ].join('');
+    d.head.appendChild(s);
+  }
+  function ensureCard3(){
+    var c3=d.getElementById('card-motor-quick');
+    if(c3) return c3;
     var t=d.createElement('template');
-    t.innerHTML =
-    '<section id="card-motor-quick" class="card" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1rem;box-shadow:0 1px 2px rgba(0,0,0,.04)">'+
+    t.innerHTML=
+      '<section id="card-motor-quick" class="card" style="background:#fff;border:1px solid #e5e7eb;border-radius:12px;padding:1rem;box-shadow:0 1px 2px rgba(0,0,0,.04)">'+
       '<h2 style="margin:.25rem 0">Nº de Motor - Pesquisa / Engine No. - Search</h2>'+
       '<div style="display:grid;gap:.5rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">'+
-        '<label><b>Marca / Brand</b><input id="mq-brand" placeholder="Yamaha, Honda, Mercury..."></label>'+
-        '<label><b>Modelo / Model</b><input id="mq-model" placeholder="F350, BF150, DF90..."></label>'+
-        '<label><b>Variante / Variant</b><input id="mq-variant" placeholder="NSA, A, X, L..."></label>'+
-        '<label><b>Nº Série / Serial</b><input id="mq-serial" placeholder="6ML-1005843 / BAAL-1234567"></label>'+
+      '<label><b>Marca / Brand</b><input id="mq-brand" placeholder="Yamaha, Honda, Mercury..."></label>'+
+      '<label><b>Modelo / Model</b><input id="mq-model" placeholder="F350, BF150, DF90..."></label>'+
+      '<label><b>Variante / Variant</b><input id="mq-variant" placeholder="NSA, A, X, L..."></label>'+
+      '<label><b>Nº Série / Serial</b><input id="mq-serial" placeholder="6ML-1005843 / BAAL-1234567"></label>'+
       '</div>'+
       '<div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap">'+
-        '<button id="mq-validate" class="btn" style="padding:.6rem 1rem;border:1px solid #0b6bcb;border-radius:10px;background:#0b6bcb;color:#fff;cursor:pointer">Validar nº de motor / Validate</button>'+
-        '<a class="btn secondary" href="validador_motor_simplificado.html" style="padding:.6rem 1rem;border:1px solid #0b6bcb;border-radius:10px;background:#fff;color:#0b6bcb;cursor:pointer;text-decoration:none">Abrir página avançada / Open advanced</a>'+
+      '<button id="mq-validate" class="btn" style="padding:.6rem 1rem;border:1px solid #0b6bcb;border-radius:10px;background:#0b6bcb;color:#fff;cursor:pointer">Validar nº de motor / Validate</button>'+
+      '<a class="btn secondary" href="validador_motor_simplificado.html" style="padding:.6rem 1rem;border:1px solid #0b6bcb;border-radius:10px;background:#fff;color:#0b6bcb;cursor:pointer;text-decoration:none">Abrir página avançada / Open advanced</a>'+
       '</div>'+
       '<div id="mq-feedback" class="muted" style="margin-top:.5rem;opacity:.8"></div>'+
-    '</section>';
+      '</section>';
     return t.content.firstElementChild;
   }
-  function attachLogic(){
-    var b=d.getElementById('mq-validate'); if(!b) return;
-    if(b.dataset.bound) return; b.dataset.bound="1";
-    b.addEventListener('click', function(){
-      var v=function(x){return (x||'').trim();};
-      var rec={
-        date:new Date().toISOString(),
-        brand:v(d.getElementById('mq-brand')?.value),
-        model:v(d.getElementById('mq-model')?.value),
-        variant:v(d.getElementById('mq-variant')?.value),
-        motor:v(d.getElementById('mq-serial')?.value),
-        result:'Registado / Recorded',
-        reason:'Cartão 3',
-        photo:''
-      };
-      try{var a=JSON.parse(localStorage.getItem('hist_motor')||'[]'); a.unshift(rec); localStorage.setItem('hist_motor', JSON.stringify(a));}catch(e){}
-      var fb=d.getElementById('mq-feedback'); if(fb){ fb.textContent='Registado: '+[rec.brand,rec.model,rec.variant,rec.motor].filter(Boolean).join(' / '); }
-    });
-  }
   function place(){
-    style();
-    var c3=d.getElementById('card-motor-quick') || buildCard();
-    var cards=Array.from(d.querySelectorAll('main .card'));
-    var c2=cards[1]; if(!c2){ // fallback: mete no fim do <main>
-      (d.querySelector('main')||d.body).appendChild(c3); attachLogic(); return;
+    css();
+    var c3 = ensureCard3();
+    var main = d.querySelector('main')||d.body;
+
+    // 1) Card 2: segundo .card dentro de <main> (fallback: card anterior ao c3)
+    var cards = Array.from(main.querySelectorAll('.card'));
+    var c2 = cards[1] || (function(){var p=c3.previousElementSibling; while(p && !p.classList.contains('card')) p=p.previousElementSibling; return p;})();
+
+    if(!c2){ (main).appendChild(c3); return; }
+
+    // 2) Coluna onde vive o Card 2 (Bootstrap/Tailwind/etc.)
+    var col = c2.closest('.col, [class*="col-"], .column, .grid, .grid-col, .columns') || c2.parentElement;
+
+    // 3) Cria um wrapper 2-colunas DENTRO dessa coluna e mete c2+c3 lá dentro
+    //    (mantém a grelha principal de 2 colunas intocada)
+    var wrap = d.createElement('div');
+    wrap.className='two-cards-row';
+
+    // Se já existir um wrap, não duplica
+    if(c2.parentElement && c2.parentElement.classList.contains('two-cards-row')){
+      // já existe → só garantir que c3 está lá
+      if(c3.parentElement!==c2.parentElement) c2.parentElement.appendChild(c3);
+    }else{
+      col.insertBefore(wrap, c2);
+      wrap.appendChild(c2);
+      if(c3.parentElement!==wrap) wrap.appendChild(c3);
     }
-    var wrap=d.createElement('div'); wrap.className='cards-row';
-    // inserir antes do cartão 2
-    (c2.closest('.card')||c2).parentNode.insertBefore(wrap,(c2.closest('.card')||c2));
-    wrap.appendChild(c2.closest('.card')||c2);
-    wrap.appendChild(c3.closest('.card')||c3);
-    // neutralizar wrappers col-12, etc.
-    [wrap.firstElementChild, wrap.lastElementChild].forEach(function(el){
-      if(el && el.parentElement===wrap) { el.style.width='auto'; el.style.maxWidth='100%'; el.style.margin='0'; }
+
+    // 4) neutraliza wrappers que forçam 100% de largura
+    [c2,c3].forEach(function(el){
+      var p=el.parentElement;
+      if(p && p!==wrap && !p.classList.contains('two-cards-row')) p.style.display='contents';
+      el.style.width='auto'; el.style.maxWidth='100%'; el.style.margin='0';
     });
-    attachLogic();
+
+    // 5) lógica do botão (se ainda não tiver)
+    var b=d.getElementById('mq-validate'); 
+    if(b && !b.dataset.bound){
+      b.dataset.bound="1";
+      b.addEventListener('click', function(){
+        var v=(x)=> (x||'').trim();
+        var rec={
+          date:new Date().toISOString(),
+          brand:v(d.getElementById('mq-brand')?.value),
+          model:v(d.getElementById('mq-model')?.value),
+          variant:v(d.getElementById('mq-variant')?.value),
+          motor:v(d.getElementById('mq-serial')?.value),
+          result:'Registado / Recorded', reason:'Cartão 3', photo:''
+        };
+        try{var a=JSON.parse(localStorage.getItem('hist_motor')||'[]'); a.unshift(rec); localStorage.setItem('hist_motor', JSON.stringify(a));}catch(e){}
+        var fb=d.getElementById('mq-feedback'); if(fb) fb.textContent='Registado: '+[rec.brand,rec.model,rec.variant,rec.motor].filter(Boolean).join(' / ');
+      });
+    }
   }
   if(d.readyState!=='loading') place(); else d.addEventListener('DOMContentLoaded', place);
 })(document);
 </script>
 
-
-  
+ 
 </body>
 </html>
 

@@ -92,5 +92,53 @@
   <!-- (limpo) removido idmar-layout.r3c.js -->
   <script src="js/forense-r1.js?v=r1"></script>
 <script defer src="js/forense-i18n.v3.1.js"></script>
+<!-- IDMAR Forense i18n v3.1 inline -->
+<script>
+(function(w,d){
+  var MAP=[
+    ['Abrir lightbox','Open lightbox'],
+    ['Comparar','Compare'],
+    ['Anotar (rect)','Annotate (rect)'],
+    ['Limpar anotações','Clear annotations'],
+    ['Exportar PNG anotado','Export annotated PNG'],
+    ['Guardar "bundle" (JSON)','Save "bundle" (JSON)'],
+    ['Escolher ficheiro','Choose file'],
+    ['Workspace','Workspace'],
+    ['Checklist forense','Forensic checklist'],
+    ['Anexar ao histórico mais recente','Attach to most recent history'],
+    // Checklist:
+    ['Rebites inconsistentes/adiados','Inconsistent/added rivets'],
+    ['Cordões de solda anómalos','Anomalous weld beads'],
+    ['Placa remarcada/substituída','Re-stamped/substituted plate'],
+    ['Camadas de tinta/abrasões','Paint layers/abrasions'],
+    ['Etiqueta adulterada/ausente (motor)','Tampered/missing label (engine)'],
+    ['Core plug danificado/removido (motor)','Core plug damaged/removed (engine)'],
+    ['Solda/corrosão anómala no boss (motor)','Abnormal weld/corrosion on boss (engine)'],
+    ['Remarcação no bloco (motor)','Re-stamping on block (engine)'],
+    ['Notas','Notes'],
+    ['Observações técnicas…','Technical observations…'],
+    ['Observações técnicas...','Technical observations...']
+  ];
+  function bilingual(t){return t && t.indexOf(' / ')>=0;}
+  function xlate(t){t=(t||'').trim(); for(var i=0;i<MAP.length;i++){if(t.toLowerCase()===MAP[i][0].toLowerCase())return MAP[i][0]+' / '+MAP[i][1];} return null;}
+  function apply(){
+    ['h1','h2','h3','legend','label','th','button','.btn'].forEach(function(sel){
+      Array.from(d.querySelectorAll(sel)).forEach(function(el){
+        var t=(el.textContent||'').trim(); if(!t || bilingual(t)) return;
+        var tx=xlate(t); if(tx) el.textContent=tx;
+      });
+    });
+    Array.from(d.querySelectorAll('input[type="button"],input[type="submit"]')).forEach(function(el){
+      var v=(el.value||'').trim(); if(!v || bilingual(v)) return; var tx=xlate(v); if(tx) el.value=tx;
+    });
+    Array.from(d.querySelectorAll('textarea')).forEach(function(el){
+      var ph=el.getAttribute('placeholder'); if(!ph || bilingual(ph)) return; var tx=xlate(ph); if(tx) el.setAttribute('placeholder',tx);
+    });
+  }
+  if(d.readyState!=='loading') apply(); else d.addEventListener('DOMContentLoaded', apply);
+})(window,document);
+</script>
+
+  
 </body>
 </html>

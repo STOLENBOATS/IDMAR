@@ -1,17 +1,17 @@
 
-IDMAR — MIC + Motores bundle (EU/UK + US) — v1
-==============================================
-Conteúdo:
-- data/iso_countries_eu_uk_us.json   → siglas ISO → país (PT/EN)
-- data/mic_eu_uk_template.csv        → template de MIC por país (UE/UK)
-- data/mic_us_template.csv           → template USCG HIN/MIC
-- data/engines_catalog.json          → catálogo (seed: Yamaha, Suzuki) — extensível
-- js/engine_catalog.js               → loader API
-- js/engine_autocomplete_addon.v1.js → add-on drop-in para autocomplete/rolls conforme Marca
+IDMAR helper bundle
+===================
 
-Como ligar no Validador Motor (drop-in):
-1) Copia as pastas /data e /js para o projeto.
-2) No fim do <body> do validador, adiciona:
-   <script type="module" src="js/engine_autocomplete_addon.v1.js" data-catalog="data/engines_catalog.json"></script>
-3) Opcionalmente, coloca data-attributes nos inputs:
-   data-engine-field="brand|letter_pair|shaft|model_code|series|power|displacement|origin"
+Arquivos:
+- js/card3-grid-inject.v1.js     → adiciona o Cartão 3 e aplica grelha de 3 colunas (não mexe nos teus cartões existentes)
+- js/android-orientation-guard.js → mostra aviso PT/EN em Android em modo portrait
+
+Como usar (2 passos):
+1) Copia a pasta `js/` deste ZIP para a **raiz** do site (onde está o validador.html).
+2) Em `validador.html`, antes de </body>, adiciona:
+   <script defer src="js/card3-grid-inject.v1.js"></script>
+   <script defer src="js/android-orientation-guard.js"></script>
+
+Feito. Os cartões devem aparecer lado a lado (WIN | Motor | Pesquisa) e o botão do Cartão 3 grava no histórico (localStorage 'hist_motor') e abre o histórico.
+
+Se quiseres aplicar o aviso Android noutras páginas, adiciona só o segundo <script> nessas páginas.

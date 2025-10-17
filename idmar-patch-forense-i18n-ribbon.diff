@@ -1,7 +1,7 @@
-﻿diff --git a/js/validador-win.r3b.js b/js/validador-win.r3b.js
+diff --git a/js/validador-win.r3b+hist.js b/js/validador-win.r3b+hist.js
 index 0000000..0000001 100644
---- a/js/validador-win.r3b.js
-+++ b/js/validador-win.r3b.js
+--- a/js/validador-win.r3b+hist.js
++++ b/js/validador-win.r3b+hist.js
 @@ -1,6 +1,32 @@
  (function(w,d){
    "use strict";
@@ -13,7 +13,7 @@ index 0000000..0000001 100644
 +  }
 +
 +  function buildForensicFlags() {
-+    // usa as chaves já carregadas em i18n (IDMAR_i18n.t)
++    // usa as chaves já carregadas em i18n.min.v1.js
 +    const t = w.IDMAR_i18n?.t || ((k)=>k);
 +    return {
 +      layout: { pt: t('forense.flag.layout_pt'),  en: t('forense.flag.layout_en') },

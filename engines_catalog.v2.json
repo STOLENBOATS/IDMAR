@@ -1,673 +1,881 @@
 {
-  "schema": "engines_catalog.v2",
+  "schema_version": 2,
   "brands": {
     "Yamaha": {
+      "segments": [
+        "outboard"
+      ],
+      "id_schema": {
+        "fields": [
+          "model_code",
+          "shaft",
+          "rotation",
+          "rigging",
+          "year_pair",
+          "series"
+        ],
+        "letter_pairs_hint": "BA, BB, ... (ano)",
+        "series_digits": [
+          6,
+          7
+        ],
+        "model_code_patterns": [
+          "F{hp}",
+          "LF{hp}",
+          "XTO{hp}"
+        ],
+        "notes": "Shaft: S(15\"), L(20\"), X(25\"), U(30\"), XX(35\"). Rotação: STD / CCW (contra-rotação)."
+      },
       "families": {
-        "Portable F2.5": {
-          "display": "Portable F2.5",
-          "version_options": [
-            "F2.5B"
+        "XTO Offshore V8": {
+          "years": [
+            2019,
+            2025
           ],
-          "power_options": [
+          "displacement_cc": 5559,
+          "hp": [
+            450,
+            425
+          ],
+          "rigging": [
+            "DEC"
+          ],
+          "shaft": [
+            "X",
+            "U",
+            "XX"
+          ],
+          "rotation": [
+            "STD",
+            "CCW"
+          ],
+          "gearcase": [
+            "Standard"
+          ],
+          "color": [
+            "Gray",
+            "White"
+          ],
+          "variants": [
+            {
+              "code": "XTO450",
+              "hp": 450,
+              "shaft": [
+                "U",
+                "XX"
+              ],
+              "rotation": [
+                "STD",
+                "CCW"
+              ]
+            },
+            {
+              "code": "XTO425",
+              "hp": 425,
+              "shaft": [
+                "X",
+                "U"
+              ],
+              "rotation": [
+                "STD",
+                "CCW"
+              ]
+            }
+          ]
+        },
+        "Offshore V6 4.2L": {
+          "years": [
+            2010,
+            2025
+          ],
+          "displacement_cc": 4169,
+          "hp": [
+            300,
+            250,
+            225
+          ],
+          "rigging": [
+            "DEC",
+            "Mechanical"
+          ],
+          "shaft": [
+            "L",
+            "X",
+            "U"
+          ],
+          "rotation": [
+            "STD",
+            "CCW"
+          ],
+          "gearcase": [
+            "Standard",
+            "Offshore"
+          ],
+          "color": [
+            "Gray",
+            "Pearl White"
+          ]
+        },
+        "Inline-4": {
+          "years": [
+            2014,
+            2025
+          ],
+          "displacement_cc": 2785,
+          "hp": [
+            200,
+            175,
+            150
+          ],
+          "rigging": [
+            "DEC",
+            "Mechanical"
+          ],
+          "shaft": [
+            "L",
+            "X"
+          ],
+          "rotation": [
+            "STD",
+            "CCW"
+          ],
+          "gearcase": [
+            "Standard"
+          ]
+        },
+        "Midrange": {
+          "years": [
+            2010,
+            2025
+          ],
+          "hp": [
+            115,
+            90,
+            75,
+            70,
+            60,
+            50,
+            40,
+            30
+          ],
+          "rigging": [
+            "Mechanical"
+          ],
+          "shaft": [
+            "S",
+            "L",
+            "X"
+          ],
+          "rotation": [
+            "STD"
+          ],
+          "gearcase": [
+            "Standard"
+          ]
+        },
+        "Portable": {
+          "years": [
+            2010,
+            2025
+          ],
+          "hp": [
+            25,
+            20,
+            15,
+            9.9,
+            8,
+            6,
+            4,
             2.5
           ],
-          "versions": [
-            {
-              "version": "F2.5B",
-              "power": 2.5,
-              "displacement_cc": 72,
-              "years": "≈2008–presente",
-              "rigging": "Tiller",
-              "shaft": "S",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
+          "rigging": [
+            "Tiller",
+            "Mechanical"
+          ],
+          "shaft": [
+            "S",
+            "L"
+          ],
+          "rotation": [
+            "STD"
           ]
         },
-        "Portable F4/5/6": {
-          "display": "Portable F4/5/6",
-          "version_options": [
-            "F4",
-            "F5",
-            "F6"
+        "V MAX SHO": {
+          "years": [
+            2010,
+            2025
           ],
-          "power_options": [
-            4.0,
-            5.0,
-            6.0
+          "hp": [
+            250,
+            225,
+            200,
+            175,
+            150,
+            115,
+            90
           ],
-          "versions": [
-            {
-              "version": "F4",
-              "power": 4.0,
-              "displacement_cc": 139,
-              "years": "≈2010–presente",
-              "rigging": "Tiller",
-              "shaft": "S,L",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            },
-            {
-              "version": "F5",
-              "power": 5.0,
-              "displacement_cc": 139,
-              "years": "≈2010–presente",
-              "rigging": "Tiller",
-              "shaft": "S,L",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            },
-            {
-              "version": "F6",
-              "power": 6.0,
-              "displacement_cc": 139,
-              "years": "≈2010–presente",
-              "rigging": "Tiller",
-              "shaft": "S,L",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
+          "rigging": [
+            "Mechanical"
+          ],
+          "shaft": [
+            "L",
+            "X"
+          ],
+          "rotation": [
+            "STD",
+            "CCW"
+          ],
+          "color": [
+            "Matte Black"
+          ]
+        }
+      }
+    },
+    "Suzuki": {
+      "segments": [
+        "outboard"
+      ],
+      "id_schema": {
+        "fields": [
+          "model_code",
+          "shaft",
+          "rotation",
+          "rigging",
+          "series"
+        ],
+        "series_digits": [
+          6,
+          7
+        ],
+        "model_code_patterns": [
+          "DF{hp}",
+          "DF{hp}A"
+        ],
+        "notes": "Drive-by-Wire (A) em várias potências; shafts L/X/UL conforme modelo."
+      },
+      "families": {
+        "DF-A Series": {
+          "years": [
+            2010,
+            2025
+          ],
+          "hp": [
+            350,
+            300,
+            250,
+            200,
+            175,
+            150,
+            140,
+            115,
+            90
+          ],
+          "rigging": [
+            "Drive-by-Wire",
+            "Mechanical"
+          ],
+          "shaft": [
+            "L",
+            "X",
+            "UL"
+          ],
+          "rotation": [
+            "STD",
+            "CCW"
           ]
         },
-        "F8/F9.9": {
-          "display": "F8/F9.9",
-          "version_options": [
-            "F8",
-            "F9.9"
+        "Midrange/Portable": {
+          "years": [
+            2010,
+            2025
           ],
-          "power_options": [
-            8.0,
-            9.9
-          ],
-          "versions": [
-            {
-              "version": "F8",
-              "power": 8.0,
-              "displacement_cc": 212,
-              "years": "≈2005–presente",
-              "rigging": "Tiller,Remote",
-              "shaft": "S,L",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            },
-            {
-              "version": "F9.9",
-              "power": 9.9,
-              "displacement_cc": 212,
-              "years": "≈2005–presente",
-              "rigging": "Tiller,Remote",
-              "shaft": "S,L",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
-          ]
-        },
-        "High Thrust": {
-          "display": "High Thrust",
-          "version_options": [
-            "T9.9",
-            "T25",
-            "T50",
-            "T60"
-          ],
-          "power_options": [
+          "hp": [
+            80,
+            70,
+            60,
+            50,
+            40,
+            30,
+            25,
+            20,
+            15,
             9.9,
-            25.0,
-            50.0,
-            60.0
+            8,
+            6,
+            4,
+            2.5
           ],
-          "versions": [
-            {
-              "version": "T9.9",
-              "power": 9.9,
-              "displacement_cc": 212,
-              "years": "≈2005–presente",
-              "rigging": "Tiller,Remote",
-              "shaft": "S,L",
-              "rotation": "",
-              "gearcase": "High-Thrust",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            },
-            {
-              "version": "T25",
-              "power": 25.0,
-              "displacement_cc": 432,
-              "years": "≈2018–presente",
-              "rigging": "Tiller,Remote",
-              "shaft": "S,L,XL",
-              "rotation": "",
-              "gearcase": "High-Thrust",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            },
-            {
-              "version": "T50",
-              "power": 50.0,
-              "displacement_cc": 996,
-              "years": "≈2010–presente",
-              "rigging": "Remote",
-              "shaft": "L,XL",
-              "rotation": "",
-              "gearcase": "High-Thrust",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            },
-            {
-              "version": "T60",
-              "power": 60.0,
-              "displacement_cc": 996,
-              "years": "≈2010–presente",
-              "rigging": "Remote",
-              "shaft": "L,XL",
-              "rotation": "",
-              "gearcase": "High-Thrust",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
+          "rigging": [
+            "Mechanical",
+            "Tiller"
+          ],
+          "shaft": [
+            "S",
+            "L",
+            "X"
+          ],
+          "rotation": [
+            "STD"
+          ]
+        }
+      }
+    },
+    "Honda": {
+      "segments": [
+        "outboard"
+      ],
+      "id_schema": {
+        "fields": [
+          "model_code",
+          "shaft",
+          "rotation",
+          "rigging",
+          "series"
+        ],
+        "model_code_patterns": [
+          "BF{hp}",
+          "BF{hp}A"
+        ],
+        "series_digits": [
+          7
+        ],
+        "notes": "Shaft: S/L/X. Rigging mecânico e DBW em gamas recentes."
+      },
+      "families": {
+        "BF250/225/200": {
+          "years": [
+            2012,
+            2025
+          ],
+          "hp": [
+            250,
+            225,
+            200
+          ],
+          "rigging": [
+            "Drive-by-Wire",
+            "Mechanical"
+          ],
+          "shaft": [
+            "L",
+            "X",
+            "UL"
+          ],
+          "rotation": [
+            "STD",
+            "CCW"
           ]
         },
-        "F15/F20 (EFI)": {
-          "display": "F15/F20 (EFI)",
-          "version_options": [
-            "F15",
-            "F20"
+        "BF150/135/115": {
+          "years": [
+            2004,
+            2025
           ],
-          "power_options": [
-            15.0,
-            20.0
+          "hp": [
+            150,
+            135,
+            115
           ],
-          "versions": [
-            {
-              "version": "F15",
-              "power": 15.0,
-              "displacement_cc": 362,
-              "years": "≈2016–presente",
-              "rigging": "Tiller,Remote",
-              "shaft": "S,L",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            },
-            {
-              "version": "F20",
-              "power": 20.0,
-              "displacement_cc": 362,
-              "years": "≈2016–presente",
-              "rigging": "Tiller,Remote",
-              "shaft": "S,L",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
+          "rigging": [
+            "Mechanical"
+          ],
+          "shaft": [
+            "L",
+            "X"
+          ],
+          "rotation": [
+            "STD",
+            "CCW"
           ]
         },
-        "F25": {
-          "display": "F25",
-          "version_options": [
-            "F25G"
+        "Midrange/Portable": {
+          "years": [
+            2010,
+            2025
           ],
-          "power_options": [
-            25.0
+          "hp": [
+            100,
+            90,
+            80,
+            75,
+            60,
+            50,
+            40,
+            30,
+            20,
+            15,
+            10,
+            8,
+            6,
+            5,
+            4,
+            2.3
           ],
-          "versions": [
-            {
-              "version": "F25G",
-              "power": 25.0,
-              "displacement_cc": 432,
-              "years": "2017–presente",
-              "rigging": "Tiller,Remote",
-              "shaft": "S,L",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
+          "rigging": [
+            "Mechanical",
+            "Tiller"
+          ],
+          "shaft": [
+            "S",
+            "L"
+          ],
+          "rotation": [
+            "STD"
+          ]
+        }
+      }
+    },
+    "Mercury": {
+      "segments": [
+        "outboard"
+      ],
+      "status": "active",
+      "id_schema": {
+        "fields": [
+          "model_code",
+          "shaft",
+          "rotation",
+          "rigging"
+        ],
+        "model_code_patterns": [
+          "Verado {hp}",
+          "FourStroke {hp}",
+          "SeaPro {hp}"
+        ],
+        "notes": "Famílias Verado/SeaPro/FourStroke; shafts L/X/XX; STD/CCW; DBW/Mecânico conforme série."
+      },
+      "families": {
+        "Verado": {
+          "years": [
+            2015,
+            2025
+          ],
+          "hp": [
+            600,
+            400,
+            350,
+            300,
+            250
+          ],
+          "rigging": [
+            "Digital"
+          ],
+          "shaft": [
+            "X",
+            "XX"
+          ],
+          "rotation": [
+            "STD",
+            "CCW"
+          ],
+          "color": [
+            "Black",
+            "White"
           ]
         },
-        "F30": {
-          "display": "F30",
-          "version_options": [
-            "F30"
+        "FourStroke": {
+          "years": [
+            2010,
+            2025
           ],
-          "power_options": [
-            30.0
+          "hp": [
+            300,
+            250,
+            225,
+            200,
+            175,
+            150,
+            115,
+            90,
+            75,
+            60,
+            50,
+            40,
+            30,
+            25,
+            20,
+            15,
+            9.9,
+            8,
+            6,
+            5,
+            4,
+            3.5,
+            2.5
           ],
-          "versions": [
-            {
-              "version": "F30",
-              "power": 30.0,
-              "displacement_cc": 747,
-              "years": "≈2009–presente",
-              "rigging": "Remote",
-              "shaft": "S,L",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
+          "rigging": [
+            "Mechanical",
+            "Digital"
+          ],
+          "shaft": [
+            "S",
+            "L",
+            "X",
+            "XX"
+          ],
+          "rotation": [
+            "STD",
+            "CCW"
           ]
         },
-        "F40": {
-          "display": "F40",
-          "version_options": [
-            "F40"
+        "SeaPro": {
+          "years": [
+            2017,
+            2025
           ],
-          "power_options": [
-            40.0
+          "hp": [
+            500,
+            400,
+            300,
+            250,
+            200,
+            150,
+            115
           ],
-          "versions": [
-            {
-              "version": "F40",
-              "power": 40.0,
-              "displacement_cc": 747,
-              "years": "≈2009–presente",
-              "rigging": "Remote",
-              "shaft": "S,L,XL",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
+          "rigging": [
+            "Commercial"
+          ],
+          "shaft": [
+            "L",
+            "X",
+            "XX"
+          ],
+          "rotation": [
+            "STD",
+            "CCW"
+          ]
+        }
+      }
+    },
+    "MerCruiser": {
+      "segments": [
+        "sterndrive",
+        "inboard"
+      ],
+      "id_schema": {
+        "fields": [
+          "engine_no",
+          "drive_no",
+          "transom_no",
+          "rotation"
+        ],
+        "notes": "Registo usa nº motor, nº drive e nº transom. Gasolina 4.5L/6.2L/8.2L; Diesel TDI."
+      },
+      "families": {
+        "Gasoline V6/V8": {
+          "years": [
+            2010,
+            2025
+          ],
+          "hp": [
+            250,
+            300,
+            350,
+            380,
+            430
+          ],
+          "rigging": [
+            "Inboard/Sterndrive"
+          ],
+          "shaft": [],
+          "rotation": [
+            "STD",
+            "CCW"
+          ],
+          "gearcase": [
+            "Alpha",
+            "Bravo One",
+            "Bravo Two",
+            "Bravo Three"
           ]
         },
-        "F50/F60": {
-          "display": "F50/F60",
-          "version_options": [
-            "F50",
-            "F60"
+        "Diesel TDI": {
+          "years": [
+            2010,
+            2025
           ],
-          "power_options": [
-            50.0,
-            60.0
+          "hp": [
+            230,
+            260,
+            270,
+            300,
+            370
           ],
-          "versions": [
-            {
-              "version": "F50",
-              "power": 50.0,
-              "displacement_cc": 996,
-              "years": "≈2010–presente",
-              "rigging": "Remote",
-              "shaft": "L,XL",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            },
-            {
-              "version": "F60",
-              "power": 60.0,
-              "displacement_cc": 996,
-              "years": "≈2010–presente",
-              "rigging": "Remote",
-              "shaft": "L,XL",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
+          "rigging": [
+            "Sterndrive"
+          ],
+          "rotation": [
+            "STD",
+            "CCW"
+          ],
+          "gearcase": [
+            "Bravo"
+          ]
+        }
+      }
+    },
+    "Volvo Penta": {
+      "segments": [
+        "sterndrive",
+        "inboard",
+        "saildrive"
+      ],
+      "id_schema": {
+        "fields": [
+          "engine_no",
+          "drive_no",
+          "transom_no"
+        ],
+        "notes": "Séries gasolina V6/V8 (Aquamatic), diesel D1–D6, IPS. Identificação por nº motor/drive/transom."
+      },
+      "families": {
+        "Aquamatic Gasoline V6/V8": {
+          "years": [
+            2015,
+            2025
+          ],
+          "hp": [
+            240,
+            280,
+            300,
+            350,
+            380,
+            430
+          ],
+          "rigging": [
+            "Sterndrive"
+          ],
+          "gearcase": [
+            "SX",
+            "DPS"
+          ],
+          "rotation": [
+            "STD",
+            "CCW"
           ]
         },
-        "F70": {
-          "display": "F70",
-          "version_options": [
-            "F70A"
+        "Diesel D-series": {
+          "years": [
+            2005,
+            2025
           ],
-          "power_options": [
-            70.0
+          "hp": [
+            110,
+            150,
+            200,
+            230,
+            260,
+            300,
+            380
           ],
-          "versions": [
-            {
-              "version": "F70A",
-              "power": 70.0,
-              "displacement_cc": 996,
-              "years": "2010–presente",
-              "rigging": "Remote",
-              "shaft": "L",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
+          "rigging": [
+            "Inboard",
+            "Sterndrive",
+            "IPS"
+          ],
+          "rotation": [
+            "STD",
+            "CCW"
+          ]
+        }
+      }
+    },
+    "Yanmar": {
+      "segments": [
+        "inboard"
+      ],
+      "id_schema": {
+        "fields": [
+          "engine_no_plate",
+          "engine_no_block"
+        ],
+        "notes": "Diesel inboard; etiqueta e estampagem no bloco."
+      },
+      "families": {
+        "Small/Mid Diesel": {
+          "years": [
+            1995,
+            2025
+          ],
+          "hp": [
+            9,
+            15,
+            21,
+            29,
+            40,
+            54,
+            80,
+            110,
+            125,
+            150,
+            195,
+            240,
+            315,
+            370
+          ],
+          "rigging": [
+            "Inboard"
+          ],
+          "rotation": [
+            "STD"
+          ]
+        }
+      }
+    },
+    "Tohatsu": {
+      "segments": [
+        "outboard"
+      ],
+      "id_schema": {
+        "fields": [
+          "model_code",
+          "shaft",
+          "rotation",
+          "rigging",
+          "series"
+        ],
+        "series_digits": [
+          6,
+          7
+        ],
+        "model_code_patterns": [
+          "MFS {hp}",
+          "BFT {hp}"
+        ],
+        "notes": "MFS (próprios); BFT (co-branded Honda)."
+      },
+      "families": {
+        "MFS": {
+          "years": [
+            2010,
+            2025
+          ],
+          "hp": [
+            140,
+            115,
+            100,
+            90,
+            75,
+            60,
+            50,
+            40,
+            30,
+            25,
+            20,
+            15,
+            9.9,
+            8,
+            6,
+            5,
+            4,
+            3.5,
+            2.5
+          ],
+          "rigging": [
+            "Mechanical",
+            "Tiller"
+          ],
+          "shaft": [
+            "S",
+            "L",
+            "X",
+            "UL"
+          ],
+          "rotation": [
+            "STD"
+          ]
+        }
+      }
+    },
+    "Evinrude/Johnson": {
+      "segments": [
+        "outboard"
+      ],
+      "status": "discontinued",
+      "id_schema": {
+        "fields": [
+          "model_code",
+          "shaft",
+          "rotation",
+          "series"
+        ],
+        "notes": "OMC legado; BRP E-TEC/G2 descontinuado. Identificação por model & serial; verificar etiqueta."
+      },
+      "families": {
+        "E-TEC G2": {
+          "years": [
+            2014,
+            2020
+          ],
+          "hp": [
+            150,
+            175,
+            200,
+            225,
+            250,
+            300
+          ],
+          "rigging": [
+            "Digital"
+          ],
+          "shaft": [
+            "L",
+            "X",
+            "UL"
+          ],
+          "rotation": [
+            "STD",
+            "CCW"
+          ],
+          "color": [
+            "Custom panels"
           ]
         },
-        "F75/F90 (1.8 SOHC)": {
-          "display": "F75/F90 (1.8 SOHC)",
-          "version_options": [
-            "F75",
-            "F90"
+        "Legacy (OMC/BRP)": {
+          "years": [
+            1990,
+            2007
           ],
-          "power_options": [
-            75.0,
-            90.0
+          "hp": [
+            2,
+            4,
+            6,
+            8,
+            9.9,
+            15,
+            25,
+            30,
+            40,
+            50,
+            60,
+            70,
+            75,
+            85,
+            90,
+            100,
+            115,
+            120,
+            130,
+            140,
+            150,
+            175,
+            200,
+            225,
+            250,
+            300
           ],
-          "versions": [
-            {
-              "version": "F75",
-              "power": 75.0,
-              "displacement_cc": 1832,
-              "years": "2019–presente",
-              "rigging": "Remote",
-              "shaft": "L,XL",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            },
-            {
-              "version": "F90",
-              "power": 90.0,
-              "displacement_cc": 1832,
-              "years": "2019–presente",
-              "rigging": "Remote",
-              "shaft": "L,XL",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
-          ]
-        },
-        "F115 (1.8 DOHC)": {
-          "display": "F115 (1.8 DOHC)",
-          "version_options": [
-            "F115B"
+          "rigging": [
+            "Mechanical",
+            "Tiller"
           ],
-          "power_options": [
-            115.0
+          "shaft": [
+            "S",
+            "L",
+            "X"
           ],
-          "versions": [
-            {
-              "version": "F115B",
-              "power": 115.0,
-              "displacement_cc": 1832,
-              "years": "2014–presente",
-              "rigging": "Remote",
-              "shaft": "L,XL",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
-          ]
-        },
-        "F130 (1.8 DOHC)": {
-          "display": "F130 (1.8 DOHC)",
-          "version_options": [
-            "F130A"
-          ],
-          "power_options": [
-            130.0
-          ],
-          "versions": [
-            {
-              "version": "F130A",
-              "power": 130.0,
-              "displacement_cc": 1832,
-              "years": "2014–presente",
-              "rigging": "Remote",
-              "shaft": "L,XL",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
-          ]
-        },
-        "F150 (2.7L)": {
-          "display": "F150 (2.7L)",
-          "version_options": [
-            "F150D"
-          ],
-          "power_options": [
-            150.0
-          ],
-          "versions": [
-            {
-              "version": "F150D",
-              "power": 150.0,
-              "displacement_cc": 2670,
-              "years": "≈2015–presente",
-              "rigging": "Remote",
-              "shaft": "L,XL",
-              "rotation": "",
-              "gearcase": "Standard",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
-          ]
-        },
-        "F175 (2.8L)": {
-          "display": "F175 (2.8L)",
-          "version_options": [
-            "F175"
-          ],
-          "power_options": [
-            175.0
-          ],
-          "versions": [
-            {
-              "version": "F175",
-              "power": 175.0,
-              "displacement_cc": 2785,
-              "years": "≈2013–presente",
-              "rigging": "Remote",
-              "shaft": "L,XL",
-              "rotation": "",
-              "gearcase": "Standard",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
-          ]
-        },
-        "F200 (2.8L I-4)": {
-          "display": "F200 (2.8L I-4)",
-          "version_options": [
-            "F200G/GE"
-          ],
-          "power_options": [
-            200.0
-          ],
-          "versions": [
-            {
-              "version": "F200G/GE",
-              "power": 200.0,
-              "displacement_cc": 2785,
-              "years": "≈2013–presente",
-              "rigging": "DEC/DBW",
-              "shaft": "L,XL",
-              "rotation": "",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
-          ]
-        },
-        "V6 4.2L": {
-          "display": "V6 4.2L",
-          "version_options": [
-            "F225",
-            "F250",
-            "F300"
-          ],
-          "power_options": [
-            225.0,
-            250.0,
-            300.0
-          ],
-          "versions": [
-            {
-              "version": "F225",
-              "power": 225.0,
-              "displacement_cc": 4169,
-              "years": "≈2010–presente",
-              "rigging": "Mechanical,DEC/DBW",
-              "shaft": "L,XL,XX",
-              "rotation": "STD,Counter",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            },
-            {
-              "version": "F250",
-              "power": 250.0,
-              "displacement_cc": 4169,
-              "years": "≈2010–presente",
-              "rigging": "Mechanical,DEC/DBW",
-              "shaft": "L,XL,XX",
-              "rotation": "STD,Counter",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            },
-            {
-              "version": "F300",
-              "power": 300.0,
-              "displacement_cc": 4169,
-              "years": "≈2010–presente",
-              "rigging": "Mechanical,DEC/DBW",
-              "shaft": "L,XL,XX",
-              "rotation": "STD,Counter",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
-          ]
-        },
-        "V6 4.3L": {
-          "display": "V6 4.3L",
-          "version_options": [
-            "F350 (2024+)"
-          ],
-          "power_options": [
-            350.0
-          ],
-          "versions": [
-            {
-              "version": "F350 (2024+)",
-              "power": 350.0,
-              "displacement_cc": 4300,
-              "years": "2024–presente",
-              "rigging": "DES/DEC",
-              "shaft": "XL,XX",
-              "rotation": "STD,Counter",
-              "gearcase": "",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
-          ]
-        },
-        "V8 XTO": {
-          "display": "V8 XTO",
-          "version_options": [
-            "XF425",
-            "XF450"
-          ],
-          "power_options": [
-            425.0,
-            450.0
-          ],
-          "versions": [
-            {
-              "version": "XF425",
-              "power": 425.0,
-              "displacement_cc": 5559,
-              "years": "2018–presente",
-              "rigging": "DEC/DBW",
-              "shaft": "XL,XX",
-              "rotation": "STD,Counter",
-              "gearcase": "Heavy-Duty",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            },
-            {
-              "version": "XF450",
-              "power": 450.0,
-              "displacement_cc": 5559,
-              "years": "2023–presente",
-              "rigging": "DEC/DBW",
-              "shaft": "XL,XX",
-              "rotation": "STD,Counter",
-              "gearcase": "Heavy-Duty",
-              "serial": {
-                "notes": "Etiqueta na braçadeira (bb).",
-                "ranges": []
-              }
-            }
+          "rotation": [
+            "STD",
+            "CCW"
           ]
         }
       }

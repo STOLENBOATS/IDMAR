@@ -1,29 +1,17 @@
 
-# IDMAR hotfix – histórico sem mexer no WIN
+IDMAR — MIC + Motores bundle (EU/UK + US) — v1
+==============================================
+Conteúdo:
+- data/iso_countries_eu_uk_us.json   → siglas ISO → país (PT/EN)
+- data/mic_eu_uk_template.csv        → template de MIC por país (UE/UK)
+- data/mic_us_template.csv           → template USCG HIN/MIC
+- data/engines_catalog.json          → catálogo (seed: Yamaha, Suzuki) — extensível
+- js/engine_catalog.js               → loader API
+- js/engine_autocomplete_addon.v1.js → add-on drop-in para autocomplete/rolls conforme Marca
 
-## O que vem aqui
-- `js/engine-history.v1.js`: API de histórico (localStorage).
-- `js/validator-hook.save-history.v1.js`: liga o botão do cartão 3 para gravar no histórico **sem tocar** no teu fluxo do WIN.
-- `engine-history.html`: lista/exporta/apaga registos.
-
-## Como integrar no teu `validador.html` existente
-1. **Mantém** o teu HTML original (com os scripts do WIN, botões, etc.).
-2. Adiciona estas duas linhas antes de `</body>`:
-
-```html
-<script defer src="js/engine-history.v1.js"></script>
-<script defer src="js/validator-hook.save-history.v1.js"></script>
-```
-
-3. Garante que no Cartão 3 existe um botão para gravar, por exemplo:
-```html
-<button id="btnValidateSerial" type="button">Validar nº de motor</button>
-```
-
-Pronto. O botão vai:
-- recolher `brand/model` do EnginePicker,
-- ler o nº de série e notas,
-- guardar no histórico (`localStorage["IDMAR_ENGINE_HISTORY"]`),
-- atualizar o visor com a mensagem de sucesso.
-
-Para ver o histórico, abre `engine-history.html`.
+Como ligar no Validador Motor (drop-in):
+1) Copia as pastas /data e /js para o projeto.
+2) No fim do <body> do validador, adiciona:
+   <script type="module" src="js/engine_autocomplete_addon.v1.js" data-catalog="data/engines_catalog.json"></script>
+3) Opcionalmente, coloca data-attributes nos inputs:
+   data-engine-field="brand|letter_pair|shaft|model_code|series|power|displacement|origin"

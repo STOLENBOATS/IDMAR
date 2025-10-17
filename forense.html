@@ -1,49 +1,6 @@
 <!doctype html>
 <html lang="pt">
 <head>
-<script>
-(function(){
-  if (window.__IDMAR_QSA_PATCHED_V2__) return;
-  function makeSafeQSA(orig){
-    return function(selector){
-      try { return orig.call(this, selector); }
-      catch(e){
-        try{
-          var sel = String(selector).replace(/\[data-x\]\("([^"]+)"\)/g, ':contains("$1")');
-          var parts = sel.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
-          var out = [];
-          for (var i=0;i<parts.length;i++){
-            var part = parts[i], m = part.match(/^(.*?):contains\("([^"]+)"\)$/);
-            if (m){
-              var base = m[1] || '*', text = m[2].toLowerCase();
-              var nodes = orig.call(this, base);
-              for (var j=0;j<nodes.length;j++){
-                var el = nodes[j];
-                if ((el.textContent||'').toLowerCase().indexOf(text) > -1) out.push(el);
-              }
-            } else {
-              try { var nodes2 = orig.call(this, part);
-                for (var k=0;k<nodes2.length;k++) out.push(nodes2[k]); } catch(_){}
-            }
-          }
-          out.forEach = Array.prototype.forEach; return out;
-        }catch(_){ var empty=[]; empty.forEach = Array.prototype.forEach; return empty; }
-      }
-    };
-  }
-  if (!Document.prototype.__idmar_qsa_v2){
-    Document.prototype.querySelectorAll = makeSafeQSA(Document.prototype.querySelectorAll);
-    Document.prototype.__idmar_qsa_v2 = true;
-  }
-  if (!Element.prototype.__idmar_qsa_v2){
-    Element.prototype.querySelectorAll = makeSafeQSA(Element.prototype.querySelectorAll);
-    Element.prototype.__idmar_qsa_v2 = true;
-  }
-  window.__IDMAR_QSA_PATCHED_V2__ = true;
-  console.info("[IDMAR shim] qSA v2: Document+Element protegidos (:contains + [data-x](..)).");
-})();
-</script>
-
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
 
@@ -64,7 +21,7 @@
   <script defer src="js/header-override.v4.js"></script>
   <script defer src="js/i18n-boot.js"></script>
   <script defer src="js/idmar-version.v4.js"></script>
-  
+  <script defer src="js/forense-i18n.v2.js"></script>
 
   <!-- Bilingue PT/EN para a página Forense -->
   <script defer src="js/forense-bilingual.v2.js"></script>
@@ -75,7 +32,7 @@
   <!-- header é injetado por JS -->
 
   <main class="container">
-    <h1>Forense  Índice</h1>
+    <h1>Forense — Índice</h1>
 
     <section class="panel">
       <h2>Carregar evidências</h2>
@@ -99,7 +56,7 @@
         <button id="addRect">Anotar (rect)</button>
         <button id="clearRects">Limpar anotações</button>
         <button id="exportPNG">Exportar PNG anotado</button>
-        <button id="saveBundle">Guardar bundle (JSON)</button>
+        <button id="saveBundle">Guardar “bundle” (JSON)</button>
         <input id="loadBundle" type="file" accept=".json" />
       </div>
       <div class="canvas-wrap" style="position:relative;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#f1f5f9;height:540px">
@@ -121,25 +78,17 @@
         <label><input type="checkbox" id="chk_bloco"> Remarcação no bloco (motor)</label>
       </div>
       <label>Notas</label>
-      <textarea id="notes" rows="4" placeholder="Observações técnicas" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:.5rem .6rem;background:#fff"></textarea>
+      <textarea id="notes" rows="4" placeholder="Observações técnicas…" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:.5rem .6rem;background:#fff"></textarea>
     </section>
   </main>
 
-  <footer class="footer" style="border-top:1px solid var(--border);padding:1rem;opacity:.85;background:var(--bg-elev)">IDMAR  Identificação Marítima</footer>
+  <footer class="footer" style="border-top:1px solid var(--border);padding:1rem;opacity:.85;background:var(--bg-elev)">IDMAR — Identificação Marítima</footer>
 
   <div class="lightbox" id="lightbox" style="position:fixed;inset:0;background:rgba(15,23,42,.85);display:none;align-items:center;justify-content:center;z-index:50">
     <img id="lbImg" alt="" style="max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.5)"/>
   </div>
 
   <!-- (limpo) removido idmar-layout.r3c.js -->
-  <script src="js/forense-r1.js"></script>
-<script defer src="js/forense-i18n.v2.js"></script>
-  
-  <!-- PWA / SW -->
-<link rel="manifest" href="./manifest.webmanifest">
-<script defer src="./js/sw-register.js"></script>
-
+  <script src="js/forense-r1.js?v=r1"></script>
 </body>
 </html>
-
-

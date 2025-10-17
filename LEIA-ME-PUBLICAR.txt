@@ -1,0 +1,54 @@
+# STOL-IDMAR — pacote para publicar (JS + CSS)
+
+Estes ficheiros **não removem** funcionalidades: apenas **acrescentam** (Forense em WIN/Motor; filtros/ordenar nos históricos) e corrigem compatibilidade.
+
+## 1) Ficheiros incluídos
+- `js/validador-win.js`
+- `js/validador-motor.js`
+- `js/historico-win.js`
+- `js/historico-motor.js`
+- `js/utils.js` (opcional — apenas se quiseres a versão robusta de `fmtDate`/helpers)
+- `css/forense.css` (opcional — estilo do painel Forense)
+
+## 2) Substituir no repositório
+Copiar estes ficheiros para as mesmas pastas do repositório `STOL-IDMAR` (GitHub Pages).
+
+## 3) Furando cache do Pages (IMPORTANTE)
+Atualiza as páginas HTML para acrescentar `?v=2025-09-12-1452` nos `<script>` (evita servir JS antigo do CDN).
+
+### 3.1 `validador.html`
+Coloca antes do `</body>` (na ordem):
+```html
+<link rel="stylesheet" href="css/forense.css?v=2025-09-12-1452">
+<script src="js/utils.js?v=2025-09-12-1452"></script>
+<script src="js/validador-win.js?v=2025-09-12-1452"></script>
+<script src="js/validador-motor.js?v=2025-09-12-1452"></script>
+```
+
+### 3.2 `historico_win.html`
+```html
+<script src="js/utils.js?v=2025-09-12-1452"></script>
+<script src="js/historico-win.js?v=2025-09-12-1452"></script>
+```
+
+### 3.3 `historico_motor.html`
+```html
+<script src="js/utils.js?v=2025-09-12-1452"></script>
+<script src="js/historico-motor.js?v=2025-09-12-1452"></script>
+```
+
+## 4) IDs esperados (com fallback)
+- WIN: formulário `formWin` (ou `winForm`), input foto `winPhoto`
+- Motor: formulário `formMotor` (ou `motorForm`), input foto `motorPhoto`
+Se os IDs forem outros, o painel Forense ainda assim é inserido **no fim do formulário**.
+
+## 5) O que vais ver
+- Validador WIN: painel Forense com *Rebites / Cordões de solda / Placa remarcada / Camadas de tinta* + **Notas**.
+- Validador Motor: painel Forense com *Etiqueta adulterada / Core plug / Boss / Bloco* + **Notas**.
+- Ambos: se houver foto, é calculado **SHA-256** (UI não bloqueia). Após gravar, o último registo leva `forense: { hash, flags, notes }`.
+- Históricos (WIN/Motor): pesquisa, filtro por Válido/Inválido, intervalo de datas, ordenação por mais recente, ícone 🧪 quando existir `forense`.
+
+## 6) Limpar caches
+Depois do commit no GitHub, faz um **hard refresh** (Ctrl+F5). Se usares Cloudflare/afins, invalida o cache.
+
+— Fim —

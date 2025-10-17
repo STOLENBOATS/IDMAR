@@ -156,8 +156,8 @@
   <footer class="footer" id="fallback-footer">IDMAR  Identificação Marítima</footer>
 
   <!-- Removido idmar-layout.r3b.js para não duplicar header -->
-  <script src="js/validador-win.r3b.js?v=r3b"></script>
-  <script src="js/validador-motor.r3d.js?v=r3d"></script>
+  <script src="js/validador-win.js"></script>
+  <script src="js/validador-motor.js"></script>
   <script defer src="js/validator-enhancements.v4.js"></script>
 
   <!-- CONFIGURADOR (schema v2) — REMOVIDO para evitar duplicação com o Engine Picker abaixo -->
@@ -181,7 +181,7 @@
   <script type="module"
     src="js/engine_autocomplete_addon.v1.js"
     data-catalog="data/engines_catalog.v1.json"></script>
-  <script defer src="js/patch-forense-i18n-ribbon.r1.js?v=r1"></script>
+  <script defer src="idmar-patch-forense-i18n-ribbon.diff"></script>
   
   <!-- PWA / SW -->
   <link rel="manifest" href="./manifest.webmanifest">

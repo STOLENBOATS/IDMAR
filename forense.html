@@ -1,95 +1,113 @@
 <!doctype html>
 <html lang="pt">
 <head>
-  <meta charset="utf-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>IDMAR — Forense</title>
-  <link rel="icon" href="img/logo-pm.png"/>
+  <link rel="icon" href="img/logo-pm.png" />
 
+  <!-- CSS base do projeto -->
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/theme-soft-light.v1.css">
+  <link rel="stylesheet" href="css/nav-ribbon.v5.css">
+
   <style>
     :root{--bg:#f8fafc;--fg:#0f172a;--bg-elev:#ffffff;--border:#e5e7eb;--link:#0b6bcb}
     body{background:var(--bg);color:var(--fg);margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif}
     .container{max-width:1100px;margin:1.25rem auto;padding:0 1rem}
-    .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1rem;box-shadow:0 1px 2px rgba(0,0,0,.04);margin:.75rem 0}
+    .panel{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1rem;box-shadow:0 1px 2px rgba(0,0,0,.04);margin:.75rem 0}
     .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
+    .row{display:flex;flex-wrap:wrap;gap:.5rem}
     label{display:block;margin:.35rem 0 .25rem}
     input[type="file"], input[type="text"], textarea, select{width:100%;border:1px solid var(--border);border-radius:10px;padding:.5rem .6rem;background:#fff}
-    .btn{padding:.6rem 1rem;border:1px solid #0b6bcb;border-radius:10px;background:#0b6bcb;color:#fff;cursor:pointer}
-    .btn.secondary{background:#fff;color:#0b6bcb}
+    .btn{padding:.6rem 1rem;border:1px solid var(--link);border-radius:10px;background:var(--link);color:#fff;cursor:pointer}
+    .btn.secondary{background:#fff;color:var(--link)}
     .muted{opacity:.8}
+    textarea{min-height:120px}
+    .footer{border-top:1px solid var(--border);padding:1rem;text-align:left;opacity:.85;background:#fff}
   </style>
+
+  <!-- Cabeçalho/i18n do projeto -->
+  <script defer src="js/idmar-config.v4.js"></script>
+  <script defer src="js/idmar-i18n.js"></script>
+  <script defer src="js/idmar-header-only.all.v4.js"></script>
+  <script defer src="js/header-override.v4.js"></script>
+  <script defer src="js/idmar-version.v4.js"></script>
 </head>
 <body>
-<main class="container">
-  <section class="card">
+  <!-- header é injetado por JS -->
+
+  <main class="container">
     <h1>Forense / Forensic</h1>
-    <div class="grid">
-      <label><b>Carregar evidências / Upload evidence</b>
-        <input type="file" id="fz-files" multiple accept="image/*">
-      </label>
-      <label><b>Anexar ao histórico mais recente / Attach to most recent history</b>
-        <select id="fz-attach">
-          <option>Sim / Yes</option>
-          <option>Não / No</option>
-        </select>
-      </label>
-    </div>
-    <div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap">
-      <button class="btn" id="fz-lightbox">Abrir lightbox / Open lightbox</button>
-      <button class="btn" id="fz-compare">Comparar / Compare</button>
-      <button class="btn" id="fz-annot">Anotar (rect) / Annotate (rect)</button>
-      <button class="btn secondary" id="fz-clear">Limpar anotações / Clear annotations</button>
-      <button class="btn" id="fz-export">Exportar PNG anotado / Export annotated PNG</button>
-      <button class="btn" id="fz-save">Guardar "bundle" (JSON) / Save "bundle" (JSON)</button>
-    </div>
-  </section>
 
-  <section class="card">
-    <h2>Checklist forense / Forensic checklist</h2>
-    <div class="grid">
-      <label><input type="checkbox"> Rebites inconsistentes/adiados / Inconsistent/added rivets</label>
-      <label><input type="checkbox"> Cordões de solda anómalos / Anomalous weld beads</label>
-      <label><input type="checkbox"> Placa remarcada/substituída / Re-stamped/substituted plate</label>
-      <label><input type="checkbox"> Camadas de tinta/abrasões / Paint layers/abrasions</label>
-      <label><input type="checkbox"> Etiqueta adulterada/ausente (motor) / Tampered/missing label (engine)</label>
-      <label><input type="checkbox"> Core plug danificado/removido (motor) / Core plug damaged/removed (engine)</label>
-      <label><input type="checkbox"> Solda/corrosão anómala no boss (motor) / Abnormal weld/corrosion on boss (engine)</label>
-      <label><input type="checkbox"> Remarcação no bloco (motor) / Re-stamping on block (engine)</label>
-    </div>
-    <label style="margin-top:.75rem"><b>Notas / Notes</b>
-      <textarea id="fz-notes" rows="4" placeholder="Observações técnicas… / Technical observations…"></textarea>
-    </label>
-  </section>
-</main>
+    <!-- Upload + opções -->
+    <section class="panel">
+      <h2>Carregar evidências / Upload evidence</h2>
+      <div class="grid">
+        <label><b>Ficheiros / Files</b>
+          <input type="file" id="fz-files" multiple accept="image/*,application/pdf">
+        </label>
+        <label><b>Anexar ao histórico mais recente / Attach to most recent history</b>
+          <select id="fz-attach">
+            <option>Sim / Yes</option>
+            <option>Não / No</option>
+          </select>
+        </label>
+      </div>
 
-<!-- Android portrait overlay PT/EN -->
-<script>
-(function(w,d){
-  var isAndroid=/Android/i.test(navigator.userAgent||'');
-  function isPortrait(){return w.matchMedia && w.matchMedia('(orientation: portrait)').matches;}
-  function ensure(){
-    var el=d.getElementById('idmar-rotate-overlay'); if(el) return el;
-    el=d.createElement('div'); el.id='idmar-rotate-overlay';
-    el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;z-index:2147483647;color:#fff';
-    el.innerHTML='<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:2rem">'+
-      '<div style="max-width:520px;width:100%;background:#0b2440;border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:1.25rem;box-shadow:0 10px 25px rgba(0,0,0,.35)">'+
-      '<h3 style="margin:0 0 .5rem 0">Melhor em horizontal / Best viewed in landscape</h3>'+
-      '<p style="margin:.25rem 0 1rem 0;opacity:.9">Estás em Android em modo vertical. Roda o ecrã para <b>horizontal</b>.<br>You are on Android in portrait. Please rotate to <b>landscape</b>.</p>'+
-      '<div style="display:flex;gap:.5rem;justify-content:flex-end"><button id="idmar-rotate-ok" style="background:#66c2ff;border:0;padding:.5rem .9rem;border-radius:10px;color:#001b33;cursor:pointer">Já rodei / I rotated</button></div>'+
-      '</div></div>';
-    d.body.appendChild(el);
-    d.getElementById('idmar-rotate-ok').addEventListener('click', check);
-    return el;
-  }
-  function show(){ ensure().style.display='block'; }
-  function hide(){ var el=d.getElementById('idmar-rotate-overlay'); if(el) el.style.display='none'; }
-  function check(){ if(isAndroid && isPortrait()) show(); else hide(); }
-  w.addEventListener('resize', check, {passive:true});
-  w.addEventListener('orientationchange', check, {passive:true});
-  if (d.readyState!=='loading') check(); else d.addEventListener('DOMContentLoaded', check);
-})(window, document);
-</script>
+      <div class="row" style="margin-top:.75rem">
+        <button class="btn" id="fz-lightbox">Abrir lightbox / Open lightbox</button>
+        <button class="btn" id="fz-compare">Comparar / Compare</button>
+        <button class="btn" id="fz-annot">Anotar (rect) / Annotate (rect)</button>
+        <button class="btn secondary" id="fz-clear">Limpar anotações / Clear annotations</button>
+        <button class="btn" id="fz-export">Exportar PNG anotado / Export annotated PNG</button>
+        <button class="btn" id="fz-save">Guardar “bundle” (JSON) / Save “bundle” (JSON)</button>
+      </div>
+
+      <div class="panel" style="margin-top:.75rem">
+        <h3>Workspace / Workspace</h3>
+        <div id="fz-workspace" style="height:320px;border:1px dashed var(--border);border-radius:10px;background:#fafafa"></div>
+        <p class="muted" style="margin-top:.35rem">Dica: a comparação usa a 1ª e a 2ª foto; as anotações servem para redação/realce. /
+        Tip: comparison uses the 1st and 2nd photo; annotations help highlighting/notes.</p>
+      </div>
+    </section>
+
+    <!-- Checklist -->
+    <section class="panel">
+      <h2>Checklist forense / Forensic checklist</h2>
+      <div class="grid">
+        <label><input type="checkbox"> Rebites inconsistentes/adiados / Inconsistent/added rivets</label>
+        <label><input type="checkbox"> Cordões de solda anómalos / Anomalous weld beads</label>
+        <label><input type="checkbox"> Placa remarcada/substituída / Re-stamped/substituted plate</label>
+        <label><input type="checkbox"> Camadas de tinta/abrasões / Paint layers/abrasions</label>
+        <label><input type="checkbox"> Etiqueta adulterada/ausente (motor) / Tampered/missing label (engine)</label>
+        <label><input type="checkbox"> Core plug danificado/removido (motor) / Core plug damaged/removed (engine)</label>
+        <label><input type="checkbox"> Solda/corrosão anómala no boss (motor) / Abnormal weld/corrosion on boss (engine)</label>
+        <label><input type="checkbox"> Remarcação no bloco (motor) / Re-stamping on block (engine)</label>
+      </div>
+      <label style="margin-top:.75rem"><b>Notas / Notes</b>
+        <textarea id="fz-notes" placeholder="Observações técnicas… / Technical observations…"></textarea>
+      </label>
+    </section>
+  </main>
+
+  <footer class="footer">IDMAR — Identificação Marítima</footer>
+
+  <!-- Overlay Android PT/EN -->
+  <script defer src="js/android-orientation-guard.js"></script>
+
+  <!-- Espaços para integrares a tua lógica (se já tiveres JS para lightbox/anotações, basta ligar pelos IDs) -->
+  <script>
+  (function(d){
+    // Placeholders mínimos de UX para não ficar “morto”
+    var toast = function(msg){ try{ alert(msg); }catch(e){} };
+    d.getElementById('fz-export').addEventListener('click', function(){ toast('Exportar PNG anotado / Export annotated PNG'); });
+    d.getElementById('fz-save').addEventListener('click', function(){ toast('Guardar “bundle” (JSON) / Save “bundle” (JSON)'); });
+    d.getElementById('fz-clear').addEventListener('click', function(){ toast('Limpar anotações / Clear annotations'); });
+    d.getElementById('fz-annot').addEventListener('click', function(){ toast('Anotar (rect) / Annotate (rect)'); });
+    d.getElementById('fz-compare').addEventListener('click', function(){ toast('Comparar / Compare'); });
+    d.getElementById('fz-lightbox').addEventListener('click', function(){ toast('Abrir lightbox / Open lightbox'); });
+  })(document);
+  </script>
 </body>
 </html>

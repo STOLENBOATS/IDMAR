@@ -344,5 +344,89 @@
 
   <!-- 2) Bridge v2 → Base/Variante + pesquisa por potência -->
   <script defer src="js/model-split-bridge.v2.js"></script>
+
+  <script defer src="js/engine-history.v1.js"></script>
+<script defer src="js/validator-hook.save-history.v1.js"></script>
+
+  <style>
+  /* destacar o botão do Cartão 3 para não passar despercebido */
+  #btnValidateSerial {
+    font-weight: 700;
+    min-width: 220px;
+  }
+</style>
+
+<script>
+(function (w, d) {
+  function ensureValidateBtn() {
+    let btn = d.getElementById('btnValidateSerial');
+    const hostPanel = d.getElementById('card-serial');
+    if (!hostPanel) return null;
+
+    if (!btn) {
+      // criar o botão logo abaixo do campo de série
+      const holder = d.createElement('div');
+      holder.style.margin = '.75rem 0 .25rem';
+      btn = d.createElement('button');
+      btn.type = 'button';
+      btn.id = 'btnValidateSerial';
+      btn.textContent = '✓ Validar nº de motor';
+      holder.appendChild(btn);
+
+      const after = d.getElementById('engine-sn-result') || d.getElementById('engine-sn-raw') || hostPanel;
+      after.parentNode.insertBefore(holder, after.nextSibling);
+      console.log('[IDMAR] botão de validação criado dinamicamente');
+    }
+    return btn;
+  }
+
+  function onClickValidate() {
+    const sn = (document.getElementById('engine-sn-raw')?.value || '').trim();
+    const notes = (document.getElementById('engine-sn-notes')?.value || '').trim();
+
+    // recolha básica (sem depender de nada externo)
+    const brand =
+      w.EnginePickerState?.brand ||
+      document.getElementById('engineBrand')?.value || '';
+    const model =
+      w.EnginePickerState?.model ||
+      document.getElementById('engineModel')?.value || '';
+    const family = w.EnginePickerState?.family || null;
+
+    const payload = {
+      ts: new Date().toISOString(),
+      brand, model, family,
+      serial: { raw: sn, kind: (document.querySelector('input[name="engine-sn-kind"]:checked')?.value || 'auto') },
+      notes
+    };
+
+    // guardar no histórico local
+    try {
+      const KEY = 'IDMAR_ENGINE_HISTORY';
+      const arr = JSON.parse(localStorage.getItem(KEY) || '[]');
+      arr.push(payload);
+      localStorage.setItem(KEY, JSON.stringify(arr, null, 2));
+      console.log('[IDMAR] guardado no histórico:', payload);
+
+      const visor = document.getElementById('engine-id-status');
+      if (visor) visor.textContent = '✓ Registo guardado no histórico local.';
+      alert('✓ Nº de motor validado/guardado no histórico local.');
+    } catch (e) {
+      console.error('[IDMAR] falha ao gravar histórico', e);
+      alert('Falha ao gravar histórico local.');
+    }
+  }
+
+  w.addEventListener('DOMContentLoaded', function () {
+    const btn = ensureValidateBtn();
+    if (btn && !btn.dataset._bound) {
+      btn.dataset._bound = '1';
+      btn.addEventListener('click', onClickValidate);
+    }
+  });
+})(window, document);
+</script>
+
+
 </body>
 </html>

@@ -1,55 +1,53 @@
-// js/engine-history.v1.js — guarda e lista registos de motores (localStorage)
-(function(w, d){
+
+// js/engine-history.v1.js
+(function (w) {
   'use strict';
   const KEY = 'IDMAR_ENGINE_HISTORY';
   const MAX = 1000;
 
-  function nowISO(){ return new Date().toISOString(); }
-
-  function load(){
-    try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }
-    catch(e){ return []; }
+  function _load() {
+    try { return JSON.parse(localStorage.getItem(KEY) || '[]'); }
+    catch (e) { return []; }
   }
-  function saveList(list){
-    localStorage.setItem(KEY, JSON.stringify(list.slice(-MAX)));
-    try{ w.dispatchEvent(new Event('idmar:engine-history-changed')); }catch(e){}
+  function _save(list) {
+    localStorage.setItem(KEY, JSON.stringify(list, null, 2));
   }
 
-  function save(payload){
-    const entry = {
-      ts: nowISO(),
-      brand: payload?.brand || '',
-      model: (payload?.model || '').trim(),
-      family: payload?.family || null,
-      power: payload?.family?.power || null,
-      serial: payload?.serial?.raw || '',
-      serial_kind: payload?.serial?.kind || 'auto',
-      notes: payload?.notes || '',
-      extra: payload?.extra || {}
-    };
-    const list = load();
-    list.push(entry);
-    saveList(list);
-    return entry;
+  function save(entry) {
+    const now = Date.now();
+    const rec = Object.assign({ ts: now }, entry || {});
+    const list = _load();
+    list.unshift(rec);
+    while (list.length > MAX) list.pop();
+    _save(list);
+    return rec;
   }
 
-  function all(){ return load().slice().reverse(); }
-  function clear(){ saveList([]); }
-  function removeByTs(ts){
-    const list = load().filter(e => e.ts !== ts);
-    saveList(list);
+  function all() { return _load(); }
+  function clear() { localStorage.removeItem(KEY); }
+  function removeByTs(ts) {
+    const list = _load().filter(x => String(x.ts) !== String(ts));
+    _save(list);
   }
-
-  function toCSV(list){
-    const cols=['ts','brand','model','power','serial','serial_kind','notes'];
-    const esc=v=>`"${String(v||'').replace(/"/g,'""')}"`;
-    return [cols.join(',')].concat(list.map(e=>cols.map(c=>esc(e[c])).join(','))).join('\n');
-  }
-
-
-    const cols = ['ts','brand','model','power','serial','serial_kind','notes'];
-    const esc = v => '"' + String(v||'').replace(/"/g,'""') + '"';
+  function toCSV(arr) {
+    arr = Array.isArray(arr) ? arr : _load();
+    if (!arr.length) return 'timestamp,brand,model,serial,notes,family.version,family.power\n';
+    const head = ['timestamp','brand','model','serial','notes','family.version','family.power'];
+    const lines = [head.join(',')];
+    for (const r of arr) {
+      const row = [
+        new Date(r.ts||Date.now()).toISOString(),
+        (r.brand||'').replace(/,/g,' '),
+        (r.model||'').replace(/,/g,' '),
+        (r.serial?.raw||r.serial||'').toString().replace(/,/g,' '),
+        (r.notes||'').toString().replace(/[\r\n,]+/g,' ').slice(0,400),
+        (r.family?.version||'').toString().replace(/,/g,' '),
+        (r.family?.power||'').toString().replace(/,/g,' ')
+      ];
+      lines.push(row.join(','));
+    }
+    return lines.join('\n') + '\n';
   }
 
   w.EngineHistory = { save, all, clear, removeByTs, toCSV };
-})(window, document);
+})(window);

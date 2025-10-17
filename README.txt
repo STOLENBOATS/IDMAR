@@ -1,22 +1,29 @@
-IDMAR roll-down bridge patch
---------------------------------
-Colocar estes ficheiros no teu repositório:
 
-/js/model-split-bridge.v1.js           (novo)  → preenche os dropdowns “Modelo base” e “Variante” a partir de data/engine_families.v1.json e faz a ponte para o picker de família/versão.
-/js/engine-family-picker.v1.js         (update)→ expõe CurrentBrandPolicy, auto-seleciona versão quando existe BASE+VARIANTE e hidrata potência + ranges.
-/js/engine-serial-range-check.v1.js    (update)→ valida nº por política da marca + intervalos, suporta overlaps.
-/js/engine-sn-panel.v2.js              (update)→ mostra todos os matches; amarelo quando só estrutural.
+# IDMAR hotfix – histórico sem mexer no WIN
 
-HTML (cartão Motor):
-- Adiciona os selects:
-  <select id="modelBaseList"></select>
-  <select id="modelVariantList"></select>
-- Garante os hidden inputs:
-  <input id="engineBase" type="hidden">
-  <input id="engineVariant" type="hidden">
+## O que vem aqui
+- `js/engine-history.v1.js`: API de histórico (localStorage).
+- `js/validator-hook.save-history.v1.js`: liga o botão do cartão 3 para gravar no histórico **sem tocar** no teu fluxo do WIN.
+- `engine-history.html`: lista/exporta/apaga registos.
 
-Scripts (no fim do <body>):
-  <script defer src="js/engine-family-picker.v1.js"></script>
-  <script defer src="js/model-split-bridge.v1.js"></script>
-  <script defer src="js/engine-serial-range-check.v1.js"></script>
-  <script defer src="js/engine-sn-panel.v2.js"></script>
+## Como integrar no teu `validador.html` existente
+1. **Mantém** o teu HTML original (com os scripts do WIN, botões, etc.).
+2. Adiciona estas duas linhas antes de `</body>`:
+
+```html
+<script defer src="js/engine-history.v1.js"></script>
+<script defer src="js/validator-hook.save-history.v1.js"></script>
+```
+
+3. Garante que no Cartão 3 existe um botão para gravar, por exemplo:
+```html
+<button id="btnValidateSerial" type="button">Validar nº de motor</button>
+```
+
+Pronto. O botão vai:
+- recolher `brand/model` do EnginePicker,
+- ler o nº de série e notas,
+- guardar no histórico (`localStorage["IDMAR_ENGINE_HISTORY"]`),
+- atualizar o visor com a mensagem de sucesso.
+
+Para ver o histórico, abre `engine-history.html`.

@@ -4,87 +4,96 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>IDMAR — Histórico de motores</title>
+  <link rel="icon" href="img/logo-pm.png"/>
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/theme-soft-light.v1.css">
   <style>
     :root{--bg:#f8fafc;--fg:#0f172a;--bg-elev:#fff;--border:#e5e7eb;--link:#0b6bcb}
-    body{background:var(--bg);color:var(--fg);margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif}
-    .container{max-width:1100px;margin:1rem auto;padding:0 1rem}
+    body{background:var(--bg);color:var(--fg);margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif}
+    main{max-width:1100px;margin:1.25rem auto;padding:0 1rem}
     .panel{background:var(--bg-elev);border:1px solid var(--border);border-radius:12px;padding:1rem;margin:.75rem 0}
-    input,select{border:1px solid var(--border);border-radius:10px;padding:.45rem .6rem;background:#fff}
     table{width:100%;border-collapse:collapse}
-    th,td{border-bottom:1px solid var(--border);padding:.5rem;text-align:left;font-size:.95rem}
-    .actions{display:flex;gap:.4rem;flex-wrap:wrap}
-    button{background:#0b6bcb;color:#fff;border:none;border-radius:10px;padding:.5rem .8rem;cursor:pointer}
-    .btn-secondary{background:#111827}
+    th,td{border-bottom:1px solid var(--border);padding:.5rem .4rem;text-align:left;font-size:14px}
+    .row{display:flex;gap:.5rem;flex-wrap:wrap;margin:.5rem 0}
+    button{background:#0b6bcb;color:#fff;border:none;border-radius:10px;padding:.55rem .9rem;cursor:pointer}
+    .btn-secondary{background:#111827;color:#fff}
     .btn-danger{background:#ef4444}
+    input[type="search"]{width:260px;border:1px solid var(--border);border-radius:10px;padding:.4rem .6rem}
   </style>
 </head>
 <body>
-  <main class="container">
-    <h1 style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
-      <button class="btn-secondary" onclick="location.href='validador.html'">← Validador</button>
-      <span>Histórico de motores</span>
-    </h1>
+<main>
+  <h1>Histórico de motores</h1>
+  <div class="row">
+    <button class="btn-secondary" onclick="location.href='validador.html'">← Voltar ao Validador</button>
+    <input id="q" type="search" placeholder="procurar por modelo, série, notas…">
+    <button id="exportCsv">Exportar CSV</button>
+    <button id="clear" class="btn-danger">Limpar tudo</button>
+  </div>
+  <div class="panel">
+    <table>
+      <thead><tr>
+        <th>Data</th><th>Marca</th><th>Modelo</th><th>Nº série</th><th>Versão</th><th>Potência</th><th>Notas</th><th></th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</main>
 
-    <div class="panel">
-      <div class="actions" style="margin-bottom:.75rem">
-        <input id="q" placeholder="Pesquisa… (marca, modelo, SN)" style="flex:1">
-        <button id="exportCsv">Exportar CSV</button>
-        <button id="exportJson" class="btn-secondary">Exportar JSON</button>
-        <button id="clear" class="btn-danger">Limpar</button>
-      </div>
-      <table id="tbl">
-        <thead>
-          <tr>
-            <th>Data</th><th>Marca</th><th>Modelo</th><th>Potência</th><th>SN</th><th>Notas</th><th></th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </main>
+<script src="js/engine-history.v1.js"></script>
+<script>
+(function(){
+  const $ = s => document.querySelector(s);
+  const tbody = $('#tbody');
+  const q = $('#q');
 
-  <script src="js/engine-history.v1.js"></script>
-  <script>
-    const $ = s => document.querySelector(s);
-    function fmtTs(ts){ try{ const d=new Date(ts); return d.toLocaleString(); }catch(e){ return ts; } }
-
-    function render(){
-      const q = ($('#q').value||'').toLowerCase();
-      const data = EngineHistory.all().filter(e =>
-        !q || [e.brand,e.model,e.serial].join(' ').toLowerCase().includes(q)
-      );
-      const tbody = $('#tbl tbody');
-      tbody.innerHTML = data.map(e => `
-        <tr>
-          <td>${fmtTs(e.ts)}</td>
-          <td>${e.brand}</td>
-          <td>${e.model || (e.family?.version || '')}</td>
-          <td>${e.power || ''}</td>
-          <td>${e.serial || ''}</td>
-          <td>${e.notes || ''}</td>
-          <td><button class="btn-danger" data-del="${e.ts}">Apagar</button></td>
-        </tr>`).join('');
-      tbody.querySelectorAll('[data-del]').forEach(btn => {
-        btn.addEventListener('click', ()=>{ EngineHistory.removeByTs(btn.getAttribute('data-del')); render(); });
-      });
-    }
-
-    document.getElementById('q').addEventListener('input', render);
-    document.getElementById('clear').addEventListener('click', ()=>{ if(confirm('Limpar histórico?')){ EngineHistory.clear(); render(); }});
-    document.getElementById('exportCsv').addEventListener('click', ()=>{
-      const csv = EngineHistory.toCSV(EngineHistory.all());
-      const blob = new Blob([csv], {type:'text/csv'});
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='engine_history.csv'; a.click(); URL.revokeObjectURL(a.href);
+  function render(list){
+    tbody.innerHTML = '';
+    list.forEach(r => {
+      const tr = document.createElement('tr');
+      const td = (t)=>{ const x=document.createElement('td'); x.textContent=t||''; return x; };
+      tr.appendChild(td(new Date(r.ts).toLocaleString()));
+      tr.appendChild(td(r.brand));
+      tr.appendChild(td(r.model));
+      tr.appendChild(td(r.serial && (r.serial.raw || r.serial)));
+      tr.appendChild(td(r.family && r.family.version));
+      tr.appendChild(td(r.family && r.family.power));
+      tr.appendChild(td(r.notes));
+      const del = document.createElement('td');
+      const b = document.createElement('button');
+      b.textContent = 'Apagar';
+      b.className = 'btn-danger';
+      b.onclick = ()=>{ EngineHistory.removeByTs(r.ts); load(); };
+      del.appendChild(b);
+      tr.appendChild(del);
+      tbody.appendChild(tr);
     });
-    document.getElementById('exportJson').addEventListener('click', ()=>{
-      const blob = new Blob([JSON.stringify(EngineHistory.all(), null, 2)], {type:'application/json'});
-      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='engine_history.json'; a.click(); URL.revokeObjectURL(a.href);
-    });
+  }
 
-    window.addEventListener('idmar:engine-history-changed', render);
-    render();
-  </script>
+  function load(){
+    const list = EngineHistory.all();
+    const term = (q.value || '').toLowerCase();
+    const filt = !term ? list : list.filter(r => JSON.stringify(r).toLowerCase().includes(term));
+    render(filt);
+  }
+
+  $('#exportCsv').onclick = ()=>{
+    const csv = EngineHistory.toCSV(EngineHistory.all());
+    const blob = new Blob([csv], {type:'text/csv;charset=utf-8'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'idmar_engine_history.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+  $('#clear').onclick = ()=>{
+    if(confirm('Limpar todo o histórico?')){ EngineHistory.clear(); load(); }
+  };
+  q.addEventListener('input', load);
+
+  load();
+})();
+</script>
 </body>
 </html>

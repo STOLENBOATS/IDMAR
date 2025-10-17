@@ -1,12 +1,7 @@
-/* css/engine-picker.css (r4) */
-.engine-picker { margin-top: .5rem; }
-.ep-field { display: flex; flex-direction: column; gap: .25rem; }
-.ep-label { font-weight: 600; font-size: .95rem; }
-.ep-input { padding: .5rem .6rem; border: 1px solid #e5e7eb; border-radius: .5rem; font-size: .95rem; }
-.ep-error { color: #b91c1c; font-weight: 600; margin:.5rem 0; }
-.ep-hint { color: #374151; font-size:.9rem; }
-@media (prefers-color-scheme: dark) {
-  .ep-input { border-color: #374151; background: #111827; color: #e5e7eb; }
-  .ep-label { color: #e5e7eb; }
-  .ep-hint { color: #9ca3af; }
-}
+/* css/engine-picker.css — minimal */
+.engine-picker { margin:.25rem 0 .5rem; }
+.ep-field { display:flex; flex-direction:column; gap:.25rem; }
+.ep-label { font-weight:600; }
+.ep-input { width:100%; border:1px solid #e5e7eb; border-radius:10px; padding:.5rem .6rem; }
+.ep-error { padding:.6rem .75rem; border:1px solid #fecaca; border-radius:10px; background:#fff1f2; }
+.ep-hint { font-size:.9rem; opacity:.8; margin-top:.25rem; }

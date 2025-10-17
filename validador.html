@@ -1,6 +1,5 @@
 <!doctype html>
 <html lang="pt">
-
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -12,7 +11,7 @@
   <link rel="stylesheet" href="css/theme-soft-light.v1.css"><!-- tema claro -->
   <link rel="stylesheet" href="css/nav-ribbon.v5.css"><!-- botões "ribbon" v5 -->
 
-   <style>
+  <style>
     :root{--bg:#f8fafc;--fg:#0f172a;--bg-elev:#ffffff;--border:#e5e7eb;--link:#0b6bcb}
     html,body{height:100%}
     body{background:var(--bg);color:var(--fg);margin:0;display:flex;flex-direction:column;
@@ -20,8 +19,11 @@
     main{flex:1}
     .container{max-width:1100px;margin:1.25rem auto;padding:0 1rem}
     .panel{background:var(--bg-elev);border:1px solid var(--border);border-radius:12px;padding:1rem;margin:.75rem 0}
-    .two{display:grid;grid-template-columns:1fr;gap:1rem}
-    @media(min-width:980px){ .two{grid-template-columns:1fr 1fr} }
+    /* grelha 3 cartões */
+    .cards-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;align-items:start}
+    @media (max-width:1280px){ .cards-row-3{grid-template-columns:1fr 1fr} }
+    @media (max-width:900px){ .cards-row-3{grid-template-columns:1fr} }
+    .cards-row-3 > .panel{width:auto;max-width:100%;margin:0}
     label{display:block;margin:.35rem 0 .25rem}
     input[type="text"], input[type="search"], input[type="file"], select, textarea{
       width:100%;border:1px solid var(--border);background:#fff;border-radius:10px;padding:.5rem .6rem;
@@ -37,7 +39,7 @@
     .forense-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.5rem;margin-top:.5rem}
     .footer{border-top:1px solid var(--border);padding:1rem;text-align:left;opacity:.85;background:var(--bg-elev)}
   </style>
-  
+
   <!-- Gate de sessão simples -->
   <script>
     (function(){
@@ -68,15 +70,17 @@
   <main class="container">
     <h1>Validador</h1>
 
-    <section class="two">
-      <!-- WIN -->
-      <div class="panel">
-        <h2>Validador WIN</h2>
+    <!-- ====== TRÊS CARTÕES ====== -->
+    <section class="cards-row-3">
+
+      <!-- CARTÃO 1: WIN -->
+      <div class="panel" id="card-win">
+        <h2>Validador WIN / WIN Validator</h2>
         <form id="formWin">
           <label for="win">WIN / HIN</label>
           <input id="win" type="text" placeholder="Ex.: PT-ABC12345D404"/>
           <div style="margin:.5rem 0">
-            <button id="btnWin" type="submit">Validar WIN</button>
+            <button id="btnWin" type="submit">Validar WIN / Validate WIN</button>
           </div>
 
           <div style="margin-top:.5rem">
@@ -95,51 +99,49 @@
         </form>
       </div>
 
-      <!-- MOTOR -->
-      <div class="panel">
-        <h2>Validador Motor</h2>
+      <!-- CARTÃO 2: MOTOR -->
+      <div class="panel" id="card-engine">
+        <h2>Validador Motor / Engine Validator</h2>
         <form id="formMotor">
-          <label for="brand">Marca</label>
-          <!-- marca -->
+          <label for="brand">Marca / Brand</label>
           <select id="brand" data-engine-field="brand">
             <option>Yamaha</option><option>Honda</option><option>Suzuki</option><option>Tohatsu</option>
             <option>Mercury</option><option>MerCruiser</option><option>Volvo Penta</option>
             <option>Yanmar</option><option>Evinrude/Johnson</option>
           </select>
 
-          <!-- aqui o JS pode injetar campos dinâmicos (shaft / par de letras / série, etc.) -->
           <div id="brandDynamic"></div>
 
           <div style="margin-top:.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:.5rem">
             <div>
-              <label>Modelo (pesquisa)</label>
+              <label>Modelo (pesquisa) / Model (search)</label>
               <input id="srch_model" type="text" placeholder="Ex.: DF140A"
                      data-engine-field="model_code"/>
             </div>
             <div>
-              <label>Potência (hp)</label>
+              <label>Potência (hp) / Power (hp)</label>
               <input id="srch_power" type="text" placeholder="Ex.: 150"
                      data-engine-field="power"/>
             </div>
             <div>
-              <label>Cilindrada (cc)</label>
+              <label>Cilindrada (cc) / Displacement (cc)</label>
               <input id="srch_disp" type="text" placeholder="Ex.: 2670"
                      data-engine-field="displacement"/>
             </div>
             <div>
-              <label>Ano</label>
+              <label>Ano / Year</label>
               <input id="srch_year" type="text" placeholder="Ex.: 2017"
                      data-engine-field="year"/>
             </div>
             <div>
-              <label>Origem</label>
+              <label>Origem / Origin</label>
               <input id="srch_origin" type="text" placeholder="Ex.: Japão"
                      data-engine-field="origin"/>
             </div>
           </div>
 
           <div style="margin:.5rem 0">
-            <button id="btnMotor" type="submit">Validar Motor</button>
+            <button id="btnMotor" type="submit">Validar Motor / Validate Engine</button>
           </div>
 
           <div style="margin-top:.5rem">
@@ -150,12 +152,45 @@
           <div id="motorOut" style="margin-top:.75rem"></div>
         </form>
       </div>
+
+      <!-- CARTÃO 3: Nº DE MOTOR — PESQUISA -->
+      <div class="panel" id="card-motor-quick">
+        <h2>Nº de Motor - Pesquisa / Engine No. - Search</h2>
+
+        <div style="display:grid;gap:.5rem;grid-template-columns:repeat(auto-fit,minmax(180px,1fr))">
+          <label><b>Marca / Brand</b>
+            <input id="mq-brand" placeholder="Yamaha, Honda, Mercury...">
+          </label>
+          <label><b>Modelo / Model</b>
+            <input id="mq-model" placeholder="F350, BF150, DF90...">
+          </label>
+          <label><b>Variante / Variant</b>
+            <input id="mq-variant" placeholder="NSA, A, X, L...">
+          </label>
+          <label><b>Nº Série / Serial</b>
+            <input id="mq-serial" placeholder="6ML-1005843 / BAAL-1234567">
+          </label>
+        </div>
+
+        <div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap">
+          <button id="mq-validate" class="btn">
+            Validar nº de motor / Validate
+          </button>
+          <a class="btn secondary" href="validador_motor_simplificado.html">
+            Abrir página avançada / Open advanced
+          </a>
+        </div>
+
+        <div id="mq-feedback" class="small" style="margin-top:.5rem"></div>
+      </div>
+
     </section>
+    <!-- ====== /TRÊS CARTÕES ====== -->
   </main>
 
   <footer class="footer" id="fallback-footer">IDMAR — Identificação Marítima</footer>
 
-  <!-- Removido idmar-layout.r3b.js para não duplicar header -->
+  <!-- Scripts funcionais existentes -->
   <script src="js/validador-win.r3b.js?v=r3b"></script>
   <script src="js/validador-motor.r3d.js?v=r3d"></script>
   <script defer src="js/validator-enhancements.v4.js"></script>
@@ -169,7 +204,7 @@
   <script defer src="js/engine_validation.v1.js"></script>
 
   <!-- Admin rápido embutido (motores + WIN) – se NÃO quiseres este bloco na página, comenta esta linha -->
-  <!-- <script defer src="js/engine_admin_embed.v1.js"></script>
+  <!-- <script defer src="js/engine_admin_embed.v1.js"></script> -->
 
   <!-- Botão "Admin" no ribbon -->
   <script>window.IDMAR_ADMIN_URL = 'admin-engines.html';</script>
@@ -179,9 +214,37 @@
   <script type="module"
     src="js/engine_autocomplete_addon.v1.js"
     data-catalog="data/engines_catalog.v1.json"></script>
-<script defer src="js/orientation-guard.js"></script>
-  <script defer src="js/boot-idmar.js"></script>
+
+  <!-- Aviso Android PT/EN -->
+  <script defer src="js/android-orientation-guard.js"></script>
+
+  <!-- Lógica mínima do Cartão 3 (grava no histórico e abre o histórico) -->
+  <script>
+  (function(d){
+    var b=d.getElementById('mq-validate'); if(!b) return;
+    if(!b.dataset.bound){ b.dataset.bound="1";
+      b.addEventListener('click', function(e){
+        e.preventDefault();
+        var v=(x)=> (x||'').trim();
+        var rec={
+          date:new Date().toISOString(),
+          brand:v(d.getElementById('mq-brand')?.value),
+          model:v(d.getElementById('mq-model')?.value),
+          variant:v(d.getElementById('mq-variant')?.value),
+          motor:v(d.getElementById('mq-serial')?.value),
+          result:'Registado / Recorded', reason:'Cartão 3', photo:''
+        };
+        try{
+          var arr=JSON.parse(localStorage.getItem('hist_motor')||'[]'); arr.unshift(rec);
+          localStorage.setItem('hist_motor', JSON.stringify(arr));
+        }catch(e){}
+        var fb=d.getElementById('mq-feedback');
+        if(fb){ fb.textContent='Registado: '+[rec.brand,rec.model,rec.variant,rec.motor].filter(Boolean).join(' / '); }
+        try{ window.location.href='historico_motor.html'; }catch(_){}
+      });
+    }
+  })(document);
+  </script>
 
 </body>
 </html>
-

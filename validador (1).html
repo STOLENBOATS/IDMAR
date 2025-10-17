@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>IDMAR — Validador</title>
+  <link rel="icon" href="img/logo-pm.png"/>
+
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/theme-soft-light.v1.css">
+  <link rel="stylesheet" href="css/nav-ribbon.v5.css">
+
+  <style>
+    :root{--bg:#f8fafc;--fg:#0f172a;--bg-elev:#ffffff;--border:#e5e7eb;--link:#0b6bcb}
+    html,body{height:100%}
+    body{background:var(--bg);color:var(--fg);margin:0;display:flex;flex-direction:column;
+         font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif}
+    main{flex:1}
+    .container{max-width:1200px;margin:1.25rem auto;padding:0 1rem}
+    .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1rem;box-shadow:0 1px 2px rgba(0,0,0,.04)}
+    .cards-row-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;align-items:start}
+    @media (max-width:1280px){ .cards-row-3{grid-template-columns:1fr 1fr} }
+    @media (max-width:900px){ .cards-row-3{grid-template-columns:1fr} }
+    .cards-row-3 > .card{width:auto;max-width:100%;margin:0}
+    label{display:block;margin:.35rem 0 .25rem}
+    input[type="text"], input[type="search"], input[type="file"], select, textarea{
+      width:100%;border:1px solid var(--border);background:#fff;border-radius:10px;padding:.5rem .6rem;
+    }
+    .muted{opacity:.8}
+    .btn{padding:.6rem 1rem;border:1px solid #0b6bcb;border-radius:10px;background:#0b6bcb;color:#fff;cursor:pointer}
+    .btn.secondary{background:#fff;color:#0b6bcb}
+    .footer{border-top:1px solid var(--border);padding:1rem;text-align:left;opacity:.85;background:#fff}
+  </style>
+
+  <script>
+    (function(){
+      try{
+        var ok = sessionStorage.getItem('IDMAR_SESSION')==='ok' || sessionStorage.getItem('NAV_SESSION')==='ok';
+        if(!ok) location.replace('login.html');
+      }catch(e){}
+    })();
+  </script>
+</head>
+<body>
+<header id="injected-header"></header>
+
+<main class="container">
+  <div class="cards-row-3">
+
+    <section class="card" id="card-win">
+      <h2>Validador WIN / WIN Validator</h2>
+      <div>
+        <label><b>WIN / HIN</b>
+          <input type="text" id="win-input" placeholder="Ex.: PT-ABC12345K919">
+        </label>
+        <div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap">
+          <button id="btn-win-validate" class="btn">Validar WIN / Validate WIN</button>
+        </div>
+        <div id="win-feedback" class="muted" style="margin-top:.5rem"></div>
+      </div>
+    </section>
+
+    <section class="card" id="card-engine">
+      <h2>Validador Motor / Engine Validator</h2>
+      <div style="display:grid;gap:.5rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+        <label><b>Marca / Brand</b><input id="eng-brand" placeholder="Yamaha, Honda, Mercury..."></label>
+        <label><b>Modelo / Model</b><input id="eng-model" placeholder="F350, BF150, DF90..."></label>
+        <label><b>Variante / Variant</b><input id="eng-variant" placeholder="NSA, A, X, L..."></label>
+        <label><b>Nº Série / Serial</b><input id="eng-serial" placeholder="6ML-1005843 / BAAL-1234567"></label>
+      </div>
+      <div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <button id="btn-engine-validate" class="btn">Validar Motor / Validate Engine</button>
+      </div>
+      <div id="eng-feedback" class="muted" style="margin-top:.5rem"></div>
+    </section>
+
+    <section id="card-motor-quick" class="card">
+      <h2>Nº de Motor - Pesquisa / Engine No. - Search</h2>
+      <div style="display:grid;gap:.5rem;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+        <label><b>Marca / Brand</b><input id="mq-brand" placeholder="Yamaha, Honda, Mercury..."></label>
+        <label><b>Modelo / Model</b><input id="mq-model" placeholder="F350, BF150, DF90..."></label>
+        <label><b>Variante / Variant</b><input id="mq-variant" placeholder="NSA, A, X, L..."></label>
+        <label><b>Nº Série / Serial</b><input id="mq-serial" placeholder="6ML-1005843 / BAAL-1234567"></label>
+      </div>
+      <div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap">
+        <button id="mq-validate" class="btn">Validar nº de motor / Validate</button>
+        <a class="btn secondary" href="validador_motor_simplificado.html">Abrir página avançada / Open advanced</a>
+      </div>
+      <div id="mq-feedback" class="muted" style="margin-top:.5rem"></div>
+    </section>
+
+  </div>
+</main>
+
+<footer class="footer">IDMAR — Identificação Marítima</footer>
+
+<!-- Android portrait overlay PT/EN -->
+<script>
+(function(w,d){
+  var isAndroid=/Android/i.test(navigator.userAgent||'');
+  function isPortrait(){return w.matchMedia && w.matchMedia('(orientation: portrait)').matches;}
+  function ensure(){
+    var el=d.getElementById('idmar-rotate-overlay'); if(el) return el;
+    el=d.createElement('div'); el.id='idmar-rotate-overlay';
+    el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;z-index:2147483647;color:#fff';
+    el.innerHTML='<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:2rem">'+
+      '<div style="max-width:520px;width:100%;background:#0b2440;border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:1.25rem;box-shadow:0 10px 25px rgba(0,0,0,.35)">'+
+      '<h3 style="margin:0 0 .5rem 0">Melhor em horizontal / Best viewed in landscape</h3>'+
+      '<p style="margin:.25rem 0 1rem 0;opacity:.9">Estás em Android em modo vertical. Roda o ecrã para <b>horizontal</b>.<br>You are on Android in portrait. Please rotate to <b>landscape</b>.</p>'+
+      '<div style="display:flex;gap:.5rem;justify-content:flex-end"><button id="idmar-rotate-ok" style="background:#66c2ff;border:0;padding:.5rem .9rem;border-radius:10px;color:#001b33;cursor:pointer">Já rodei / I rotated</button></div>'+
+      '</div></div>';
+    d.body.appendChild(el);
+    d.getElementById('idmar-rotate-ok').addEventListener('click', check);
+    return el;
+  }
+  function show(){ ensure().style.display='block'; }
+  function hide(){ var el=d.getElementById('idmar-rotate-overlay'); if(el) el.style.display='none'; }
+  function check(){ if(isAndroid && isPortrait()) show(); else hide(); }
+  w.addEventListener('resize', check, {passive:true});
+  w.addEventListener('orientationchange', check, {passive:true});
+  if (d.readyState!=='loading') check(); else d.addEventListener('DOMContentLoaded', check);
+})(window, document);
+</script>
+
+<!-- Lógica mínima do Cartão 3 -->
+<script>
+(function(d){
+  var b=d.getElementById('mq-validate'); if(!b) return;
+  if(!b.dataset.bound){ b.dataset.bound="1";
+    b.addEventListener('click', function(){
+      var v=(x)=> (x||'').trim();
+      var rec={date:new Date().toISOString(),
+               brand:v(d.getElementById('mq-brand')?.value),
+               model:v(d.getElementById('mq-model')?.value),
+               variant:v(d.getElementById('mq-variant')?.value),
+               motor:v(d.getElementById('mq-serial')?.value),
+               result:'Registado / Recorded', reason:'Cartão 3', photo:''};
+      try{ var a=JSON.parse(localStorage.getItem('hist_motor')||'[]'); a.unshift(rec); localStorage.setItem('hist_motor', JSON.stringify(a)); }catch(e){}
+      var fb=d.getElementById('mq-feedback'); if(fb){ fb.textContent='Registado: '+[rec.brand,rec.model,rec.variant,rec.motor].filter(Boolean).join(' / '); }
+    });
+  }
+})(document);
+</script>
+</body>
+</html>

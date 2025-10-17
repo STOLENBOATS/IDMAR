@@ -3,96 +3,93 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>IDMAR — Forense</title>
+  <link rel="icon" href="img/logo-pm.png"/>
 
-  <!-- CSS base -->
   <link rel="stylesheet" href="css/styles.css">
   <link rel="stylesheet" href="css/theme-soft-light.v1.css">
-  <link rel="stylesheet" href="css/nav-ribbon.v5.css"><!-- os botões novos -->
-
-  <!-- Versão + branding -->
-  <script>window.IDMAR_VERSION="Vs 1.3";</script>
-  <script defer src="js/idmar-config.v4.js"></script>
-
-  <!-- Header/i18n (core) -->
-  <script defer src="js/idmar-i18n.js"></script>
-  <script defer src="js/idmar-header-only.all.v4.js"></script>
-
-  <!-- Overrides -->
-  <script defer src="js/header-override.v4.js"></script>
-  <script defer src="js/i18n-boot.js"></script>
-  <script defer src="js/idmar-version.v4.js"></script>
-  <script defer src="js/forense-i18n.v2.js"></script>
-
-  <!-- Bilingue PT/EN para a página Forense -->
-  <script defer src="js/forense-bilingual.v2.js"></script>
-
+  <style>
+    :root{--bg:#f8fafc;--fg:#0f172a;--bg-elev:#ffffff;--border:#e5e7eb;--link:#0b6bcb}
+    body{background:var(--bg);color:var(--fg);margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,sans-serif}
+    .container{max-width:1100px;margin:1.25rem auto;padding:0 1rem}
+    .card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1rem;box-shadow:0 1px 2px rgba(0,0,0,.04);margin:.75rem 0}
+    .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem}
+    label{display:block;margin:.35rem 0 .25rem}
+    input[type="file"], input[type="text"], textarea, select{width:100%;border:1px solid var(--border);border-radius:10px;padding:.5rem .6rem;background:#fff}
+    .btn{padding:.6rem 1rem;border:1px solid #0b6bcb;border-radius:10px;background:#0b6bcb;color:#fff;cursor:pointer}
+    .btn.secondary{background:#fff;color:#0b6bcb}
+    .muted{opacity:.8}
+  </style>
 </head>
-
 <body>
-  <!-- header é injetado por JS -->
-
-  <main class="container">
-    <h1>Forense — Índice</h1>
-
-    <section class="panel">
-      <h2>Carregar evidências</h2>
-      <div class="row" style="display:flex;gap:.5rem;flex-wrap:wrap">
-        <input id="evPhotos" type="file" accept="image/*" multiple />
-        <select id="evContext">
-          <option value="win">Contexto: WIN/HIN</option>
-          <option value="motor">Contexto: Motor</option>
+<main class="container">
+  <section class="card">
+    <h1>Forense / Forensic</h1>
+    <div class="grid">
+      <label><b>Carregar evidências / Upload evidence</b>
+        <input type="file" id="fz-files" multiple accept="image/*">
+      </label>
+      <label><b>Anexar ao histórico mais recente / Attach to most recent history</b>
+        <select id="fz-attach">
+          <option>Sim / Yes</option>
+          <option>Não / No</option>
         </select>
-        <button id="evAttach">Anexar ao histórico mais recente</button>
-      </div>
-      <div id="evMeta" class="meta" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:.5rem;margin-top:.5rem"></div>
-      <div id="evThumbs" class="thumbs" style="display:flex;gap:.5rem;flex-wrap:wrap"></div>
-    </section>
+      </label>
+    </div>
+    <div style="margin-top:.75rem;display:flex;gap:.5rem;flex-wrap:wrap">
+      <button class="btn" id="fz-lightbox">Abrir lightbox / Open lightbox</button>
+      <button class="btn" id="fz-compare">Comparar / Compare</button>
+      <button class="btn" id="fz-annot">Anotar (rect) / Annotate (rect)</button>
+      <button class="btn secondary" id="fz-clear">Limpar anotações / Clear annotations</button>
+      <button class="btn" id="fz-export">Exportar PNG anotado / Export annotated PNG</button>
+      <button class="btn" id="fz-save">Guardar "bundle" (JSON) / Save "bundle" (JSON)</button>
+    </div>
+  </section>
 
-    <section class="panel">
-      <h2>Workspace</h2>
-      <div class="row" style="display:flex;gap:.5rem;flex-wrap:wrap">
-        <button id="lbOpen">Abrir lightbox</button>
-        <label>Comparar <input id="cmpRange" type="range" min="0" max="100" value="50"/></label>
-        <button id="addRect">Anotar (rect)</button>
-        <button id="clearRects">Limpar anotações</button>
-        <button id="exportPNG">Exportar PNG anotado</button>
-        <button id="saveBundle">Guardar “bundle” (JSON)</button>
-        <input id="loadBundle" type="file" accept=".json" />
-      </div>
-      <div class="canvas-wrap" style="position:relative;border:1px solid var(--border);border-radius:10px;overflow:hidden;background:#f1f5f9;height:540px">
-        <canvas id="evCanvas" style="display:block;width:100%;height:100%"></canvas>
-      </div>
-      <small>Dica: a comparação usa a 1ª e a 2ª foto; as anotações servem para redacção/realce.</small>
-    </section>
+  <section class="card">
+    <h2>Checklist forense / Forensic checklist</h2>
+    <div class="grid">
+      <label><input type="checkbox"> Rebites inconsistentes/adiados / Inconsistent/added rivets</label>
+      <label><input type="checkbox"> Cordões de solda anómalos / Anomalous weld beads</label>
+      <label><input type="checkbox"> Placa remarcada/substituída / Re-stamped/substituted plate</label>
+      <label><input type="checkbox"> Camadas de tinta/abrasões / Paint layers/abrasions</label>
+      <label><input type="checkbox"> Etiqueta adulterada/ausente (motor) / Tampered/missing label (engine)</label>
+      <label><input type="checkbox"> Core plug danificado/removido (motor) / Core plug damaged/removed (engine)</label>
+      <label><input type="checkbox"> Solda/corrosão anómala no boss (motor) / Abnormal weld/corrosion on boss (engine)</label>
+      <label><input type="checkbox"> Remarcação no bloco (motor) / Re-stamping on block (engine)</label>
+    </div>
+    <label style="margin-top:.75rem"><b>Notas / Notes</b>
+      <textarea id="fz-notes" rows="4" placeholder="Observações técnicas… / Technical observations…"></textarea>
+    </label>
+  </section>
+</main>
 
-    <section class="panel">
-      <h2>Checklist forense</h2>
-      <div class="checkboxes" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:.35rem">
-        <label><input type="checkbox" id="chk_rebites"> Rebites inconsistentes/añadidos</label>
-        <label><input type="checkbox" id="chk_solda"> Cordões de solda anómalos</label>
-        <label><input type="checkbox" id="chk_placa"> Placa remarcada/substituída</label>
-        <label><input type="checkbox" id="chk_tinta"> Camadas de tinta/abrasões</label>
-        <label><input type="checkbox" id="chk_etq"> Etiqueta adulterada/ausente (motor)</label>
-        <label><input type="checkbox" id="chk_core"> Core plug danificado/removido (motor)</label>
-        <label><input type="checkbox" id="chk_boss"> Solda/corrosão anómala no boss (motor)</label>
-        <label><input type="checkbox" id="chk_bloco"> Remarcação no bloco (motor)</label>
-      </div>
-      <label>Notas</label>
-      <textarea id="notes" rows="4" placeholder="Observações técnicas…" style="width:100%;border:1px solid var(--border);border-radius:10px;padding:.5rem .6rem;background:#fff"></textarea>
-    </section>
-  </main>
-
-  <footer class="footer" style="border-top:1px solid var(--border);padding:1rem;opacity:.85;background:var(--bg-elev)">IDMAR — Identificação Marítima</footer>
-
-  <div class="lightbox" id="lightbox" style="position:fixed;inset:0;background:rgba(15,23,42,.85);display:none;align-items:center;justify-content:center;z-index:50">
-    <img id="lbImg" alt="" style="max-width:90vw;max-height:90vh;border-radius:12px;box-shadow:0 10px 40px rgba(0,0,0,.5)"/>
-  </div>
-
-  <!-- (limpo) removido idmar-layout.r3c.js -->
-  <script src="js/forense-r1.js?v=r1"></script>
-<script defer src="js/orientation-guard.js"></script>
-<script defer src="js/boot-idmar.js"></script>
-
-  
+<!-- Android portrait overlay PT/EN -->
+<script>
+(function(w,d){
+  var isAndroid=/Android/i.test(navigator.userAgent||'');
+  function isPortrait(){return w.matchMedia && w.matchMedia('(orientation: portrait)').matches;}
+  function ensure(){
+    var el=d.getElementById('idmar-rotate-overlay'); if(el) return el;
+    el=d.createElement('div'); el.id='idmar-rotate-overlay';
+    el.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.75);display:none;z-index:2147483647;color:#fff';
+    el.innerHTML='<div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;padding:2rem">'+
+      '<div style="max-width:520px;width:100%;background:#0b2440;border:1px solid rgba(255,255,255,.2);border-radius:14px;padding:1.25rem;box-shadow:0 10px 25px rgba(0,0,0,.35)">'+
+      '<h3 style="margin:0 0 .5rem 0">Melhor em horizontal / Best viewed in landscape</h3>'+
+      '<p style="margin:.25rem 0 1rem 0;opacity:.9">Estás em Android em modo vertical. Roda o ecrã para <b>horizontal</b>.<br>You are on Android in portrait. Please rotate to <b>landscape</b>.</p>'+
+      '<div style="display:flex;gap:.5rem;justify-content:flex-end"><button id="idmar-rotate-ok" style="background:#66c2ff;border:0;padding:.5rem .9rem;border-radius:10px;color:#001b33;cursor:pointer">Já rodei / I rotated</button></div>'+
+      '</div></div>';
+    d.body.appendChild(el);
+    d.getElementById('idmar-rotate-ok').addEventListener('click', check);
+    return el;
+  }
+  function show(){ ensure().style.display='block'; }
+  function hide(){ var el=d.getElementById('idmar-rotate-overlay'); if(el) el.style.display='none'; }
+  function check(){ if(isAndroid && isPortrait()) show(); else hide(); }
+  w.addEventListener('resize', check, {passive:true});
+  w.addEventListener('orientationchange', check, {passive:true});
+  if (d.readyState!=='loading') check(); else d.addEventListener('DOMContentLoaded', check);
+})(window, document);
+</script>
 </body>
 </html>

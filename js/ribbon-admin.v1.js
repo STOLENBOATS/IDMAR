@@ -1,7 +1,7 @@
-// ribbon-admin.v1.js  injeta boto "Admin" ao lado do "Validador" com o MESMO estilo
+// ribbon-admin.v1.js — injeta botão "Admin" ao lado do "Validador" com o MESMO estilo
 (function () {
   const ADMIN_URL = window.IDMAR_ADMIN_URL || 'admin-engines.html';
-  const LABEL = 'Win/Motor Novo';
+  const LABEL = 'Item Novo / New Item';
 
   function findRibbonContainer() {
     return (
@@ -19,7 +19,7 @@
     return links.find(a => /validador/i.test(a.textContent || ''));
   }
 
-  // === boto novo, herdando estilo do "Validador" quando possvel ===
+  // === botão novo, herdando estilo do "Validador" quando possível ===
   function makeBtn(likeEl) {
     const a = document.createElement('a');
     a.href = ADMIN_URL;
@@ -30,7 +30,7 @@
       // herda EXATAMENTE as mesmas classes (tamanho/hover)
       a.className = likeEl.className;
 
-      // COR DO BOTO (inline)  azul claro
+      // COR DO BOTÃO (inline) — azul claro
       a.style.background = 'linear-gradient(180deg,#4FA8FF,#2F86E5)';
       a.style.color = '#fff';
 
@@ -42,7 +42,7 @@
         a.style.background = 'linear-gradient(180deg,#4FA8FF,#2F86E5)';
       });
 
-      // clona o losango/cone do Validador, se existir
+      // clona o “losango”/ícone do Validador, se existir
       const icon = likeEl.querySelector('span, i, svg');
       if (icon) a.prepend(icon.cloneNode(true));
 
@@ -50,7 +50,7 @@
       if (likeEl.style.padding) a.style.padding = likeEl.style.padding;
       if (likeEl.style.borderRadius) a.style.borderRadius = likeEl.style.borderRadius;
     } else {
-      // Fallback (caso no ache o Validador): estilo mnimo
+      // Fallback (caso não ache o Validador): estilo mínimo
       a.className = 'nav-ribbon__item ribbon-btn';
       a.style.display = 'inline-flex';
       a.style.alignItems = 'center';
@@ -71,13 +71,13 @@
   }
 
   function inject() {
-    if (document.querySelector('[data-idmar-admin-btn]')) return true; // j existe
+    if (document.querySelector('[data-idmar-admin-btn]')) return true; // já existe
 
     const val = findValidadorBtn();
     const admin = makeBtn(val);
 
     if (val && val.parentElement) {
-      // coloca mesmo ao lado do Validador
+      // coloca mesmo ao lado do “Validador”
       val.insertAdjacentElement('afterend', admin);
       return true;
     }
@@ -92,13 +92,13 @@
 
   function boot() {
     if (inject()) return;
-    // header  injetado por JS  observa at aparecer
+    // header é injetado por JS — observa até aparecer
     const obs = new MutationObserver(() => {
       if (inject()) obs.disconnect();
     });
     obs.observe(document.documentElement, { childList: true, subtree: true });
 
-    // fallback de tentativas peridicas
+    // fallback de tentativas periódicas
     let tries = 0;
     const t = setInterval(() => {
       tries++;

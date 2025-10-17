@@ -249,8 +249,12 @@
       const url = './data/engines_catalog.v2.json';
       try {
         await fetch(url).then(r => r.json());
-        EnginePicker?.init?.({ dataUrl: url });
-        console.log('[IDMAR] EnginePicker (v2) OK:', url);
+        if (window.EnginePicker && typeof EnginePicker.init === 'function') {
+          EnginePicker.init({ dataUrl: url });
+          console.log('[IDMAR] EnginePicker (v2) OK:', url);
+        } else {
+          console.error('[IDMAR] EnginePicker não disponível.');
+        }
       } catch (e) {
         console.error('[IDMAR] Falha a carregar o catálogo v2:', e);
         alert('Falha a carregar o catálogo de motores (v2). Verifica data/engines_catalog.v2.json');
@@ -326,18 +330,45 @@
       scheduleUpdate();
     });
 
-    // Botão do cartão 3
+    // Botão do cartão 3: mostra feedback textual no #engine-sn-result
     window.addEventListener('DOMContentLoaded', () => {
       const btn = d.getElementById('btnValidateSerial');
-      if (!btn) return;
-      btn.addEventListener('click', () => {
-        const data = window.EngineCollect?.collect?.() || {};
-        console.log('[IDMAR] VALIDAR SN:', data);
-        alert('Registo preparado. Ver visor à direita para o estado do nº de motor.');
-      });
+      const out = d.getElementById('engine-sn-result');
+      function render(verdict){
+        if(!out) return;
+        if(!verdict){ out.innerHTML = ''; return; }
+        const li = (verdict.reasons||[]).map(r=>`<li>${r}</li>`).join('');
+        out.innerHTML =
+          `<div class="muted" style="margin:.25rem 0">
+             <strong>Marca detetada:</strong> ${verdict.brand||'—'}
+             &nbsp;|&nbsp; <strong>Score:</strong> ${(verdict.score*100|0)}%
+           </div>
+           <ul style="margin:.25rem 0 0 .9rem">${li}</ul>`;
+      }
+      function run(){
+        const raw = d.getElementById('engine-sn-raw')?.value || '';
+        const ranges = (w.EngineCollect?.collect?.().family?.ranges) || [];
+        const verdict = (w.EngineSNRange && w.EngineSNRange.check) ? w.EngineSNRange.check(raw, ranges) : null;
+        render(verdict);
+      }
+      btn?.addEventListener('click', run);
+      d.getElementById('engine-sn-raw')?.addEventListener('input', run);
+      run();
     });
   })(window, document);
   </script>
+
+  <!-- Regras de S/N + Validador v2 -->
+  <script>
+    window.EngineSNRules = null;
+    window.addEventListener('DOMContentLoaded', () => {
+      fetch('data/engine-sn-rules.v1.json')
+        .then(r=>r.json())
+        .then(j => { window.EngineSNRules = j; console.log('[IDMAR] SN rules v1 carregadas'); })
+        .catch(e => console.warn('[IDMAR] Falha a carregar SN rules', e));
+    });
+  </script>
+  <script defer src="js/validators/engine-sn.v2.js?v=r1"></script>
 
   <!-- 1) Wire que preenche a ficha e só “commit” humano foca o SN -->
   <script defer src="js/model-meta-wire.v1.js" data-json="data/engines_catalog.v2.json"></script>

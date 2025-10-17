@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IDMAR — Histórico de motores</title>
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="stylesheet" href="css/theme-soft-light.v1.css">
+  <style>
+    :root{--bg:#f8fafc;--fg:#0f172a;--bg-elev:#fff;--border:#e5e7eb;--link:#0b6bcb}
+    body{background:var(--bg);color:var(--fg);margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Arial,sans-serif}
+    .container{max-width:1100px;margin:1rem auto;padding:0 1rem}
+    .panel{background:var(--bg-elev);border:1px solid var(--border);border-radius:12px;padding:1rem;margin:.75rem 0}
+    input,select{border:1px solid var(--border);border-radius:10px;padding:.45rem .6rem;background:#fff}
+    table{width:100%;border-collapse:collapse}
+    th,td{border-bottom:1px solid var(--border);padding:.5rem;text-align:left;font-size:.95rem}
+    .actions{display:flex;gap:.4rem;flex-wrap:wrap}
+    button{background:#0b6bcb;color:#fff;border:none;border-radius:10px;padding:.5rem .8rem;cursor:pointer}
+    .btn-secondary{background:#111827}
+    .btn-danger{background:#ef4444}
+  </style>
+</head>
+<body>
+  <main class="container">
+    <h1 style="display:flex;gap:.5rem;align-items:center;flex-wrap:wrap">
+      <button class="btn-secondary" onclick="location.href='validador.html'">← Validador</button>
+      <span>Histórico de motores</span>
+    </h1>
+
+    <div class="panel">
+      <div class="actions" style="margin-bottom:.75rem">
+        <input id="q" placeholder="Pesquisa… (marca, modelo, SN)" style="flex:1">
+        <button id="exportCsv">Exportar CSV</button>
+        <button id="exportJson" class="btn-secondary">Exportar JSON</button>
+        <button id="clear" class="btn-danger">Limpar</button>
+      </div>
+      <table id="tbl">
+        <thead>
+          <tr>
+            <th>Data</th><th>Marca</th><th>Modelo</th><th>Potência</th><th>SN</th><th>Notas</th><th></th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script src="js/engine-history.v1.js"></script>
+  <script>
+    const $ = s => document.querySelector(s);
+    function fmtTs(ts){ try{ const d=new Date(ts); return d.toLocaleString(); }catch(e){ return ts; } }
+
+    function render(){
+      const q = ($('#q').value||'').toLowerCase();
+      const data = EngineHistory.all().filter(e =>
+        !q || [e.brand,e.model,e.serial].join(' ').toLowerCase().includes(q)
+      );
+      const tbody = $('#tbl tbody');
+      tbody.innerHTML = data.map(e => `
+        <tr>
+          <td>${fmtTs(e.ts)}</td>
+          <td>${e.brand}</td>
+          <td>${e.model || (e.family?.version || '')}</td>
+          <td>${e.power || ''}</td>
+          <td>${e.serial || ''}</td>
+          <td>${e.notes || ''}</td>
+          <td><button class="btn-danger" data-del="${e.ts}">Apagar</button></td>
+        </tr>`).join('');
+      tbody.querySelectorAll('[data-del]').forEach(btn => {
+        btn.addEventListener('click', ()=>{ EngineHistory.removeByTs(btn.getAttribute('data-del')); render(); });
+      });
+    }
+
+    document.getElementById('q').addEventListener('input', render);
+    document.getElementById('clear').addEventListener('click', ()=>{ if(confirm('Limpar histórico?')){ EngineHistory.clear(); render(); }});
+    document.getElementById('exportCsv').addEventListener('click', ()=>{
+      const csv = EngineHistory.toCSV(EngineHistory.all());
+      const blob = new Blob([csv], {type:'text/csv'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='engine_history.csv'; a.click(); URL.revokeObjectURL(a.href);
+    });
+    document.getElementById('exportJson').addEventListener('click', ()=>{
+      const blob = new Blob([JSON.stringify(EngineHistory.all(), null, 2)], {type:'application/json'});
+      const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download='engine_history.json'; a.click(); URL.revokeObjectURL(a.href);
+    });
+
+    window.addEventListener('idmar:engine-history-changed', render);
+    render();
+  </script>
+</body>
+</html>
